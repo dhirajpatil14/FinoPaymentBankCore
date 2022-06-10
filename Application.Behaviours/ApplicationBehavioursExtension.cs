@@ -5,9 +5,9 @@ using System.Reflection;
 
 namespace Application.Behaviours
 {
-    public static class ApplicationBehavioursRegister
+    public static class ApplicationBehavioursExtension
     {
-        public static void AddApplicationBehaviour(this IServiceCollection services)
+        public static void AddApplicationBehaviourLayer(this IServiceCollection services)
         {
 
             //services.AddAutoMapper(Assembly.GetExecutingAssembly());

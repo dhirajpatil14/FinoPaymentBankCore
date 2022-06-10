@@ -4,9 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HotRod.Cache
 {
-    public static class CacheServiceRegistration
+    public static class CacheServiceExtension
     {
-        public static void AddCacheServiceRegistration(this IServiceCollection services, IConfiguration Configuration)
+        public static void AddCacheServiceLayer(this IServiceCollection services, IConfiguration Configuration)
         {
             services.Configure<CacheSettings>(Configuration.GetSection("CacheSettings"));
             services.AddSingleton<HotRodCache>();
