@@ -1,14 +1,11 @@
-﻿using HotRod.Cache.Settings;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace HotRod.Cache
 {
     public static class CacheServiceExtension
     {
-        public static void AddCacheServiceLayer(this IServiceCollection services, IConfiguration Configuration)
+        public static void AddCacheServiceLayer(this IServiceCollection services)
         {
-            services.Configure<CacheSettings>(Configuration.GetSection("CacheSettings"));
             services.AddSingleton<HotRodCache>();
         }
     }

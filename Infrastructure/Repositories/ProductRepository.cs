@@ -8,6 +8,7 @@ namespace Sample.Infrastructure.Repositories
     public class ProductRepository : RepositoryBase<Product>, IProductRepository
     {
 
+
         public ProductRepository()
         {
         }
@@ -16,5 +17,8 @@ namespace Sample.Infrastructure.Repositories
         {
             throw new System.NotImplementedException();
         }
+
+
+
     }
 }
