@@ -18,4 +18,8 @@
     <ProjectReference Include="..\Core\Sample.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Products\Queries\" />
+  </ItemGroup>
+
 </Project>
