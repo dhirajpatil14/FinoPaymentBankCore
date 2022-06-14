@@ -49,8 +49,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Infrastructure", "In
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNet.Attributes", "AspNet.Attributes\AspNet.Attributes.csproj", "{40F9E2BC-D0F5-4CE2-9D49-0971A96EB243}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{12ECB0F8-C810-4255-B2C6-D139AD051054}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{88A3ABAD-E1A0-4425-9A7D-64FC4587E6B8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.API.IntegrationTests", "Sample.API.IntegrationTests\Sample.API.IntegrationTests.csproj", "{57905495-83FC-40DC-9EB0-C70DB466DEE2}"
