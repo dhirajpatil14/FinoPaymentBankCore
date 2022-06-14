@@ -1,5 +1,4 @@
-﻿using HotRod.Cache.Settings;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Sample.API.Extensions
@@ -19,7 +18,7 @@ namespace Sample.API.Extensions
                 });
             });
 
-            services.Configure<CacheSettings>(_config.GetSection("CacheSettings"));
+
 
         }
     }
