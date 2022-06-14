@@ -1,4 +1,5 @@
 ﻿using AspNet.Attributes;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Sample.Application.Features.Products.Commands.UpdateProduct;
@@ -19,7 +20,9 @@ namespace Sample.API.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        [HttpPut("updateProducts")]
+        [HttpPut(Name = "updateProducts")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateProductsAsync(UpdateProductCommand command)
         {
             _logger.LogInformation("Call UpdateProductsAsync Method");
