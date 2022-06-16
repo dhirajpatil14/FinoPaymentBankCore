@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Common.Wrappers;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Sample.Application.Contracts.Persistence;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Sample.Application.Features.Products.Commands.UpdateProduct
 {
-    public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand>
+    public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, Response<Unit>>
     {
         private readonly IProductRepository _productRepository;
         private readonly ILogger<UpdateProductCommandHandler> _logger;
@@ -21,7 +22,7 @@ namespace Sample.Application.Features.Products.Commands.UpdateProduct
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper;
         }
-        public async Task<Unit> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
+        public async Task<Response<Unit>> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
         {
             var product = await _productRepository.GetByIdAsync(request.Id);
 
@@ -34,9 +35,9 @@ namespace Sample.Application.Features.Products.Commands.UpdateProduct
 
             await _productRepository.UpdateAsync(product);
 
-            _logger.LogInformation($"Product {product.Id} is successfully updated.");
+            _logger.LogInformation($"Product {product?.Id} is successfully updated.");
 
-            return Unit.Value;
+            return new Response<Unit>(Unit.Value, message: $"Product Successfully updated.");
 
         }
     }

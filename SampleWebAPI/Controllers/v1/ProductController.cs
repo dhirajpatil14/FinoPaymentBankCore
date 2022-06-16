@@ -6,7 +6,7 @@ using Sample.Application.Features.Products.Commands.UpdateProduct;
 using System;
 using System.Threading.Tasks;
 
-namespace Sample.API.Controllers
+namespace Sample.API.Controllers.v1
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -28,8 +28,6 @@ namespace Sample.API.Controllers
             _logger.LogInformation("Call UpdateProductsAsync Method");
             return Ok(await Mediator.Send(command));
         }
-
-
 
     }
 }

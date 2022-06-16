@@ -7,11 +7,14 @@ namespace Sample.API.Extensions
     {
         public static void UseCorsExtension(this IServiceCollection services, IConfiguration _config)
         {
+
+            string Urls = _config.GetSection("URLWhiteListings").GetSection("URLs").Value;
+
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", builder =>
                 {
-                    builder.WithOrigins(_config.GetSection("AppSettings:CorsUrl").Value)
+                    builder.WithOrigins(Urls)
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();
