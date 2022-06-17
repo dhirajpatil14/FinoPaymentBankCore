@@ -62,8 +62,6 @@ namespace Sample.Application.UnitTests.Product.Commands
             var allProducts = await _mockProductRepository.Object.GetAllAsync();
             allProducts.Count.ShouldBe(2);
             allProducts.ShouldContain(oldProduct);
-            //oldProduct.ShouldBeEquivalentTo(newProduct);
-
         }
 
     }
