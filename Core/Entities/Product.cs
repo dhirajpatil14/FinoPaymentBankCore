@@ -1,6 +1,6 @@
 ﻿using Common.Wrappers;
 
-namespace Sample.Core.Entities
+namespace Sample.Domain.Entities
 {
     public class Product : AuditableBaseEntity
     {

@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
 using Common.Wrappers;
 using MediatR;
-using Microsoft.Extensions.Logging;
 using Sample.Application.Contracts.Persistence;
-using Sample.Core.Entities;
+using Sample.Domain.Entities;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,13 +12,13 @@ namespace Sample.Application.Features.Products.Commands.UpdateProduct
     public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, Response<Unit>>
     {
         private readonly IProductRepository _productRepository;
-        private readonly ILogger<UpdateProductCommandHandler> _logger;
+        // private readonly ILogger<UpdateProductCommandHandler> _logger;
         private readonly IMapper _mapper;
 
-        public UpdateProductCommandHandler(IProductRepository productRepository, IMapper mapper, ILogger<UpdateProductCommandHandler> logger)
+        public UpdateProductCommandHandler(IMapper mapper, IProductRepository productRepository)
         {
             _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            //   _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper;
         }
         public async Task<Response<Unit>> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
@@ -35,7 +34,7 @@ namespace Sample.Application.Features.Products.Commands.UpdateProduct
 
             await _productRepository.UpdateAsync(product);
 
-            _logger.LogInformation($"Product {product?.Id} is successfully updated.");
+            // _logger.LogInformation($"Product {product?.Id} is successfully updated.");
 
             return new Response<Unit>(Unit.Value, message: $"Product Successfully updated.");
 

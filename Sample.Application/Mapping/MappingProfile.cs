@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Sample.Application.Features.Products.Commands.UpdateProduct;
-using Sample.Core.Entities;
+using Sample.Domain.Entities;
 
 namespace Sample.Application.Mapping
 {

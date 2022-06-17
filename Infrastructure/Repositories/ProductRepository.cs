@@ -1,6 +1,6 @@
 ﻿using Common.Application;
 using Sample.Application.Contracts.Persistence;
-using Sample.Core.Entities;
+using Sample.Domain.Entities;
 using System.Threading.Tasks;
 
 namespace Sample.Infrastructure.Repositories

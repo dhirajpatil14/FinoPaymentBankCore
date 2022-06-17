@@ -1,5 +1,5 @@
 ﻿using Common.Application;
-using Sample.Core.Entities;
+using Sample.Domain.Entities;
 using System.Threading.Tasks;
 
 namespace Sample.Application.Contracts.Persistence
