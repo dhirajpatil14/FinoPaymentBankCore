@@ -9,7 +9,7 @@ namespace Sample.Application.Features.Products.Commands.UpdateProduct
             RuleFor(p => p.ProductCode)
                 .NotEmpty().WithMessage("{ProductCode} is required.")
                 .NotNull()
-                .MaximumLength(10).WithMessage("{ProductCode} must not exceed 50 characters.");
+                .MaximumLength(10).WithMessage("{ProductCode} must not exceed 10 characters.");
 
             RuleFor(p => p.Description)
                 .NotEmpty().WithMessage("{Description} is required.")
