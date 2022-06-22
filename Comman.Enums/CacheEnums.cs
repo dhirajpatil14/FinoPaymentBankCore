@@ -2,7 +2,7 @@
 
 namespace Common.Enums
 {
-    public enum CacheEnum : int
+    public enum Cache
     {
         #region session cache key
 

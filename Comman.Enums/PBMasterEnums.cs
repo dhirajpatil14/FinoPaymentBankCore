@@ -2,7 +2,7 @@
 
 namespace Common.Enums
 {
-    public enum PBMasterEnum : int
+    public enum PBMaster
     {
         [StringValue("MstUPIErrorCodes")]
         MSTUPIERRORCODES = 1,

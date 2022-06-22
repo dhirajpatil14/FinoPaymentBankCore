@@ -2,7 +2,7 @@
 
 namespace Common.Enums
 {
-    public enum ExcelDataTypeEnums : int
+    public enum ExcelDataType
     {
         [IntValueAttribute(0)]
         General = 0,

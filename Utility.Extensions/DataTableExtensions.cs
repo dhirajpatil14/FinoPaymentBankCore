@@ -43,12 +43,12 @@ namespace Utility.Extensions
                 // if exists, set the value
                 if (p != null && row[c] != DBNull.Value)
                 {
-                    // if (p.PropertyType == typeof(Nullable<DateTime>))
+
                     if (p.PropertyType == typeof(DateTime))
                     {
                         if (DateTime.TryParse(row[c].ToString(), out DateTime dateTime))
                         {
-                            //Console.WriteLine(dateTime);
+
                             p.SetValue(item, dateTime, null);
                         }
 

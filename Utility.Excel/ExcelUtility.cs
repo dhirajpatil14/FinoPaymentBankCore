@@ -61,18 +61,18 @@ namespace Utility.Excel
         private static string GetValue(SpreadsheetDocument doc, Cell cell)
         {
             var value = cell?.CellValue?.InnerText;
-            if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+            if (cell?.DataType != null && cell.DataType.Value == CellValues.SharedString)
             {
                 return doc.WorkbookPart.SharedStringTablePart.SharedStringTable.ChildElements.GetItem(int.Parse(value)).InnerText;
             }
-            else if (cell.StyleIndex != null) // number & dates. added code
+            else if (cell?.StyleIndex != null) // number & dates. added code
             {
                 if (doc.WorkbookPart.WorkbookStylesPart.Stylesheet.CellFormats.ChildElements[
                     int.Parse(cell.StyleIndex.InnerText)] is CellFormat cellFormat)
                 {
                     var formatMethodId = cellFormat.NumberFormatId.Value;
 
-                    if (formatMethodId == (uint)ExcelDataTypeEnums.DateShort || formatMethodId == (uint)ExcelDataTypeEnums.DateLong)
+                    if (formatMethodId == (uint)ExcelDataType.DateShort || formatMethodId == (uint)ExcelDataType.DateLong)
                     {
                         if (double.TryParse(cell.InnerText, out double oaDate))
                         {

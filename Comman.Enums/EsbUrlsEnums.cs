@@ -2,7 +2,7 @@
 
 namespace Common.Enums
 {
-    public enum EsbUrls : int
+    public enum EsbUrls
     {
         //Login Service Url
         [IntValueAttribute(28)]

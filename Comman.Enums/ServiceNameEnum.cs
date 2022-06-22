@@ -2,7 +2,7 @@
 
 namespace Common.Enums
 {
-    public enum ServiceName : int
+    public enum ServiceName
     {
         [IntValueAttribute(26)]
         UPISERVICE = 26,

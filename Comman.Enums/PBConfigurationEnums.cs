@@ -2,7 +2,7 @@
 
 namespace Common.Enums
 {
-    public enum PBConfigurationEnum : int
+    public enum PBConfiguration
     {
         [StringValue("tblESBUrl")]
         ESBURL = 1

@@ -53,7 +53,7 @@ namespace AspNet.Attributes
                                     break;
                             }
                         }
-                        catch
+                        catch (Exception)
                         {
 
                         }

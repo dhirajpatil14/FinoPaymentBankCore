@@ -23,7 +23,6 @@ namespace AspNet.Attributes.Model
 
         public string JWToken { get; set; }
 
-        //public string XAuthTokenId { get; set; }
 
         [JsonIgnore]
         public string RefreshToken { get; set; }

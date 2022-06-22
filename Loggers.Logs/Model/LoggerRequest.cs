@@ -42,7 +42,7 @@ namespace Loggers.Logs.Model
         public int? ChannelID { get; set; }
         [JsonProperty("CMSClientID")]
         public string CMSClientID { get; set; }
-        //public string RequestResponse { get; set; }
+
 
     }
 }

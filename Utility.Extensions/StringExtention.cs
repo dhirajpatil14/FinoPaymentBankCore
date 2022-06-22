@@ -28,7 +28,7 @@ namespace Utility.Extensions
             }
             else
             {
-                return null;
+                return Convert.FromBase64String(string.Empty);
             }
 
         }

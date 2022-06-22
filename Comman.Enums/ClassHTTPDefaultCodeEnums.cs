@@ -2,7 +2,7 @@
 
 namespace Common.Enums
 {
-    public enum HTTPDefaultCode : int
+    public enum HTTPDefaultCode
     {
         [IntValueAttribute(1)]
         DEFAULTSTSTUSCODE = 1
