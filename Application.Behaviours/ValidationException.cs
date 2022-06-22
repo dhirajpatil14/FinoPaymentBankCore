@@ -1,12 +1,17 @@
 ﻿using FluentValidation.Results;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Application.Behaviours
 {
-
+    [Serializable]
     public class ValidationException : Exception
     {
+        protected ValidationException(SerializationInfo info,
+     StreamingContext context) : base(info, context)
+        {
+        }
 
         public ValidationException() : base("One or more validation failures have occurred.")
         {
