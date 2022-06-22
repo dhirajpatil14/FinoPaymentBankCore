@@ -109,7 +109,7 @@ namespace Utility.Extensions
                                                                                 .ToArray();
 
                     var field = 0;
-                    if (roleProperties.Count() > 0)
+                    if (roleProperties?.Count() > 0)
                     {
                         dynamicFilter = " where ";
                     }
