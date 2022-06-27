@@ -6,7 +6,7 @@ namespace WebApi.Services
 {
     public interface IWebApiRequestService
     {
-        Task<Response<T>> GetAsync<T, T1>(WebApiRequestSettings<T1> webApiRequestSettings, string message = "");
-        Task<Response<T>> PostAsync<T, T1>(WebApiRequestSettings<T1> webApiRequestSettings, string message = "");
+        Task<Response<TResponse>> GetAsync<TResponse, TRequest>(WebApiRequestSettings<TRequest> webApiRequestSettings, string message = "");
+        Task<Response<TResponse>> PostAsync<TResponse, TRequest>(WebApiRequestSettings<TRequest> webApiRequestSettings, string message = "");
     }
 }

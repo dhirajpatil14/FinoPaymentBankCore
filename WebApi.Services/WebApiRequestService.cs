@@ -20,7 +20,7 @@ namespace WebApi.Services
             //_appSettings = appSettings.Value;
         }
 
-        public async Task<Response<T>> GetAsync<T, T1>(WebApiRequestSettings<T1> webApiRequestSettings, string message = "")
+        public async Task<Response<TResponse>> GetAsync<TResponse, TRequest>(WebApiRequestSettings<TRequest> webApiRequestSettings, string message = "")
         {
 
             var sbURI = new StringBuilder(webApiRequestSettings.URL);
@@ -69,8 +69,8 @@ namespace WebApi.Services
 
             try
             {
-                var output = apiResponse.ToJsonDeSerialize<T>();
-                return new Response<T>(output) { StatusCode = (int)reply.StatusCode, Message = message };
+                var output = apiResponse.ToJsonDeSerialize<TResponse>();
+                return new Response<TResponse>(output) { StatusCode = (int)reply.StatusCode, Message = message };
 
             }
             catch (Exception ex)
@@ -78,12 +78,12 @@ namespace WebApi.Services
                 try
                 {
                     reply.EnsureSuccessStatusCode();
-                    return new Response<T>() { StatusCode = (int)reply.StatusCode, Succeeded = false, Message = message, Errors = new List<string> { ex.Message } };
+                    return new Response<TResponse>() { StatusCode = (int)reply.StatusCode, Succeeded = false, Message = message, Errors = new List<string> { ex.Message } };
                 }
                 catch (HttpRequestException)
                 {
 
-                    var responseModel = new Response<T>() { Succeeded = false, Message = message };
+                    var responseModel = new Response<TResponse>() { Succeeded = false, Message = message };
                     return responseModel;
                 }
 
@@ -91,7 +91,7 @@ namespace WebApi.Services
 
         }
 
-        public async Task<Response<T>> PostAsync<T, T1>(WebApiRequestSettings<T1> webApiRequestSettings, string message = "")
+        public async Task<Response<TResponse>> PostAsync<TResponse, TRequest>(WebApiRequestSettings<TRequest> webApiRequestSettings, string message = "")
         {
             string data = webApiRequestSettings.PostParameter.ToJsonSerialize();
 
@@ -121,8 +121,8 @@ namespace WebApi.Services
 
             try
             {
-                var output = apiResponse.ToJsonDeSerialize<T>();
-                return new Response<T>(output) { StatusCode = (int)reply.StatusCode, Message = message };
+                var output = apiResponse.ToJsonDeSerialize<TResponse>();
+                return new Response<TResponse>(output) { StatusCode = (int)reply.StatusCode, Message = message };
 
             }
             catch (Exception ex)
@@ -130,12 +130,12 @@ namespace WebApi.Services
                 try
                 {
                     reply.EnsureSuccessStatusCode();
-                    return new Response<T>() { StatusCode = (int)reply.StatusCode, Succeeded = false, Message = message, Errors = new List<string> { ex.Message } };
+                    return new Response<TResponse>() { StatusCode = (int)reply.StatusCode, Succeeded = false, Message = message, Errors = new List<string> { ex.Message } };
                 }
                 catch (HttpRequestException)
                 {
 
-                    var responseModel = new Response<T>() { Succeeded = false, Message = message };
+                    var responseModel = new Response<TResponse>() { Succeeded = false, Message = message };
 
                     //switch (httpexception.StatusCode)
                     //{
