@@ -23,8 +23,6 @@ namespace Login.Identity.Service
 
         public async Task AuthenticateAsync(AuthenticationRequest authenticationRequest)
         {
-
-            //ESB URL Get 
             var urlData = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbCheckAuthenticationUrl, ServiceName.LOGINSERVICE);
 
             var request = new WebApiRequestSettings<AuthenticationRequest>
@@ -38,8 +36,17 @@ namespace Login.Identity.Service
 
 
             var result = await _webApiRequestService.PostAsync<dynamic, AuthenticationRequest>(request);
-            if (result.Data)
+            if (!result?.Data)
             {
+                //write some log
+            }
+            else if (result?.Data && result?.StatusCode == 200)
+            {
+                //write log
+            }
+            else
+            {
+                //write log
 
             }
 
