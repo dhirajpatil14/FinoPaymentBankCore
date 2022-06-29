@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Loggers.Logs\Loggers.Logs.csproj" />
     <ProjectReference Include="..\..\..\Shared.Services\Shared.Services.csproj" />
     <ProjectReference Include="..\..\..\WebApi.Services\WebApi.Services.csproj" />
     <ProjectReference Include="..\..\Application\LoginService.Application\LoginService.Application.csproj" />

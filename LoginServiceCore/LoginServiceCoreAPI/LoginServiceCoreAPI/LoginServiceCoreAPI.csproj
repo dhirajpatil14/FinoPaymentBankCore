@@ -14,6 +14,9 @@
     <ProjectReference Include="..\..\..\AspNet.Attributes\AspNet.Attributes.csproj" />
     <ProjectReference Include="..\..\..\Core\Sample.Domain.csproj" />
     <ProjectReference Include="..\..\..\HotRod.Cache\HotRod.Cache.csproj" />
+    <ProjectReference Include="..\..\Application\LoginService.Application\LoginService.Application.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Login.Identity\Login.Identity.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Login.Infrastructure\Login.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

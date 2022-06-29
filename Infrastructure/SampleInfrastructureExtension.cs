@@ -13,6 +13,7 @@ namespace Sample.Infrastructure
             //    options.UseSqlServer(configuration.GetConnectionString("OrderingConnectionString")));
 
             services.CommonApplicationLayer();
+
             services.AddScoped<IProductRepository, ProductRepository>();
         }
     }

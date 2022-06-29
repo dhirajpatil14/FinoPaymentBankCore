@@ -1,7 +1,8 @@
 ﻿using HotRod.Cache.Settings;
+using LoginService.Application.Models.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Sample.Domain;
+
 
 namespace LoginServiceCoreAPI.Extensions
 {

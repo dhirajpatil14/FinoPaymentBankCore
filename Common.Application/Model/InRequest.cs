@@ -6,7 +6,7 @@
         public string TellerId { get; set; }
         public string TokenId { get; set; }
         public bool IsEncrypt { get; set; }
-        protected string RequestData { get; set; }
+        public string RequestData { get; set; }
         public string XAuthToken { get; set; }
         public int ChannelID { get; set; }
         public string ProductCode { get; set; }

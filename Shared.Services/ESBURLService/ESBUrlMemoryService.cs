@@ -2,6 +2,8 @@
 using Common.Enums;
 using Data.Db.Service.Interface;
 using Data.Db.Service.Model;
+using Microsoft.Extensions.Options;
+using SQL.Helper;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,29 +17,32 @@ namespace Shared.Services.ESBURLService
 
         private readonly Dictionary<string, IEnumerable<EsbUrl>> _cacheESBUrls;
 
+        private readonly SqlConnectionStrings _sqlConnectionStrings;
+
         protected internal EsbUrlMemoryService()
         {
             _cacheESBUrls = new Dictionary<string, IEnumerable<EsbUrl>>();
         }
 
-        public EsbUrlMemoryService(IDataDbConfigurationService dataDbConfigurationService)
+        public EsbUrlMemoryService(IDataDbConfigurationService dataDbConfigurationService, IOptions<SqlConnectionStrings> sqlConnection)
         {
             _dataDbConfigurationService = dataDbConfigurationService;
             if (_cacheESBUrls == null)
             {
                 _cacheESBUrls = new Dictionary<string, IEnumerable<EsbUrl>>();
             }
+            _sqlConnectionStrings = sqlConnection.Value;
         }
 
         protected async Task<IEnumerable<EsbUrl>> AddESBListAsync(string key, int serviceId, int serviceName)
         {
             var dataValue = GetorNullAsync(key);
 
-            if (dataValue == null)
+            if (!dataValue.Any())
             {
                 var config = new DataDbConfigSettings<EsbUrl>
                 {
-                    DbConnection = "",
+                    DbConnection = _sqlConnectionStrings.PBConfigurationConnection,
                     TableEnums = PBConfiguration.ESBURL,
                     Request = new EsbUrl
                     {

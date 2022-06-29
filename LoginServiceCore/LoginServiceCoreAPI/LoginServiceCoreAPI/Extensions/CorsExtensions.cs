@@ -10,19 +10,19 @@ namespace LoginServiceCoreAPI.Extensions
 
             string Urls = _config.GetSection("URLWhiteListings").GetSection("URLs").Value;
 
-            services.AddCors(options =>
+            if (Urls is not null)
             {
-                options.AddPolicy("CorsPolicy", builder =>
+                services.AddCors(options =>
                 {
-                    builder.WithOrigins(Urls)
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials();
+                    options.AddPolicy("CorsPolicy", builder =>
+                    {
+                        builder.WithOrigins(Urls)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                    });
                 });
-            });
-
-
-
+            }
         }
     }
 }

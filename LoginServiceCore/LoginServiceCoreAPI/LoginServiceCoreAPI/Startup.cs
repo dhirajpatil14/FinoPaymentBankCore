@@ -1,10 +1,13 @@
 using HotRod.Cache;
+using Login.Identity;
+using LoginService.Application;
 using LoginServiceCoreAPI.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SQL.Helper;
 
 namespace LoginServiceCoreAPI
 {
@@ -22,6 +25,8 @@ namespace LoginServiceCoreAPI
         {
             services.AddControllers();
 
+            services.AddSqlConnectionService(Configuration);
+
             services.AddSwaggerExtension();
 
             services.AddApiVersioningExtension();
@@ -34,6 +39,9 @@ namespace LoginServiceCoreAPI
 
             services.AddAuthentication();
 
+            services.AddApplicationService();
+
+            services.AddIdentityService();
 
         }
 

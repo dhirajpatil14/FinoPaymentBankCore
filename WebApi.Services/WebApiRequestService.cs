@@ -12,12 +12,10 @@ namespace WebApi.Services
 {
     public class WebApiRequestService : IWebApiRequestService
     {
-        //private readonly AppSettings _appSettings;
 
         public WebApiRequestService()
         {
-            //IOptions<AppSettings> appSettings
-            //_appSettings = appSettings.Value;
+
         }
 
         public async Task<Response<TResponse>> GetAsync<TResponse, TRequest>(WebApiRequestSettings<TRequest> webApiRequestSettings, string message = "")
@@ -109,10 +107,24 @@ namespace WebApi.Services
 
             client.DefaultRequestHeaders.Add("X-Auth-Token", webApiRequestSettings.XAuthToken);
             client.DefaultRequestHeaders.Add("X-Source-System", "_appSettings.InstitutionId");
-            client.DefaultRequestHeaders.Add("reqId", webApiRequestSettings.RequestId);
+
+            if (!string.IsNullOrEmpty(webApiRequestSettings.RequesterId))
+            {
+                client.DefaultRequestHeaders.Add("RequestorId", webApiRequestSettings.RequesterId);
+            }
+
             client.DefaultRequestHeaders.Add("X-Correlation-Id", webApiRequestSettings.RequestId);
+
+            if (!string.IsNullOrEmpty(webApiRequestSettings.TokenId))
+            {
+                client.DefaultRequestHeaders.Add("TokenId", webApiRequestSettings.TokenId);
+            }
+
             client.DefaultRequestHeaders.Add("Connection", webApiRequestSettings.Connection);
             client.DefaultRequestHeaders.Add("Keep-Alive", "timeout=" + webApiRequestSettings.Timeout);
+
+
+
             ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
 
             var reply = await client.PostAsync(webApiRequestSettings.URL, stringContent);
