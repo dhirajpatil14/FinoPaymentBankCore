@@ -11,5 +11,9 @@
 
         public string DecryptKeygen { get; set; }
 
+        public string ESBCBSMessagesByCache { get; set; }
+
+        public int SessionExpired { get; set; }
+
     }
 }

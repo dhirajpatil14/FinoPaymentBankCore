@@ -14,7 +14,7 @@ namespace SQL.Helper
 
             services.Configure<SqlConnectionStrings>((opt =>
             {
-                opt.PBConfigurationConnection = configuration.GetSection("ConnectionStrings:PBLogsConnection").Value.ToDBStringDecrypt();
+                opt.PBConfigurationConnection = configuration.GetSection("ConnectionStrings:PBConfigurationConnection").Value.ToDBStringDecrypt();
                 opt.PBLogsConnection = configuration.GetSection("ConnectionStrings:PBLogsConnection").Value.ToDBStringDecrypt();
                 opt.PBMasterConnection = configuration.GetSection("ConnectionStrings:PBMasterConnection").Value.ToDBStringDecrypt();
                 opt.PBtransactionInfoConnection = configuration.GetSection("ConnectionStrings:PBtransactionInfoConnection").Value.ToDBStringDecrypt();

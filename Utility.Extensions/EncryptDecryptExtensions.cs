@@ -86,7 +86,6 @@ namespace Utility.Extensions
             return encryptedPassword;
         }
 
-
         public static string ToEncrypt(this string text, string keyString)
         {
             var key = Encoding.UTF8.GetBytes(keyString);
@@ -178,7 +177,6 @@ namespace Utility.Extensions
             using StreamReader streamReader = new StreamReader((Stream)cryptoStream);
             return streamReader.ReadToEnd();
         }
-
 
         public static string ToDecryptOpenSSL(this string cipherText, string keyString, Int32 KeySize = 256)
         {

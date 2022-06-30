@@ -80,7 +80,7 @@ namespace Shared.Services.ESBURLService
             {
                 TableEnums = PBConfiguration.ESBURL,
                 Request = eSBURL,
-                DbConnection = ""
+                DbConnection = _sqlConnectionStrings.PBConfigurationConnection
             };
             var reply = await _dataDbConfigurationService.AddDataAsync<EsbUrl>(config);
 

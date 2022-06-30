@@ -129,39 +129,24 @@ namespace WebApi.Services
 
             var reply = await client.PostAsync(webApiRequestSettings.URL, stringContent);
 
-            string apiResponse = await reply.Content.ReadAsStringAsync();
 
-            try
+            if (reply.StatusCode == HttpStatusCode.OK)
             {
-                var output = apiResponse.ToJsonDeSerialize<TResponse>();
-                return new Response<TResponse>(output) { StatusCode = (int)reply.StatusCode, Message = message };
-
-            }
-            catch (Exception ex)
-            {
+                string apiResponse = await reply.Content.ReadAsStringAsync();
                 try
                 {
-                    reply.EnsureSuccessStatusCode();
-                    return new Response<TResponse>() { StatusCode = (int)reply.StatusCode, Succeeded = false, Message = message, Errors = new List<string> { ex.Message } };
+                    var output = apiResponse.ToJsonDeSerialize<TResponse>();
+                    return new Response<TResponse>(output) { StatusCode = (int)reply.StatusCode, Message = message };
+
                 }
-                catch (HttpRequestException)
+                catch (Exception ex)
                 {
-
-                    var responseModel = new Response<TResponse>() { Succeeded = false, Message = message };
-
-                    //switch (httpexception.StatusCode)
-                    //{
-                    //    case HttpStatusCode.Unauthorized:
-                    //        responseModel.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    //        responseModel.Errors = new List<string> { "You are not Authorized" };
-                    //        break;
-                    //    default:
-                    //        responseModel.StatusCode = (int)httpexception.StatusCode;
-                    //        responseModel.Errors = new List<string> { responseModel.Message };
-                    //        break;
-                    //}
-                    return responseModel;
+                    return new Response<TResponse>() { StatusCode = (int)reply.StatusCode, Message = message, Succeeded = false, ErrorMessage = !(string.IsNullOrEmpty(apiResponse)) ? apiResponse : string.Empty, Errors = new List<string>() };
                 }
+            }
+            else
+            {
+                return new Response<TResponse>() { StatusCode = (int)reply.StatusCode, ErrorMessage = reply.ReasonPhrase, Message = reply.ReasonPhrase };
             }
         }
     }

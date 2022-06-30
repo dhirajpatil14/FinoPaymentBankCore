@@ -5,6 +5,10 @@ namespace Common.Enums
     public enum PBConfiguration
     {
         [StringValue("tblESBUrl")]
-        ESBURL = 1
+        ESBURL = 1,
+
+        [StringValue("mstESBCBSMessages")]
+        ESBCBSMessages = 2,
+
     }
 }

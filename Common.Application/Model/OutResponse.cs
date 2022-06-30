@@ -2,7 +2,7 @@
 {
     public class OutResponse : Common
     {
-        public string ResponseCode { get; set; }
+        public int ResponseCode { get; set; }
         public string DisplayMessage { get; set; }
         public string ResponseMessage { get; set; }
         public string MessageType { get; set; }

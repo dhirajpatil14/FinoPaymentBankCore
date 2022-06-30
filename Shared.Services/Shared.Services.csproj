@@ -8,6 +8,7 @@
     <ProjectReference Include="..\Comman.Enums\Common.Enums.csproj" />
     <ProjectReference Include="..\Common.Application\Common.Application.csproj" />
     <ProjectReference Include="..\Data.Db.Service\Data.Db.Service.csproj" />
+    <ProjectReference Include="..\HotRod.Cache\HotRod.Cache.csproj" />
   </ItemGroup>
 
 </Project>
