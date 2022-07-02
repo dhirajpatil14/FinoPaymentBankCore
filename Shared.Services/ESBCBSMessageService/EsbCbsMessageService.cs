@@ -54,9 +54,10 @@ namespace Shared.Services.ESBCBSMessageService
                 var config = new DataDbConfigSettings<EsbCbsMessages>
                 {
                     DbConnection = _sqlConnectionStrings.PBConfigurationConnection,
-                    TableEnums = PBConfiguration.ESBCBSMessages
+                    TableEnums = PBConfiguration.ESBCBSMessages,
+                    Request = new EsbCbsMessages()
                 };
-                var data = await _dataDbConfigurationService.GetDataAsync<EsbCbsMessages, EsbCbsMessages>(config);
+                var data = await _dataDbConfigurationService.GetDatasAsync<EsbCbsMessages, EsbCbsMessages>(config);
                 return data;
             }
             return dataValue;
@@ -85,7 +86,7 @@ namespace Shared.Services.ESBCBSMessageService
                 }
             }
             var messageData = data.FirstOrDefault(xx => xx.MethodId == messageId && xx.CBSResponseCode == cbsId);
-            var messageView = messageData ?? new EsbCbsMessages { StandardMessageDescription = "Error Occured", MessageType = MessageType.Exclam.GetStringValue() };
+            var messageView = messageData ?? new EsbCbsMessages { StandardMessageDesc = "Error Occured", MessageType = MessageType.Exclam.GetStringValue() };
             return messageView;
         }
 

@@ -1,10 +1,11 @@
-﻿using LoginService.Application.Models;
+﻿using Common.Application.Model;
+using LoginService.Application.Models;
 using System.Threading.Tasks;
 
 namespace LoginService.Application.Contracts.Identity
 {
     public interface IProcessIdentityService
     {
-        Task IdentityAsync(AuthenticationRequest authenticationRequest);
+        Task<OutResponse> IdentityAsync(AuthenticationRequest authenticationRequest);
     }
 }

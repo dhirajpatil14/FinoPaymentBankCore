@@ -20,9 +20,7 @@ namespace LoginServiceCoreAPI.Controllers
         [HttpPost("authenticate")]
         public async Task<IActionResult> AuthenticationAsync(AuthenticationRequest authenticationRequest)
         {
-            await _processIdentityService.IdentityAsync(authenticationRequest);
-
-            return Ok();
+            return Ok(await _processIdentityService.IdentityAsync(authenticationRequest));
         }
 
     }

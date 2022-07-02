@@ -46,10 +46,12 @@ namespace Shared.Services.ESBMessageService
                 var config = new DataDbConfigSettings<EsbMessages>
                 {
                     DbConnection = _sqlConnectionStrings.PBMasterConnection,
-                    TableEnums = PBMaster.ESBMessages
+                    TableEnums = PBMaster.ESBMessages,
+                    Request = new EsbMessages()
+
                 };
 
-                var data = await _dataDbConfigurationService.GetDataAsync<EsbMessages, EsbMessages>(config);
+                var data = await _dataDbConfigurationService.GetDatasAsync<EsbMessages, EsbMessages>(config);
 
                 lock (_cacheEsbMessages)
                 {
@@ -161,7 +163,6 @@ namespace Shared.Services.ESBMessageService
                 {
                     return message;
                 }
-                return null;
             }
 
             return null;

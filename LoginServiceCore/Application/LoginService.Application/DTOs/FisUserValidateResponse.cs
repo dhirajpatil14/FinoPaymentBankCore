@@ -42,6 +42,10 @@ namespace LoginService.Application.DTOs
 
         [JsonProperty("security_profile")]
         public SecurityProfile SecurityProfile { get; set; }
+
+        [JsonProperty("blockReasonCode")]
+        public string BlockReasonCode { get; set; }
+
     }
 
     public partial class Policy

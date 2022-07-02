@@ -16,15 +16,15 @@ namespace Common.Application.Model
 
 
         [JsonProperty("ResponseDesc")]
-        public string ResponseDescription { get; set; }
+        public string ResponseDesc { get; set; }
 
         [JsonProperty("StandardMessageDesc")]
-        public string StandardMessageDescription { get; set; }
+        public string StandardMessageDesc { get; set; }
 
         [JsonProperty("CBSResponseCode")]
         public int? CBSResponseCode { get; set; } = null;
 
         [JsonProperty("CBSResponseDesc")]
-        public string CBSResponseDescription { get; set; }
+        public string CBSResponseDesc { get; set; }
     }
 }

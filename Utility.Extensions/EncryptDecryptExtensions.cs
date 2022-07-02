@@ -224,6 +224,24 @@ namespace Utility.Extensions
             return decriptedFromJavascript;
         }
 
+
+        public static string ToEncriptOpenSSL(this string plainText, string passphrase, Int32 KeySize = 256)
+        {
+            byte[] salt = new byte[8];
+            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+            rng.GetNonZeroBytes(salt);
+            EncryptDecrypt.ToDeriveKeyIv(passphrase, salt, out byte[] key, out byte[] iv);
+            // encrypt bytes
+            byte[] encryptedBytes = EncryptDecrypt.ToEncryptStringToBytes(plainText, key, iv, KeySize);
+            // add salt as first 8 bytes
+            byte[] encryptedBytesWithSalt = new byte[salt.Length + encryptedBytes.Length + 8];
+            Buffer.BlockCopy(Encoding.ASCII.GetBytes("Salted__"), 0, encryptedBytesWithSalt, 0, 8);
+            Buffer.BlockCopy(salt, 0, encryptedBytesWithSalt, 8, salt.Length);
+            Buffer.BlockCopy(encryptedBytes, 0, encryptedBytesWithSalt, salt.Length + 8, encryptedBytes.Length);
+            return string.Empty;
+        }
+
+
     }
     internal static class EncryptDecrypt
     {
@@ -337,5 +355,54 @@ namespace Utility.Extensions
             }
 
         }
+
+        internal static byte[] ToEncryptStringToBytes(string plainText, byte[] key, byte[] iv, Int32 KeySize = 256)
+        {
+            Int32 blockSize = 128;
+            // Check arguments.
+            if (plainText == null || plainText.Length <= 0)
+                throw new ArgumentNullException("plainText");
+            if (key == null || key.Length <= 0)
+                throw new ArgumentNullException("key");
+            if (iv == null || iv.Length <= 0)
+                throw new ArgumentNullException("iv");
+
+            // Declare the stream used to encrypt to an in memory
+            // array of bytes.
+            MemoryStream msEncrypt;
+
+            // Declare the RijndaelManaged object
+            // used to encrypt the data.
+            RijndaelManaged aesAlg = null;
+
+            try
+            {
+                // Create a RijndaelManaged object
+                // with the specified key and IV.
+                aesAlg = new RijndaelManaged { Mode = CipherMode.CBC, KeySize = KeySize, BlockSize = blockSize, Key = key, IV = iv };
+
+                // Create an encryptor to perform the stream transform.
+                ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+
+                // Create the streams used for encryption.
+                msEncrypt = new MemoryStream();
+                using CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
+                using StreamWriter swEncrypt = new StreamWriter(csEncrypt);
+
+                //Write all data to the stream.
+                swEncrypt.Write(plainText);
+                swEncrypt.Flush();
+                swEncrypt.Close();
+            }
+            finally
+            {
+                // Clear the RijndaelManaged object.
+                if (aesAlg != null)
+                    aesAlg.Clear();
+            }
+            // Return the encrypted bytes from the memory stream.
+            return msEncrypt.ToArray();
+        }
+
     }
 }

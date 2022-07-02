@@ -6,5 +6,12 @@ namespace Common.Enums
     {
         [IntValueAttribute(100)]
         ServerUnavailable = 100,
+
+        [IntValueAttribute(105)]
+        BlockUser = 105,
+
+        [IntValueAttribute(104)]
+        BlockUserPassword = 104,
+
     }
 }

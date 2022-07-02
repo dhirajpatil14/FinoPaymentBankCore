@@ -1,7 +1,9 @@
-﻿using LoginService.Application.Contracts.Identity;
+﻿using Common.Application.Model;
+using Loggers.Logs;
+using LoginService.Application.Contracts.Identity;
 using LoginService.Application.Models;
-using System;
 using System.Threading.Tasks;
+using Utility.Common;
 using Utility.Extensions;
 
 namespace Login.Identity.Service
@@ -10,26 +12,28 @@ namespace Login.Identity.Service
     {
 
         private readonly IAuthenticationService _authenticationService;
-        public ProcessIdentityService(IAuthenticationService authenticationService)
+        private readonly ILoggerService _loggerService;
+        public ProcessIdentityService(IAuthenticationService authenticationService, ILoggerService loggerService)
         {
             _authenticationService = authenticationService;
+            _loggerService = loggerService;
         }
 
-        public Task IdentityAsync(AuthenticationRequest authenticationRequest)
+        public async Task<OutResponse> IdentityAsync(AuthenticationRequest authenticationRequest)
         {
+            var outResponse = new OutResponse();
 
             if (authenticationRequest is null)
             {
-                //return outresponse empty 
+                outResponse.ResponseMessage = "";
+
+                return outResponse;
             }
             else
             {
                 if (authenticationRequest.IsEncrypt)
                 {
-                    var requestData = authenticationRequest.RequestId.ToJsonDeSerialize<dynamic>();
-                    string reqData = Convert.ToString(requestData.RequestData);
-                    string sessionId = Convert.ToString(requestData.SessionId);
-                    var decriptData = reqData.ToDecryptOpenSSL(sessionId);
+                    var decriptData = authenticationRequest?.RequestData?.ToDecryptOpenSSL(authenticationRequest.SessionId);
                     authenticationRequest.RequestData = decriptData;
                 }
 
@@ -39,19 +43,18 @@ namespace Login.Identity.Service
                 {
 
                     case 1:
-                        _authenticationService.AuthenticateAsync(authenticationRequest);
+                        outResponse = await _authenticationService?.AuthenticateAsync(authenticationRequest);
                         break;
-
                     default:
                         break;
                 }
 
+                outResponse.RouteID = $"{CommonValues.ESBRESPONSE} { new TraceCalling().ToRoute() }";
 
+                if (authenticationRequest.IsEncrypt)
+                    outResponse.ResponseData = outResponse.ResponseData.ToEncriptOpenSSL(authenticationRequest.SessionId);
             }
-
-
-
-            throw new NotImplementedException();
+            return outResponse;
         }
     }
 }

@@ -49,7 +49,7 @@ namespace Shared.Services.ESBURLService
                         ServiceUrlId = serviceName.ToString()
                     }
                 };
-                var data = await _dataDbConfigurationService.GetDataAsync<EsbUrl, EsbUrl>(config);
+                var data = await _dataDbConfigurationService.GetDatasAsync<EsbUrl, EsbUrl>(config);
 
                 lock (_cacheESBUrls)
                 {
@@ -96,7 +96,6 @@ namespace Shared.Services.ESBURLService
                 {
                     _cacheESBUrls[serviceName.ToString()] = updatedList.AsEnumerable();
                 }
-
             }
             return reply;
         }

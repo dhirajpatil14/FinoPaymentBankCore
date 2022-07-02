@@ -11,6 +11,9 @@ namespace Common.Enums
         MSTIFSCMAPPING = 2,
 
         [StringValue("mstEsbMessages")]
-        ESBMessages = 3
+        ESBMessages = 3,
+
+        [StringValue("ReasonMaster")]
+        ReasonMaster = 4
     }
 }

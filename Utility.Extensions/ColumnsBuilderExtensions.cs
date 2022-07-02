@@ -69,7 +69,7 @@ namespace Utility.Extensions
 
         public static string GetFilterdColumns<TEntity>(this TEntity entity, SqlConfiguration sqlConfiguration, bool fetchJsonProperties = false, bool ignoreIdProperty = false, IEnumerable<string> ignoreProperties = null, bool forInsert = true)
         {
-            var dynamicFilter = " where ";
+            var dynamicFilter = "";
 
             ignoreProperties ??= Enumerable.Empty<string>();
 
