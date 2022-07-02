@@ -33,9 +33,9 @@ namespace SQL.Helper
             aes.Key = Encoding.UTF8.GetBytes(key);
             aes.IV = iv;
             ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-            using MemoryStream memoryStream = new MemoryStream(buffer);
-            using CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Read);
-            using StreamReader streamReader = new StreamReader((Stream)cryptoStream);
+            using MemoryStream memoryStream = new(buffer);
+            using CryptoStream cryptoStream = new((Stream)memoryStream, decryptor, CryptoStreamMode.Read);
+            using StreamReader streamReader = new((Stream)cryptoStream);
             return streamReader.ReadToEnd();
         }
     }

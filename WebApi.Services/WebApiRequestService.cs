@@ -18,7 +18,7 @@ namespace WebApi.Services
 
         }
 
-        public async Task<Response<TResponse>> GetAsync<TResponse, TRequest>(WebApiRequestSettings<TRequest> webApiRequestSettings, string message = "")
+        public async Task<Response<TResponse>> GetAsync<TResponse, TRequest>(WebApiRequestSettings<TRequest> webApiRequestSettings, string message = "") where TRequest : new()
         {
 
             var sbURI = new StringBuilder(webApiRequestSettings.URL);
@@ -89,7 +89,7 @@ namespace WebApi.Services
 
         }
 
-        public async Task<Response<TResponse>> PostAsync<TResponse, TRequest>(WebApiRequestSettings<TRequest> webApiRequestSettings, string message = "")
+        public async Task<Response<TResponse>> PostAsync<TResponse, TRequest>(WebApiRequestSettings<TRequest> webApiRequestSettings, string message = "") where TRequest : new()
         {
             string data = webApiRequestSettings.PostParameter.ToJsonSerialize();
 

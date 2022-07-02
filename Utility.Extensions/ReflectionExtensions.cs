@@ -12,7 +12,7 @@ namespace Utility.Extensions
                                  .Where(x => type.Name.Contains("AnonymousType") ? x.CanRead : x.CanWrite && x.CanRead)
                                  .AsEnumerable();
 
-            if (filterBy != null)
+            if (filterBy is not null)
                 properties = properties.Where(filterBy);
 
             return properties.Select(x => x.Name)

@@ -16,7 +16,7 @@ namespace HotRod.Cache
             ConnectAsync();
         }
 
-        private readonly InfinispanDG InfinispanDG = new InfinispanDG();
+        private readonly InfinispanDG InfinispanDG = new();
 
         #region Add Cache Server
         /// <summary>

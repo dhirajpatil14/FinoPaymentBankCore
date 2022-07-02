@@ -1,31 +1,64 @@
-﻿using SQL.Helper;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Common.Enums;
+using Data.Db.Service.Interface;
+using Data.Db.Service.Model;
+using Loggers.Logs.Model;
+using Microsoft.Extensions.Options;
+using SQL.Helper;
 using System.Threading.Tasks;
-using Utility.Extensions;
 
 namespace Loggers.Logs
 {
     public class LoggerService : ILoggerService
     {
-        private readonly DBService dBService = new DBService();
+        private readonly SqlConnectionStrings _sqlConnectionStrings;
+        private readonly LoggingSettings _loggingSettings;
+        private readonly IDataDbConfigurationService _dataDbConfigurationService;
 
-        public async Task<int> WriteLogAsync<TLogSettings>(LogSettings<TLogSettings> loggerRequest)
+        public LoggerService(IOptions<SqlConnectionStrings> sqlConnectionStrings, IDataDbConfigurationService dataDbConfigurationService, IOptions<LoggingSettings> loggingSettings)
         {
-            var _sqlConfiguration = new LoggerQueryConfiguration(loggerRequest.LayerId);
+            _sqlConnectionStrings = sqlConnectionStrings.Value;
+            _dataDbConfigurationService = dataDbConfigurationService;
+            _loggingSettings = loggingSettings.Value;
+        }
 
-            var columns = loggerRequest.GetColumns(_sqlConfiguration, fetchJsonProperties: true);
-            var colvalue = loggerRequest.GetColumns(_sqlConfiguration, fetchJsonProperties: false);
+        private async Task<int> WriteLogAsync<TRequest>(LogSettings<TRequest> loggerRequest) where TRequest : new()
+        {
+            if (loggerRequest.LogEnable)
+            {
+                var dataDbConfig = new DataDbConfigSettings<TRequest>
+                {
+                    DbConnection = _sqlConnectionStrings.PBLogsConnection,
+                    Request = loggerRequest.Request,
+                    TableEnums = loggerRequest.LogTable
+                };
+                return await _dataDbConfigurationService.AddDataAsync<TRequest>(dataDbConfig);
+            }
+            else
+            {
+                return 0;
+            }
+        }
 
-            var valuesArray = new List<string>(columns.Count());
-            valuesArray = valuesArray.InsertQueryValuesFragment(_sqlConfiguration.ParameterNotation, colvalue);
+        public async Task<int> WriteCorelationLogAsync(CorelationLoggerRequest loggerRequest)
+        {
+            var corelationLogSettings = new LogSettings<CorelationLoggerRequest>()
+            {
+                LogEnable = _loggingSettings.EnableCorelation,
+                LogTable = LogsEnums.CORELATIONLOG,
+                Request = loggerRequest
+            };
+            return await WriteLogAsync<CorelationLoggerRequest>(corelationLogSettings);
+        }
 
-            var query = _sqlConfiguration.InsertQuery
-                                         .ReplaceInsertQueryParameters(_sqlConfiguration.SchemaName,
-                                                                       _sqlConfiguration.TableName,
-                                                                       columns.GetCommaSeparatedColumns(),
-                                                                       string.Join(", ", valuesArray));
-            return await dBService.ExecuteAsync(ConnectionString: loggerRequest.LogDbConnection, sql: query, parameter: loggerRequest.Request);
+        public async Task<int> WriteFillLogAsync(FillLoggerRequest loggerRequest)
+        {
+            var corelationLogSettings = new LogSettings<FillLoggerRequest>()
+            {
+                LogEnable = _loggingSettings.EnableCorelation,
+                LogTable = LogsEnums.TABLELOG,
+                Request = loggerRequest
+            };
+            return await WriteLogAsync<FillLoggerRequest>(corelationLogSettings);
         }
     }
 }

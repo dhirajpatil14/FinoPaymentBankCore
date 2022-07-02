@@ -26,7 +26,7 @@ namespace Utility.Extensions
             var roleProperties = Enumerable.Empty<string>();
             var idProperty = entity.GetType().GetProperty("Id");
 
-            if (idProperty != null && !ignoreIdProperty)
+            if (idProperty is not null && !ignoreIdProperty)
             {
                 var defaultIdTypeValue = idProperty.PropertyType == typeof(string) ? string.Empty : Activator.CreateInstance(idProperty.PropertyType);
                 var idPropertyValue = idProperty.GetValue(entity, null);

@@ -10,5 +10,6 @@
         public string XAuthToken { get; set; }
         public int ChannelID { get; set; }
         public string ProductCode { get; set; }
+        public int ServiceID { get; set; }
     }
 }

@@ -18,7 +18,6 @@ namespace Shared.Services.ESBCBSMessageService
 
         private readonly SqlConnectionStrings _sqlConnectionStrings;
 
-
         private readonly Dictionary<string, IEnumerable<EsbCbsMessages>> _cacheEsbCbsMessages;
 
         private readonly HotRodCache _hotRodCache;
@@ -38,7 +37,7 @@ namespace Shared.Services.ESBCBSMessageService
             _sqlConnectionStrings = sqlConnection.Value;
             _hotRodCache = hotRodCache;
 
-            if (_cacheEsbCbsMessages == null)
+            if (_cacheEsbCbsMessages is null)
             {
                 _cacheEsbCbsMessages = new Dictionary<string, IEnumerable<EsbCbsMessages>>();
             }
@@ -70,7 +69,7 @@ namespace Shared.Services.ESBCBSMessageService
 
             if (!data.Any())
             {
-                if (esbMessageByCache == "1")
+                if (esbMessageByCache is "1")
                 {
                     var esbcbsMessages = await _hotRodCache.GetCacheAsync(CACHEKEY);
                     data = esbcbsMessages.ToJsonDeSerialize<IEnumerable<EsbCbsMessages>>();
@@ -118,6 +117,5 @@ namespace Shared.Services.ESBCBSMessageService
                 _cacheEsbCbsMessages.Remove(KEY);
             }
         }
-
     }
 }

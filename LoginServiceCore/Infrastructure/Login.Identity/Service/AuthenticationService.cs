@@ -76,13 +76,12 @@ namespace Login.Identity.Service
 
             var result = await _webApiRequestService.PostAsync<FisUserValidateResponse, FisUserValidateRequest>(request);
 
-            var isNotValid = (!(result.StatusCode is (int)HttpStatusCode.OK));
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
 
             var esbMessagesdata = new EsbMessages();
-
             if (result.StatusCode is 503)
                 esbMessagesdata = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.ServerUnavailable);
-            else if (result.StatusCode != 200 && result.StatusCode != 503)
+            else if (result.StatusCode is not 200 && result.StatusCode is not 503)
                 esbMessagesdata = await _esbMessageService.GetEsbMessage(string.Empty, ResponseCode.RemoteServerError.GetStringValue(), result.ErrorMessage);
 
             var outRespnse = new OutResponse
@@ -96,20 +95,22 @@ namespace Login.Identity.Service
             var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
 
 
-            var messageType = result.Data.EncryptionKey != null && checkValidReturnCode ? MessageTypeId.AuthenticateSuccess.GetIntValue() : MessageTypeId.AuthenticateUnSuccess.GetIntValue();
-            outRespnse.SessionExpiryTime = result.Data.EncryptionKey != null ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : "0";
-            outRespnse.AuthmanFlag = result.Data.EncryptionKey != null;
-            outRespnse.ResponseCode = result.Data.EncryptionKey != null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue();
+            var messageType = result.Data.EncryptionKey is not null && checkValidReturnCode ? MessageTypeId.AuthenticateSuccess.GetIntValue() : MessageTypeId.AuthenticateUnSuccess.GetIntValue();
+            outRespnse.SessionExpiryTime = result.Data.EncryptionKey is not null ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : "0";
+            outRespnse.AuthmanFlag = result.Data.EncryptionKey is not null;
+            outRespnse.ResponseCode = result.Data.EncryptionKey is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue();
 
             var esbcbsMessage = await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, messageType, result.Data.ReturnCode);
             outRespnse.ResponseMessage = esbcbsMessage.StandardMessageDesc;
             outRespnse.MessageType = esbcbsMessage.MessageType;
 
-            var updatedMessage = !checkValidReturnCode && result?.Data?.ReturnCode == 300 &&
-                                  result?.Data?.BlockReasonCode == "11" &&
-                                 result?.Data?.ClientId != "FINOMER" ? await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.BlockUser) : null;
 
-            if (updatedMessage != null)
+
+            var updatedMessage = !checkValidReturnCode && result?.Data?.ReturnCode == 300 &&
+                                  result?.Data?.BlockReasonCode is "11" &&
+                                 result?.Data?.ClientId is not "FINOMER" ? await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.BlockUser) : null;
+
+            if (updatedMessage is not null)
             {
                 outRespnse.ResponseMessage = updatedMessage.CorrectedMessage;
                 outRespnse.ResponseMessage_Hindi = updatedMessage.HindiMessage;
@@ -124,19 +125,19 @@ namespace Login.Identity.Service
                 };
 
                 var checkUserStatus = !checkValidReturnCode &&
-                                        result?.Data?.ReturnCode == 300 && result?.Data?.BlockReasonCode != "11" && result?.Data?.ClientId != "FINOTLR" ?
+                                        result?.Data?.ReturnCode is 300 && result?.Data?.BlockReasonCode is not "11" && result?.Data?.ClientId is not "FINOTLR" ?
                                         await _dataDbConfigurationService.GetDataAsync<Reasons, Reasons>(config) : null;
 
-                if (checkUserStatus != null)
+                if (checkUserStatus is not null)
                     outRespnse.ResponseMessage = checkUserStatus?.ResponseMessage;
             }
-            if (result?.Data?.BlockReasonCode == null)
+            if (result?.Data?.BlockReasonCode is not null)
             {
                 var blockUserMessage = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.BlockUserPassword);
                 outRespnse.ResponseMessage = blockUserMessage.CorrectedMessage;
                 outRespnse.ResponseMessage_Hindi = blockUserMessage.HindiMessage;
             }
-            if (result?.Data == null && !checkValidReturnCode)
+            if (result?.Data is null && !checkValidReturnCode)
             {
                 outRespnse.ResponseMessage = $"Unable to parse Authman response.";
                 outRespnse.MessageType = MessageType.Exclam.GetStringValue();

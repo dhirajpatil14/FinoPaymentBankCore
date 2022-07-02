@@ -29,7 +29,7 @@ namespace Shared.Services.ESBMessageService
         public EsbMessageService(IDataDbConfigurationService dataDbConfigurationService, IOptions<SqlConnectionStrings> sqlConnection)
         {
             _dataDbConfigurationService = dataDbConfigurationService;
-            if (_cacheEsbMessages == null)
+            if (_cacheEsbMessages is null)
             {
                 _cacheEsbMessages = new Dictionary<string, IEnumerable<EsbMessages>>();
             }
@@ -74,7 +74,6 @@ namespace Shared.Services.ESBMessageService
             }
             return Enumerable.Empty<EsbMessages>();
         }
-
         public virtual async Task<int> AddEsbMessageAsync(EsbMessages esbMessage)
         {
             var config = new DataDbConfigSettings<EsbMessages>
@@ -86,7 +85,7 @@ namespace Shared.Services.ESBMessageService
             var reply = await _dataDbConfigurationService.AddDataAsync<EsbMessages>(config);
 
             var dataValue = GetorNullAsync();
-            if (dataValue == null)
+            if (dataValue is null)
             {
                 await AddESBMessageListAsync();
             }
@@ -106,7 +105,7 @@ namespace Shared.Services.ESBMessageService
         {
             var data = await AddESBMessageListAsync();
 
-            if (data != null)
+            if (data is not null)
             {
                 return data.SingleOrDefault(xx => xx.MessageId == esbMessageEnums.GetIntValue());
             }
@@ -158,7 +157,7 @@ namespace Shared.Services.ESBMessageService
             if (!string.IsNullOrEmpty(messageKey))
             {
                 var data = await AddESBMessageListAsync();
-                var message = data.FirstOrDefault(xx => xx.EsbMessage.ToLower().Contains(messageKey) && xx.ReturnCode == "D1" && xx.TransactionType == "Default");
+                var message = data.FirstOrDefault(xx => xx.EsbMessage.ToLower().Contains(messageKey) && xx.ReturnCode is "D1" && xx.TransactionType is "Default");
                 if (!(message is null) && !string.IsNullOrEmpty(message.CorrectedMessage))
                 {
                     return message;

@@ -2,7 +2,7 @@
 
 namespace WebApi.Services.Settings
 {
-    public class WebApiRequestSettings<T1>
+    public class WebApiRequestSettings<T1> where T1 : new()
     {
         public string URL { get; set; }
         public string Parameter { get; set; }

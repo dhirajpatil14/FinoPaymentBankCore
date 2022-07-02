@@ -6,7 +6,7 @@ namespace Utility.Extensions
     {
         public static string ToJsonSerialize<T>(this T TObject)
         {
-            if (TObject != null)
+            if (TObject is not null)
                 return JsonConvert.SerializeObject(TObject, Newtonsoft.Json.Formatting.Indented);
             else
                 return string.Empty;

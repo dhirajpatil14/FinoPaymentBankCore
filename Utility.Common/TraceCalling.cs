@@ -63,7 +63,7 @@ namespace Utility.Common
         #endregion FILE
 
         #region IGNORE
-        private Type m_IgnoreType;
+        private readonly Type m_IgnoreType;
         /// <summary>
         /// Gets the type that will be ignored.
         /// </summary>
@@ -82,15 +82,16 @@ namespace Utility.Common
         /// </summary>
         private void Initialize()
         {
+
             #region METHOD BASE
-            MethodBase method = null;
-            string ignoreName = this.m_IgnoreType == null ?
+            string ignoreName = m_IgnoreType == null ?
                 null : this.m_IgnoreType.Name;
             #endregion METHOD BASE
 
             #region STACK TRACE
             StackFrame stackFrame = null;
-            StackTrace stackTrace = new StackTrace(true);
+            StackTrace stackTrace = new(true);
+            MethodBase method;
             for (int i = 0; i < stackTrace.FrameCount; i++)
             {
                 StackFrame sf = stackTrace?.GetFrame(i);
@@ -307,6 +308,11 @@ namespace Utility.Common
         public string ToRoute()
         {
             return $"{this.TypeName} To {this.MethodName }";
+        }
+
+        public string ToModule()
+        {
+            return $"{this.Method.Module.Name} . {this.Method.DeclaringType.Name } . {this.Method.Name}";
         }
 
 

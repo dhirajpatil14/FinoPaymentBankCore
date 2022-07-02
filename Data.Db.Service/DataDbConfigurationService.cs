@@ -10,9 +10,9 @@ namespace Data.Db.Service
 {
     public class DataDbConfigurationService : IDataDbConfigurationService
     {
-        private readonly DBService dBService = new DBService();
+        private readonly DBService dBService = new();
 
-        public async Task<int> AddDataAsync<TRequest>(DataDbConfigSettings<TRequest> configSettings)
+        public async Task<int> AddDataAsync<TRequest>(DataDbConfigSettings<TRequest> configSettings) where TRequest : new()
         {
             var _sqlConfiguration = new DataDbQueryConfiguration(configSettings.TableEnums);
 
@@ -32,7 +32,7 @@ namespace Data.Db.Service
             return await dBService.ExecuteAsync(ConnectionString: configSettings.DbConnection, sql: query, parameter: configSettings.Request);
         }
 
-        public async Task<IEnumerable<TResponce>> GetDatasAsync<TRequest, TResponce>(DataDbConfigSettings<TRequest> configSettings)
+        public async Task<IEnumerable<TResponce>> GetDatasAsync<TRequest, TResponce>(DataDbConfigSettings<TRequest> configSettings) where TRequest : new()
         {
             var _sqlConfiguration = new DataDbQueryConfiguration(configSettings.TableEnums);
 
@@ -52,7 +52,7 @@ namespace Data.Db.Service
         }
 
 
-        public async Task<TResponce> GetDataAsync<TRequest, TResponce>(DataDbConfigSettings<TRequest> configSettings)
+        public async Task<TResponce> GetDataAsync<TRequest, TResponce>(DataDbConfigSettings<TRequest> configSettings) where TRequest : new()
         {
             var _sqlConfiguration = new DataDbQueryConfiguration(configSettings.TableEnums);
 

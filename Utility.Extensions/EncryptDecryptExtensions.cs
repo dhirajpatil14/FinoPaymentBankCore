@@ -172,9 +172,9 @@ namespace Utility.Extensions
             aes.Key = Encoding.UTF8.GetBytes(key);
             aes.IV = iv;
             ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-            using MemoryStream memoryStream = new MemoryStream(buffer);
-            using CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Read);
-            using StreamReader streamReader = new StreamReader((Stream)cryptoStream);
+            using MemoryStream memoryStream = new(buffer);
+            using CryptoStream cryptoStream = new((Stream)memoryStream, decryptor, CryptoStreamMode.Read);
+            using StreamReader streamReader = new((Stream)cryptoStream);
             return streamReader.ReadToEnd();
         }
 
@@ -196,7 +196,7 @@ namespace Utility.Extensions
             byte[] toEncryptArray = cipherString.ToConvertBase64ToByte();
             string key = encryptKey;
 
-            MD5CryptoServiceProvider hashmd5 = new MD5CryptoServiceProvider();
+            MD5CryptoServiceProvider hashmd5 = new();
             keyArray = hashmd5.ComputeHash(UTF8Encoding.UTF8.GetBytes(key));
             hashmd5.Clear();
 
@@ -228,7 +228,7 @@ namespace Utility.Extensions
         public static string ToEncriptOpenSSL(this string plainText, string passphrase, Int32 KeySize = 256)
         {
             byte[] salt = new byte[8];
-            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+            RNGCryptoServiceProvider rng = new();
             rng.GetNonZeroBytes(salt);
             EncryptDecrypt.ToDeriveKeyIv(passphrase, salt, out byte[] key, out byte[] iv);
             // encrypt bytes
@@ -247,7 +247,7 @@ namespace Utility.Extensions
     {
         internal static void ToDeriveKeyIv(string passphrase, byte[] salt, out byte[] key, out byte[] iv)
         {
-            List<byte> concatenatedHashes = new List<byte>(48);
+            List<byte> concatenatedHashes = new(48);
             byte[] password = Encoding.UTF8.GetBytes(passphrase);
             byte[] currentHash = new byte[0];
             MD5 md5 = MD5.Create();
@@ -299,9 +299,9 @@ namespace Utility.Extensions
                 // Create a decrytor to perform the stream transform.
                 ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
                 // Create the streams used for decryption.
-                using MemoryStream msDecrypt = new MemoryStream(cipherText);
-                using CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
-                using StreamReader srDecrypt = new StreamReader(csDecrypt);
+                using MemoryStream msDecrypt = new(cipherText);
+                using CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read);
+                using StreamReader srDecrypt = new(csDecrypt);
                 // Read the decrypted bytes from the decrypting stream
                 // and place them in a string.
                 plaintext = srDecrypt.ReadToEnd();
@@ -386,8 +386,8 @@ namespace Utility.Extensions
 
                 // Create the streams used for encryption.
                 msEncrypt = new MemoryStream();
-                using CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
-                using StreamWriter swEncrypt = new StreamWriter(csEncrypt);
+                using CryptoStream csEncrypt = new(msEncrypt, encryptor, CryptoStreamMode.Write);
+                using StreamWriter swEncrypt = new(csEncrypt);
 
                 //Write all data to the stream.
                 swEncrypt.Write(plainText);
@@ -403,6 +403,5 @@ namespace Utility.Extensions
             // Return the encrypted bytes from the memory stream.
             return msEncrypt.ToArray();
         }
-
     }
 }

@@ -27,7 +27,7 @@ namespace Shared.Services.ESBURLService
         public EsbUrlMemoryService(IDataDbConfigurationService dataDbConfigurationService, IOptions<SqlConnectionStrings> sqlConnection)
         {
             _dataDbConfigurationService = dataDbConfigurationService;
-            if (_cacheESBUrls == null)
+            if (_cacheESBUrls is null)
             {
                 _cacheESBUrls = new Dictionary<string, IEnumerable<EsbUrl>>();
             }
@@ -85,7 +85,7 @@ namespace Shared.Services.ESBURLService
             var reply = await _dataDbConfigurationService.AddDataAsync<EsbUrl>(config);
 
             var dataValue = GetorNullAsync(serviceName.ToString());
-            if (dataValue == null)
+            if (dataValue is null)
             {
                 await AddESBListAsync(serviceName.ToString(), esbUrlId.GetIntValue(), serviceName.GetIntValue());
             }
@@ -104,7 +104,7 @@ namespace Shared.Services.ESBURLService
         {
             var data = await AddESBListAsync(serviceName.ToString(), esbUrlId.GetIntValue(), serviceName.GetIntValue());
 
-            if (data != null)
+            if (data is not null)
             {
                 return data.SingleOrDefault(xx => xx.ESBUrlId == esbUrlId.GetIntValue());
             }

@@ -3,7 +3,7 @@ using System;
 
 namespace Loggers.Logs.Model
 {
-    public class LoggerRequest
+    public class CorelationLoggerRequest
     {
 
         [JsonProperty("Service_ID")]
@@ -29,12 +29,12 @@ namespace Loggers.Logs.Model
         [JsonProperty("Node_IP_Address")]
         public string NodeIPAddress { get; set; }
         [JsonProperty("RequestIn")]
-        public DateTime? RequestIn { get; set; }
+        public DateTime? RequestIn { get; set; } = DateTime.Now;
         [JsonProperty("RequestOut")]
-        public DateTime? RequestOut { get; set; }
+        public DateTime? RequestOut { get; set; } = DateTime.Now;
 
         [JsonProperty("Response_Message")]
-        public string ResponseMessage { get; set; }
+        public string ResponseMessage { get; set; } = string.Empty;
 
         [JsonProperty("Status_Code")]
         public int StatusCode { get; set; }

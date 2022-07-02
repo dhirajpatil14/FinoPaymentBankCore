@@ -44,28 +44,5 @@ namespace LoginService.API.Integration.Tests.Controllers
             var result = responseString.ToJsonDeSerialize<OutResponse>();
             result.ResponseCode.ShouldBeEquivalentTo(0);
         }
-        public async Task Validate_Authentication_UserWrong_ReturnsFailResult()
-        {
-            var client = _factory.CreateDefaultClient();
-
-            var @userRequest = new AuthenticationRequest()
-            {
-                RequestId = "100032353_6292022153038769",
-                TellerId = "100032353",
-                MethodId = 1,
-                IsEncrypt = false,
-                RequestData = "{\"user_id\":\"K7CFFkt/XuWxCJZLlXpFQg==\",\"client_id\":\"FINOMER\",\"ECBBlockEncryption\":true}"
-            };
-
-            var eventJson = @userRequest.ToJsonSerialize();
-            HttpContent content = new StringContent(eventJson, Encoding.UTF8, "application/json");
-            var response = await client.PutAsync($"{apiUrl}Authenticate", content);
-            response.EnsureSuccessStatusCode();
-            var responseString = await response.Content.ReadAsStringAsync();
-            var result = responseString.ToJsonDeSerialize<OutResponse>();
-            result.ResponseCode.ShouldBeEquivalentTo(0);
-        }
-
-
     }
 }
