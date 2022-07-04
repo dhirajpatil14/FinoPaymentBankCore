@@ -22,6 +22,8 @@ namespace Common.Wrappers
         public bool Succeeded { get; set; }
         public string Message { get; set; }
         public List<string> Errors { get; set; }
+
+        public string ErrorMessage { get; set; }
         public int StatusCode { get; set; } = 200;
 
         public T Data { get; set; }

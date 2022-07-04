@@ -8,6 +8,12 @@ namespace Common.Enums
         MSTUPIERRORCODES = 1,
 
         [StringValue("mstIFSCMapping")]
-        MSTIFSCMAPPING = 2
+        MSTIFSCMAPPING = 2,
+
+        [StringValue("mstEsbMessages")]
+        ESBMessages = 3,
+
+        [StringValue("ReasonMaster")]
+        ReasonMaster = 4
     }
 }

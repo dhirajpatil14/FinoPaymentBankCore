@@ -1,11 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace WebApi.Services
 {
     public static class WebApiServiceRegistration
     {
-        public static void AddWebApiService(this IServiceCollection services, IConfiguration _config)
+        public static void AddWebApiService(this IServiceCollection services)
         {
             services.AddScoped<IWebApiRequestService, WebApiRequestService>();
         }

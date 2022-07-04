@@ -1,4 +1,6 @@
-﻿namespace Loggers.Logs
+﻿using System;
+
+namespace Loggers.Logs
 {
     public class LogSettings<TRequest>
     {
@@ -6,9 +8,7 @@
 
         public TRequest Request { get; set; }
 
-        public string LogDbConnection { get; set; }
-
-        public int LayerId { get; set; }
+        public Enum LogTable { get; set; }
 
     }
 }

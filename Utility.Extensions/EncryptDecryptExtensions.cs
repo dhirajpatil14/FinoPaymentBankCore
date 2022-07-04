@@ -3,6 +3,7 @@ using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Paddings;
 using Org.BouncyCastle.Crypto.Parameters;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -73,7 +74,7 @@ namespace Utility.Extensions
             engine = new AesEngine();
             blockCipher = new CbcBlockCipher(engine); //CBC
             cipher = new PaddedBufferedBlockCipher(blockCipher); //Default scheme is PKCS5/PKCS7
-            keyParam = new KeyParameter(Convert.FromBase64String(keyval));
+            keyParam = new KeyParameter(keyval.ToConvertBase64ToByte());
             keyParamWithIV = new ParametersWithIV(keyParam, iv, 0, 16);
 
             // Encrypt
@@ -84,7 +85,6 @@ namespace Utility.Extensions
             string encryptedPassword = Convert.ToBase64String(outputBytes);
             return encryptedPassword;
         }
-
 
         public static string ToEncrypt(this string text, string keyString)
         {
@@ -113,7 +113,7 @@ namespace Utility.Extensions
 
         public static string ToDecrypt(this string cipherText, string keyString)
         {
-            var fullCipher = Convert.FromBase64String(cipherText);
+            var fullCipher = cipherText.ToConvertBase64ToByte();
 
             var iv = new byte[16];
             var cipher = new byte[16];
@@ -134,8 +134,6 @@ namespace Utility.Extensions
 
             return result;
         }
-
-
 
         public static string ToDBStringEncrypt(this string text)
         {
@@ -169,15 +167,241 @@ namespace Utility.Extensions
             var key = "E546C8DF278CD5931069B522E695D4F2";
 
             byte[] iv = new byte[16];
-            byte[] buffer = Convert.FromBase64String(cipherText);
+            byte[] buffer = cipherText.ToConvertBase64ToByte();
             using Aes aes = Aes.Create();
             aes.Key = Encoding.UTF8.GetBytes(key);
             aes.IV = iv;
             ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-            using MemoryStream memoryStream = new MemoryStream(buffer);
-            using CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Read);
-            using StreamReader streamReader = new StreamReader((Stream)cryptoStream);
+            using MemoryStream memoryStream = new(buffer);
+            using CryptoStream cryptoStream = new((Stream)memoryStream, decryptor, CryptoStreamMode.Read);
+            using StreamReader streamReader = new((Stream)cryptoStream);
             return streamReader.ReadToEnd();
+        }
+
+        public static string ToDecryptOpenSSL(this string cipherText, string keyString, Int32 KeySize = 256)
+        {
+            byte[] encryptedBytesWithSalt = cipherText.ToConvertBase64ToByte();
+            byte[] salt = new byte[8];
+            byte[] encryptedBytes = new byte[encryptedBytesWithSalt.Length - salt.Length - 8];
+            Buffer.BlockCopy(encryptedBytesWithSalt, 8, salt, 0, salt.Length);
+            Buffer.BlockCopy(encryptedBytesWithSalt, salt.Length + 8, encryptedBytes, 0, encryptedBytes.Length);
+            EncryptDecrypt.ToDeriveKeyIv(keyString, salt, out byte[] key, out byte[] iv);
+
+            return EncryptDecrypt.ToDecryptStringFromAes(encryptedBytes, key, iv, KeySize);
+        }
+
+        public static string ToDecryptEcbBlock(this string cipherString, string encryptKey)
+        {
+            byte[] keyArray;
+            byte[] toEncryptArray = cipherString.ToConvertBase64ToByte();
+            string key = encryptKey;
+
+            MD5CryptoServiceProvider hashmd5 = new();
+            keyArray = hashmd5.ComputeHash(UTF8Encoding.UTF8.GetBytes(key));
+            hashmd5.Clear();
+
+            TripleDESCryptoServiceProvider tdes = new TripleDESCryptoServiceProvider
+            {
+                Key = keyArray,
+                Mode = CipherMode.ECB,
+                Padding = PaddingMode.PKCS7
+            };
+            ICryptoTransform cTransform = tdes.CreateDecryptor();
+            byte[] resultArray = cTransform.TransformFinalBlock(
+            toEncryptArray, 0, toEncryptArray.Length);
+            tdes.Clear();
+            return UTF8Encoding.UTF8.GetString(resultArray);
+        }
+
+        public static string ToDecryptStringAES(this string cipherText, string decryptKey, string key)
+        {
+
+            var keybytes = Encoding.UTF8.GetBytes(decryptKey);
+            var iv = Encoding.UTF8.GetBytes(key);
+
+            var varEncrypted = cipherText.ToConvertBase64ToByte();
+            var decriptedFromJavascript = EncryptDecrypt.ToDecryptStringFromBytes(varEncrypted, keybytes, iv);
+            return decriptedFromJavascript;
+        }
+
+
+        public static string ToEncriptOpenSSL(this string plainText, string passphrase, Int32 KeySize = 256)
+        {
+            byte[] salt = new byte[8];
+            RNGCryptoServiceProvider rng = new();
+            rng.GetNonZeroBytes(salt);
+            EncryptDecrypt.ToDeriveKeyIv(passphrase, salt, out byte[] key, out byte[] iv);
+            // encrypt bytes
+            byte[] encryptedBytes = EncryptDecrypt.ToEncryptStringToBytes(plainText, key, iv, KeySize);
+            // add salt as first 8 bytes
+            byte[] encryptedBytesWithSalt = new byte[salt.Length + encryptedBytes.Length + 8];
+            Buffer.BlockCopy(Encoding.ASCII.GetBytes("Salted__"), 0, encryptedBytesWithSalt, 0, 8);
+            Buffer.BlockCopy(salt, 0, encryptedBytesWithSalt, 8, salt.Length);
+            Buffer.BlockCopy(encryptedBytes, 0, encryptedBytesWithSalt, salt.Length + 8, encryptedBytes.Length);
+            return string.Empty;
+        }
+
+
+    }
+    internal static class EncryptDecrypt
+    {
+        internal static void ToDeriveKeyIv(string passphrase, byte[] salt, out byte[] key, out byte[] iv)
+        {
+            List<byte> concatenatedHashes = new(48);
+            byte[] password = Encoding.UTF8.GetBytes(passphrase);
+            byte[] currentHash = new byte[0];
+            MD5 md5 = MD5.Create();
+            bool enoughBytesForKey = false;
+            // See http://www.openssl.org/docs/crypto/EVP_BytesToKey.html#KEY_DERIVATION_ALGORITHM
+            while (!enoughBytesForKey)
+            {
+                int preHashLength = currentHash.Length + password.Length + salt.Length;
+                byte[] preHash = new byte[preHashLength];
+
+                Buffer.BlockCopy(currentHash, 0, preHash, 0, currentHash.Length);
+                Buffer.BlockCopy(password, 0, preHash, currentHash.Length, password.Length);
+                Buffer.BlockCopy(salt, 0, preHash, currentHash.Length + password.Length, salt.Length);
+
+                currentHash = md5.ComputeHash(preHash);
+                concatenatedHashes.AddRange(currentHash);
+
+                if (concatenatedHashes.Count >= 48)
+                    enoughBytesForKey = true;
+            }
+
+            key = new byte[32];
+            iv = new byte[16];
+            concatenatedHashes.CopyTo(0, key, 0, 32);
+            concatenatedHashes.CopyTo(32, iv, 0, 16);
+            md5.Clear();
+        }
+
+        internal static string ToDecryptStringFromAes(byte[] cipherText, byte[] key, byte[] iv, Int32 KeySize = 256)
+        {
+            Int32 blockSize = 128;
+            // Check arguments.
+            if (cipherText == null || cipherText.Length <= 0)
+                throw new ArgumentNullException("cipherText");
+            if (key == null || key.Length <= 0)
+                throw new ArgumentNullException("key");
+            if (iv == null || iv.Length <= 0)
+                throw new ArgumentNullException("iv");
+
+            RijndaelManaged aesAlg = null;
+            string plaintext = string.Empty;
+
+            try
+            {
+                // Create a RijndaelManaged object
+                // with the specified key and IV.
+                aesAlg = new RijndaelManaged { Mode = CipherMode.CBC, KeySize = KeySize, BlockSize = blockSize, Key = key, IV = iv };
+
+                // Create a decrytor to perform the stream transform.
+                ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+                // Create the streams used for decryption.
+                using MemoryStream msDecrypt = new(cipherText);
+                using CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read);
+                using StreamReader srDecrypt = new(csDecrypt);
+                // Read the decrypted bytes from the decrypting stream
+                // and place them in a string.
+                plaintext = srDecrypt.ReadToEnd();
+                srDecrypt.Close();
+            }
+            finally
+            {
+                // Clear the RijndaelManaged object.
+                if (aesAlg != null)
+                    aesAlg.Clear();
+            }
+            return plaintext;
+        }
+
+        internal static string ToDecryptStringFromBytes(byte[] cipherText, byte[] key, byte[] iv)
+        {
+
+            // Check arguments.
+            if (cipherText == null || cipherText.Length <= 0)
+                throw new ArgumentNullException("cipherText");
+            if (key == null || key.Length <= 0)
+                throw new ArgumentNullException("key");
+            if (iv == null || iv.Length <= 0)
+                throw new ArgumentNullException("iv");
+
+
+            using var rijAlg = new RijndaelManaged();
+
+            rijAlg.Mode = CipherMode.CBC;
+            rijAlg.Padding = PaddingMode.PKCS7;
+            rijAlg.FeedbackSize = 128;
+
+            rijAlg.Key = key;
+            rijAlg.IV = iv;
+
+            // Create a decrytor to perform the stream transform.
+            var varDecryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
+            try
+            {
+                // Create the streams used for decryption.
+                using var msDecrypt = new MemoryStream(cipherText);
+                using var csDecrypt = new CryptoStream(msDecrypt, varDecryptor, CryptoStreamMode.Read);
+                using var srDecrypt = new StreamReader(csDecrypt);
+                // Read the decrypted bytes from the decrypting stream
+                // and place them in a string.
+                return srDecrypt.ReadToEnd();
+            }
+            catch
+            {
+                return "keyError";
+            }
+
+        }
+
+        internal static byte[] ToEncryptStringToBytes(string plainText, byte[] key, byte[] iv, Int32 KeySize = 256)
+        {
+            Int32 blockSize = 128;
+            // Check arguments.
+            if (plainText == null || plainText.Length <= 0)
+                throw new ArgumentNullException("plainText");
+            if (key == null || key.Length <= 0)
+                throw new ArgumentNullException("key");
+            if (iv == null || iv.Length <= 0)
+                throw new ArgumentNullException("iv");
+
+            // Declare the stream used to encrypt to an in memory
+            // array of bytes.
+            MemoryStream msEncrypt;
+
+            // Declare the RijndaelManaged object
+            // used to encrypt the data.
+            RijndaelManaged aesAlg = null;
+
+            try
+            {
+                // Create a RijndaelManaged object
+                // with the specified key and IV.
+                aesAlg = new RijndaelManaged { Mode = CipherMode.CBC, KeySize = KeySize, BlockSize = blockSize, Key = key, IV = iv };
+
+                // Create an encryptor to perform the stream transform.
+                ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+
+                // Create the streams used for encryption.
+                msEncrypt = new MemoryStream();
+                using CryptoStream csEncrypt = new(msEncrypt, encryptor, CryptoStreamMode.Write);
+                using StreamWriter swEncrypt = new(csEncrypt);
+
+                //Write all data to the stream.
+                swEncrypt.Write(plainText);
+                swEncrypt.Flush();
+                swEncrypt.Close();
+            }
+            finally
+            {
+                // Clear the RijndaelManaged object.
+                if (aesAlg != null)
+                    aesAlg.Clear();
+            }
+            // Return the encrypted bytes from the memory stream.
+            return msEncrypt.ToArray();
         }
     }
 }

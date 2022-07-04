@@ -18,7 +18,7 @@ namespace Utility.Extensions
               : char.ToUpperInvariant(str[0]) + str[1..];
         public static byte[] ToConvertBase64ToByte(this string base64String)
         {
-            if (base64String != null)
+            if (base64String is not null)
             {
                 if (base64String.Contains(","))
                 {

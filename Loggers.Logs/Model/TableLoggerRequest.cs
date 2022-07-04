@@ -3,7 +3,7 @@ using System;
 
 namespace Loggers.Logs.Model
 {
-    public class TableLoggerRequest
+    public class FillLoggerRequest
     {
         [JsonProperty("RequestID")]
         public string RequestID { get; set; }
@@ -21,14 +21,18 @@ namespace Loggers.Logs.Model
         public string SessionID { get; set; }
 
         [JsonProperty("Form")]
-        public string Form { get; set; }
+        public string Form { get; set; } = string.Empty;
 
         [JsonProperty("Module")]
         public string Module { get; set; }
         [JsonProperty("Message")]
         public string Message { get; set; }
+
+        [JsonProperty("PriorityID")]
+        public int? PriorityId { get; set; }
+
         [JsonProperty("CreatedDate")]
-        public DateTime? CreatedDate { get; set; }
+        private DateTime? CreatedDate { get; set; } = DateTime.Now;
 
         [JsonProperty("MobileNo")]
         public string MobileNo { get; set; }
@@ -37,5 +41,9 @@ namespace Loggers.Logs.Model
         public int? MethodId { get; set; }
         [JsonProperty("ChannelID")]
         public int? ChannelID { get; set; }
+
+
+
+
     }
 }

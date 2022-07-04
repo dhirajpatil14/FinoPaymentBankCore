@@ -23,8 +23,8 @@ namespace Application.Behaviours
             {
                 var context = new FluentValidation.ValidationContext<TRequest>(request);
                 var validationResults = await Task.WhenAll(_validators.Select(v => v.ValidateAsync(context, cancellationToken)));
-                var failures = validationResults.SelectMany(r => r.Errors).Where(f => f != null).ToList();
-                if (failures.Count != 0)
+                var failures = validationResults.SelectMany(r => r.Errors).Where(f => f is not null).ToList();
+                if (failures.Count is not 0)
                     throw new Behaviours.ValidationException(failures);
             }
             return await next();
