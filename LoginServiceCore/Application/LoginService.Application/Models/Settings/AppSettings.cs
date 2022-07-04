@@ -6,14 +6,10 @@
         public string InstitutionId { get; set; }
         public string EsbURL { get; set; }
         public int Timeout { get; set; }
-
         public string DecryptKey { get; set; }
-
         public string DecryptKeygen { get; set; }
-
         public string ESBCBSMessagesByCache { get; set; }
-
         public int SessionExpired { get; set; }
-
+        public int LatitudeLongitude { get; set; }
     }
 }

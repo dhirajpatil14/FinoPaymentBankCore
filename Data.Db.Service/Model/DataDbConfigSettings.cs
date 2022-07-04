@@ -9,6 +9,8 @@ namespace Data.Db.Service.Model
 
         public string DbConnection { get; set; }
 
+        public string PlainQuery { get; set; }
+
 
     }
 }

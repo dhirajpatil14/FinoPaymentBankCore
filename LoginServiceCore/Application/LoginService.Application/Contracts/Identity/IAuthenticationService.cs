@@ -6,8 +6,8 @@ namespace LoginService.Application.Contracts.Identity
 {
     public interface IAuthenticationService
     {
-        Task<OutResponse> AuthenticateAsync(AuthenticationRequest authenticationRequest);
+        Task<OutResponse> ValidateUserAuthenticationAsync(AuthenticationRequest authenticationRequest);
 
-        Task RestrictUserAccessAsync();
+        Task<OutResponse> ValidateUser(AuthenticationRequest authenticationRequest);
     }
 }

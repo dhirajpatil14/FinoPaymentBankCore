@@ -10,6 +10,12 @@ namespace Data.Db.Service.Interface
 
         Task<TResponce> GetDataAsync<TRequest, TResponce>(DataDbConfigSettings<TRequest> configSettings) where TRequest : new();
 
+
+
         Task<IEnumerable<TResponce>> GetDatasAsync<TRequest, TResponce>(DataDbConfigSettings<TRequest> configSettings) where TRequest : new();
+
+
+
+
     }
 }

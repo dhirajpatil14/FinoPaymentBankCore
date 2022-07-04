@@ -1,9 +1,10 @@
-﻿using Common.Application.Model;
+﻿using Common.Application.Interface;
+using Common.Application.Model;
 using Common.Enums;
 using Data.Db.Service.Interface;
-using Data.Db.Service.Model;
 using Loggers.Logs;
 using LoginService.Application.Contracts.Identity;
+using LoginService.Application.Contracts.Repositories;
 using LoginService.Application.DTOs;
 using LoginService.Application.Models;
 using LoginService.Application.Models.Settings;
@@ -13,10 +14,12 @@ using Shared.Services.ESBMessageService;
 using Shared.Services.ESBURLService;
 using SQL.Helper;
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Utility.Common;
 using Utility.Extensions;
+using Utility.Extensions.Aadhar;
 using WebApi.Services;
 using WebApi.Services.Settings;
 
@@ -28,7 +31,9 @@ namespace Login.Identity.Service
 
         private readonly ILoggerService _loggerService;
 
-        private readonly IDataDbConfigurationService _dataDbConfigurationService;
+        private readonly IUserRepositories _userRepositories;
+
+        private readonly IEkycAuaService _ekycAuaService;
 
         private readonly EsbUrlMemoryService _esbUrlMemoryService;
 
@@ -36,26 +41,25 @@ namespace Login.Identity.Service
 
         private readonly EsbCbsMessageService _esbCbsMessageService;
 
-        private readonly SqlConnectionStrings _sqlConnectionStrings;
-
-
         private readonly AppSettings _appSettings;
 
 
 
-        public AuthenticationService(IWebApiRequestService webApiRequestService, ILoggerService loggerService, IDataDbConfigurationService dataDbConfigurationService, IOptions<AppSettings> appSettings, IOptions<SqlConnectionStrings> sqlConnectionStrings, EsbUrlMemoryService esbUrlMemoryService, EsbMessageService esbMessageService, EsbCbsMessageService esbCbsMessageService)
+
+        public AuthenticationService(IWebApiRequestService webApiRequestService, IUserRepositories userRepositories, IEkycAuaService ekycAuaService, ILoggerService loggerService, IDataDbConfigurationService dataDbConfigurationService, IOptions<AppSettings> appSettings, IOptions<SqlConnectionStrings> sqlConnectionStrings, EsbUrlMemoryService esbUrlMemoryService, EsbMessageService esbMessageService, EsbCbsMessageService esbCbsMessageService)
         {
             _webApiRequestService = webApiRequestService;
+            _userRepositories = userRepositories;
             _loggerService = loggerService;
-            _dataDbConfigurationService = dataDbConfigurationService;
             _esbUrlMemoryService = esbUrlMemoryService;
             _esbMessageService = esbMessageService;
             _esbCbsMessageService = esbCbsMessageService;
+            _ekycAuaService = ekycAuaService;
             _appSettings = appSettings.Value;
-            _sqlConnectionStrings = sqlConnectionStrings.Value;
         }
 
-        public async Task<OutResponse> AuthenticateAsync(AuthenticationRequest authenticationRequest)
+
+        public async Task<OutResponse> ValidateUserAuthenticationAsync(AuthenticationRequest authenticationRequest)
         {
             var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<FisUserValidateRequest>();
 
@@ -117,16 +121,9 @@ namespace Login.Identity.Service
             }
             else
             {
-                var config = new DataDbConfigSettings<Reasons>
-                {
-                    TableEnums = PBMaster.ReasonMaster,
-                    Request = new Reasons { RevokeReason = result?.Data?.BlockReasonCode },
-                    DbConnection = _sqlConnectionStrings.PBMasterConnection
-                };
-
                 var checkUserStatus = !checkValidReturnCode &&
                                         result?.Data?.ReturnCode is 300 && result?.Data?.BlockReasonCode is not "11" && result?.Data?.ClientId is not "FINOTLR" ?
-                                        await _dataDbConfigurationService.GetDataAsync<Reasons, Reasons>(config) : null;
+                                        await _userRepositories.GetReasonsAsync(result?.Data?.BlockReasonCode) : null;
 
                 if (checkUserStatus is not null)
                     outRespnse.ResponseMessage = checkUserStatus?.ResponseMessage;
@@ -146,9 +143,48 @@ namespace Login.Identity.Service
             return outRespnse;
         }
 
-        public Task RestrictUserAccessAsync()
+        public async Task<OutResponse> ValidateUser(AuthenticationRequest authenticationRequest)
         {
+            var loginData = authenticationRequest.RequestData.ToJsonDeSerialize<FisUserPasswordValidateRequest>();
+            var isUserRestricted = await RestrictUserAccess(loginData);
+
+            var outRespnse = new OutResponse
+            {
+                ResponseMessage = isUserRestricted ? "User not authorized to proceed !" : string.Empty,
+                MessageType = isUserRestricted ? MessageType.Exclam.GetStringValue() : string.Empty,
+                ResponseData = isUserRestricted ? "{\"Login_Data\":null}" : string.Empty,
+                ResponseCode = isUserRestricted ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue()
+            };
+            if (isUserRestricted)
+                return outRespnse;
+            loginData.Aadhaar.RequestXmlData = await loginData.Aadhaar.GetAadharXmlAsync(_ekycAuaService);
+
+
+
+
             throw new NotImplementedException();
+        }
+
+        internal async Task<Boolean> RestrictUserAccess(FisUserPasswordValidateRequest fisUserPasswordValidateRequest)
+        {
+
+
+            var isRestricted = !((fisUserPasswordValidateRequest?.SystemInfo?.Ip is not null && fisUserPasswordValidateRequest?.SystemInfo?.Ip is not "") &&
+                       (fisUserPasswordValidateRequest?.SystemInfo?.CellId is not null) &&
+                       (fisUserPasswordValidateRequest?.SystemInfo?.Mcc is not null && fisUserPasswordValidateRequest?.SystemInfo?.Mcc is not "") &&
+                       (fisUserPasswordValidateRequest?.SystemInfo?.Lattitude is not null) &&
+                       (fisUserPasswordValidateRequest?.SystemInfo?.Longitude is not null));
+
+            if (!isRestricted)
+            {
+                return isRestricted;
+            }
+
+            var userRestrictData = await _userRepositories.GetUserRestricationAsync(fisUserPasswordValidateRequest, _appSettings.LatitudeLongitude);
+
+            isRestricted = userRestrictData.Any();
+
+            return isRestricted;
         }
     }
 }

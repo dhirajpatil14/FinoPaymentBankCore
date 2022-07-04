@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Common.Application\Common.Application.csproj" />
     <ProjectReference Include="..\SQL.Helper\SQL.Helper.csproj" />
     <ProjectReference Include="..\Utility.Attribute\Utility.Attributes.csproj" />
   </ItemGroup>

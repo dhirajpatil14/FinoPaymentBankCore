@@ -82,7 +82,7 @@ namespace Utility.Extensions
             outputBytes = new byte[cipher.GetOutputSize(inputBytes.Length)];
             int length = cipher.ProcessBytes(inputBytes, outputBytes, 0);
             cipher.DoFinal(outputBytes, length); //Do the final block
-            string encryptedPassword = Convert.ToBase64String(outputBytes);
+            string encryptedPassword = outputBytes.ToBase64String();
             return encryptedPassword;
         }
 
@@ -108,7 +108,7 @@ namespace Utility.Extensions
             Buffer.BlockCopy(iv, 0, result, 0, iv.Length);
             Buffer.BlockCopy(decryptedContent, 0, result, iv.Length, decryptedContent.Length);
 
-            return Convert.ToBase64String(result);
+            return result.ToBase64String();
         }
 
         public static string ToDecrypt(this string cipherText, string keyString)
@@ -157,7 +157,7 @@ namespace Utility.Extensions
             Buffer.BlockCopy(iv, 0, result, 0, iv.Length);
             Buffer.BlockCopy(decryptedContent, 0, result, iv.Length, decryptedContent.Length);
 
-            return Convert.ToBase64String(result);
+            return result.ToBase64String();
         }
 
 
