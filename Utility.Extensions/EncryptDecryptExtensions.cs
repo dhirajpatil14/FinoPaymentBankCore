@@ -56,7 +56,7 @@ namespace Utility.Extensions
         //    return encryptedpass;
         //}
 
-        public static string EncryptPassword(this string password, string keyval)
+        public static string ToEncryptPassword(this string password, string keyval)
         {
             byte[] iv;
             AesEngine engine;
@@ -82,7 +82,7 @@ namespace Utility.Extensions
             outputBytes = new byte[cipher.GetOutputSize(inputBytes.Length)];
             int length = cipher.ProcessBytes(inputBytes, outputBytes, 0);
             cipher.DoFinal(outputBytes, length); //Do the final block
-            string encryptedPassword = Convert.ToBase64String(outputBytes);
+            string encryptedPassword = outputBytes.ToBase64String();
             return encryptedPassword;
         }
 
@@ -108,7 +108,7 @@ namespace Utility.Extensions
             Buffer.BlockCopy(iv, 0, result, 0, iv.Length);
             Buffer.BlockCopy(decryptedContent, 0, result, iv.Length, decryptedContent.Length);
 
-            return Convert.ToBase64String(result);
+            return result.ToBase64String();
         }
 
         public static string ToDecrypt(this string cipherText, string keyString)
@@ -157,9 +157,8 @@ namespace Utility.Extensions
             Buffer.BlockCopy(iv, 0, result, 0, iv.Length);
             Buffer.BlockCopy(decryptedContent, 0, result, iv.Length, decryptedContent.Length);
 
-            return Convert.ToBase64String(result);
+            return result.ToBase64String();
         }
-
 
         public static string ToDBStringDecrypt(this string cipherText)
         {
@@ -224,7 +223,6 @@ namespace Utility.Extensions
             return decriptedFromJavascript;
         }
 
-
         public static string ToEncriptOpenSSL(this string plainText, string passphrase, Int32 KeySize = 256)
         {
             byte[] salt = new byte[8];
@@ -241,7 +239,17 @@ namespace Utility.Extensions
             return string.Empty;
         }
 
-
+        public static string ToEncriptEcbBlock(this string plainText, string key)
+        {
+            AesManaged tdes = new();
+            tdes.Key = Convert.FromBase64String(key);
+            tdes.Mode = CipherMode.ECB;
+            tdes.Padding = PaddingMode.PKCS7;
+            ICryptoTransform crypt = tdes.CreateEncryptor();
+            byte[] plain = Encoding.UTF8.GetBytes(plainText);
+            byte[] cipher = crypt.TransformFinalBlock(plain, 0, plain.Length);
+            return cipher.ToBase64String();
+        }
     }
     internal static class EncryptDecrypt
     {

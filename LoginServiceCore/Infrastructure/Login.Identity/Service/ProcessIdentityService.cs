@@ -54,7 +54,10 @@ namespace Login.Identity.Service
                 {
 
                     case 1:
-                        outResponse = await _authenticationService?.AuthenticateAsync(authenticationRequest);
+                        outResponse = await _authenticationService?.ValidateUserAuthenticationAsync(authenticationRequest);
+                        break;
+                    case 2:
+                        outResponse = await _authenticationService?.ValidateUser(authenticationRequest);
                         break;
                     default:
                         break;

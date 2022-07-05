@@ -7,7 +7,6 @@ using SQL.Helper;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Utility.Extensions;
 
 namespace Shared.Services.ESBMessageService
 {
@@ -101,13 +100,13 @@ namespace Shared.Services.ESBMessageService
             return reply;
         }
 
-        public async virtual Task<EsbMessages> GetEsbMessageByIdAsync(EsbsMessages esbMessageEnums)
+        public async virtual Task<EsbMessages> GetEsbMessageByIdAsync(int messageId)
         {
             var data = await AddESBMessageListAsync();
 
             if (data is not null)
             {
-                return data.SingleOrDefault(xx => xx.MessageId == esbMessageEnums.GetIntValue());
+                return data.SingleOrDefault(xx => xx.MessageId == messageId);
             }
 
             return null;

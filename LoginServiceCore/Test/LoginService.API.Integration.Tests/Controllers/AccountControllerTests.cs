@@ -23,7 +23,7 @@ namespace LoginService.API.Integration.Tests.Controllers
         }
 
         [Fact]
-        public async Task Validate_Authentication_User_ReturnsSuccessResult()
+        public async Task Validate_User_ReturnsSuccessResult()
         {
             var client = _factory.CreateDefaultClient();
 

@@ -106,7 +106,7 @@ namespace WebApi.Services
             client.BaseAddress = uri;
 
             client.DefaultRequestHeaders.Add("X-Auth-Token", webApiRequestSettings.XAuthToken);
-            client.DefaultRequestHeaders.Add("X-Source-System", "_appSettings.InstitutionId");
+            //client.DefaultRequestHeaders.Add("X-Source-System", "_appSettings.InstitutionId");
 
             if (!string.IsNullOrEmpty(webApiRequestSettings.RequesterId))
             {

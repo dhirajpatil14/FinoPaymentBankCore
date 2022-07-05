@@ -34,5 +34,17 @@ namespace Utility.Extensions
         }
 
 
+        public static string ToBase64Decode(this string base64EncodeData)
+        {
+            var base64EncodedBytes = System.Convert.FromBase64String(base64EncodeData);
+            return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+        }
+
+
+        public static string ToBase64String(this byte[] baseByte)
+        {
+            return Convert.ToBase64String(baseByte);
+        }
+
     }
 }

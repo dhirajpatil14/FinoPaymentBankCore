@@ -10,5 +10,7 @@ namespace Common.Enums
         [StringValue("mstESBCBSMessages")]
         ESBCBSMessages = 2,
 
+        [StringValue("tblauarequestRD")]
+        AuaRequestRd = 2,
     }
 }

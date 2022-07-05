@@ -5,4 +5,14 @@
 	  <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="GeoCoordinate.NetStandard2" Version="1.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Comman.Enums\Common.Enums.csproj" />
+    <ProjectReference Include="..\..\..\Data.Db.Service\Data.Db.Service.csproj" />
+    <ProjectReference Include="..\..\Application\LoginService.Application\LoginService.Application.csproj" />
+  </ItemGroup>
+
 </Project>

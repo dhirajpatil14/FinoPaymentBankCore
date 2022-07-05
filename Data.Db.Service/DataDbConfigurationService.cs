@@ -34,19 +34,22 @@ namespace Data.Db.Service
 
         public async Task<IEnumerable<TResponce>> GetDatasAsync<TRequest, TResponce>(DataDbConfigSettings<TRequest> configSettings) where TRequest : new()
         {
-            var _sqlConfiguration = new DataDbQueryConfiguration(configSettings.TableEnums);
+            string query = configSettings.PlainQuery;
 
+            if (string.IsNullOrEmpty(query))
+            {
+                var _sqlConfiguration = new DataDbQueryConfiguration(configSettings.TableEnums);
 
+                var filteredQuery = configSettings.Request.GetFilterdColumns(_sqlConfiguration, fetchJsonProperties: true, ignoreIdProperty: true);
 
-            var filteredQuery = configSettings.Request.GetFilterdColumns(_sqlConfiguration, fetchJsonProperties: true, ignoreIdProperty: true);
-
-            var query = _sqlConfiguration.SelectQuery
-                                         .ReplaceQueryParameters(_sqlConfiguration.SchemaName,
-                                                                 _sqlConfiguration.TableName,
-                                                                 _sqlConfiguration.ParameterNotation,
-                                                                 new string[] { },
-                                                                 new string[] { },
-                                                                 filteredQuery);
+                query = _sqlConfiguration.SelectQuery
+                                            .ReplaceQueryParameters(_sqlConfiguration.SchemaName,
+                                                                    _sqlConfiguration.TableName,
+                                                                    _sqlConfiguration.ParameterNotation,
+                                                                    new string[] { },
+                                                                    new string[] { },
+                                                                    filteredQuery);
+            }
 
             return await dBService.QueryAsync<TResponce, TRequest>(ConnectionString: configSettings.DbConnection, sql: query, parameter: configSettings.Request);
         }
@@ -54,20 +57,22 @@ namespace Data.Db.Service
 
         public async Task<TResponce> GetDataAsync<TRequest, TResponce>(DataDbConfigSettings<TRequest> configSettings) where TRequest : new()
         {
-            var _sqlConfiguration = new DataDbQueryConfiguration(configSettings.TableEnums);
+            string query = configSettings.PlainQuery;
 
+            if (string.IsNullOrEmpty(query))
+            {
+                var _sqlConfiguration = new DataDbQueryConfiguration(configSettings.TableEnums);
 
+                var filteredQuery = configSettings.Request.GetFilterdColumns(_sqlConfiguration, fetchJsonProperties: true, ignoreIdProperty: true);
 
-            var filteredQuery = configSettings.Request.GetFilterdColumns(_sqlConfiguration, fetchJsonProperties: true, ignoreIdProperty: true);
-
-            var query = _sqlConfiguration.SelectQuery
-                                         .ReplaceQueryParameters(_sqlConfiguration.SchemaName,
-                                                                 _sqlConfiguration.TableName,
-                                                                 _sqlConfiguration.ParameterNotation,
-                                                                 new string[] { },
-                                                                 new string[] { },
-                                                                 filteredQuery);
-
+                query = _sqlConfiguration.SelectQuery
+                                            .ReplaceQueryParameters(_sqlConfiguration.SchemaName,
+                                                                    _sqlConfiguration.TableName,
+                                                                    _sqlConfiguration.ParameterNotation,
+                                                                    new string[] { },
+                                                                    new string[] { },
+                                                                    filteredQuery);
+            }
             return await dBService.QueryFirstOrDefaultAsync<TResponce, TRequest>(ConnectionString: configSettings.DbConnection, sql: query, parameter: configSettings.Request);
         }
 

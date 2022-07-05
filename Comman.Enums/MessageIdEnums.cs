@@ -4,9 +4,9 @@ namespace Common.Enums
 {
     public enum MessageTypeId
     {
-        [IntValueAttribute(49)]
+        [IntValueAttribute(1)]
         LoginSuccess = 1,
-        [IntValueAttribute(49)]
+        [IntValueAttribute(2)]
         LoginUnSuccess = 2,
         [IntValueAttribute(49)]
         Exception = 3,
@@ -108,7 +108,7 @@ namespace Common.Enums
         InsertSMSSuccess = 60,
         [IntValueAttribute(49)]
         InsertSMSFailed = 61,
-        [IntValueAttribute(49)]
+        [IntValueAttribute(64)]
         ServerError = 64,
         [IntValueAttribute(65)]
         AuthenticateSuccess = 65,

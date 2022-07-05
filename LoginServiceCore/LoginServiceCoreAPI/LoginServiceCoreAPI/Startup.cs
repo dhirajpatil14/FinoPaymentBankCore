@@ -1,5 +1,6 @@
 using HotRod.Cache;
 using Login.Identity;
+using Login.Infrastructure;
 using LoginService.Application;
 using LoginServiceCoreAPI.Extensions;
 using Microsoft.AspNetCore.Builder;
@@ -42,6 +43,8 @@ namespace LoginServiceCoreAPI
             services.AddApplicationService();
 
             services.AddIdentityService();
+
+            services.AddInfrastureService();
 
         }
 
