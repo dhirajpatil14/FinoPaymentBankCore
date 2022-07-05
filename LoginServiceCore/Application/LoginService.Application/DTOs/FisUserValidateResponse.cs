@@ -5,7 +5,7 @@ namespace LoginService.Application.DTOs
     public class FisUserValidateResponse
     {
         [JsonProperty("returnCode")]
-        public int ReturnCode { get; set; }
+        public int ReturnCode { get; set; } = -1;
 
         [JsonProperty("responseMessage")]
         public string ResponseMessage { get; set; }

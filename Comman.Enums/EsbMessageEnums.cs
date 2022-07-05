@@ -13,5 +13,12 @@ namespace Common.Enums
         [IntValueAttribute(104)]
         BlockUserPassword = 104,
 
+        [IntValueAttribute(101)]
+        UnableToProcessRequest,
+
+        [IntValueAttribute(103)]
+        UnableToParseLogin
+
+
     }
 }

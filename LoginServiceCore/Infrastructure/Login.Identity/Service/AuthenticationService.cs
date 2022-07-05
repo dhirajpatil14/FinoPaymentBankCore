@@ -84,7 +84,7 @@ namespace Login.Identity.Service
 
             var esbMessagesdata = new EsbMessages();
             if (result.StatusCode is 503)
-                esbMessagesdata = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.ServerUnavailable);
+                esbMessagesdata = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.ServerUnavailable.GetIntValue());
             else if (result.StatusCode is not 200 && result.StatusCode is not 503)
                 esbMessagesdata = await _esbMessageService.GetEsbMessage(string.Empty, ResponseCode.RemoteServerError.GetStringValue(), result.ErrorMessage);
 
@@ -112,7 +112,7 @@ namespace Login.Identity.Service
 
             var updatedMessage = !checkValidReturnCode && result?.Data?.ReturnCode == 300 &&
                                   result?.Data?.BlockReasonCode is "11" &&
-                                 result?.Data?.ClientId is not "FINOMER" ? await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.BlockUser) : null;
+                                 result?.Data?.ClientId is not "FINOMER" ? await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.BlockUser.GetIntValue()) : null;
 
             if (updatedMessage is not null)
             {
@@ -130,7 +130,7 @@ namespace Login.Identity.Service
             }
             if (result?.Data?.BlockReasonCode is not null)
             {
-                var blockUserMessage = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.BlockUserPassword);
+                var blockUserMessage = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.BlockUserPassword.GetIntValue());
                 outRespnse.ResponseMessage = blockUserMessage.CorrectedMessage;
                 outRespnse.ResponseMessage_Hindi = blockUserMessage.HindiMessage;
             }
@@ -151,15 +151,94 @@ namespace Login.Identity.Service
             var outRespnse = new OutResponse
             {
                 ResponseMessage = isUserRestricted ? "User not authorized to proceed !" : string.Empty,
-                MessageType = isUserRestricted ? MessageType.Exclam.GetStringValue() : string.Empty,
-                ResponseData = isUserRestricted ? "{\"Login_Data\":null}" : string.Empty,
-                ResponseCode = isUserRestricted ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue()
+                ResponseData = isUserRestricted ? "{\"Login_Data\":null}" : string.Empty
             };
+            outRespnse.ResponseCode = ResponseCode.Failure.GetIntValue();
+            outRespnse.MessageType = MessageType.Exclam.GetStringValue();
+
             if (isUserRestricted)
                 return outRespnse;
-            loginData.Aadhaar.RequestXmlData = await loginData.Aadhaar.GetAadharXmlAsync(_ekycAuaService);
+
+            outRespnse.RequestId = authenticationRequest.RequestId;
+
+            if (loginData.Aadhaar.RequestData is not null)
+                loginData.Aadhaar.RequestData = await AadharExtension.GetAadharXmlAsync(loginData.Aadhaar, _ekycAuaService);
 
 
+
+            var responseMessage = loginData?.EncType is not null and not "NEW" ? await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.UnableToProcessRequest.GetIntValue()) : null;
+            outRespnse.ResponseMessage = responseMessage?.CorrectedMessage ?? string.Empty;
+            if (responseMessage is not null)
+                return outRespnse;
+
+            loginData.UserId = loginData.EcbBlockEncryption ? loginData?.UserId.ToDecryptEcbBlock(_appSettings.DecryptKey) : loginData.UserId;
+            loginData.UserId = !loginData.EcbBlockEncryption ? loginData.UserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen) : loginData?.UserId;
+
+
+            //loginData.Password = loginData?.EncType is null && loginData.EcbBlockEncryption && loginData?.Password is not null ? (loginData?.Password?.Split('|')[1].ToDecryptEcbBlock(_appSettings.DecryptKey)).ToEncriptEcbBlock(loginData?.Password?.Split('|')[0]) : loginData?.Password;
+            //loginData.Password = loginData?.EncType is null && !loginData.EcbBlockEncryption && loginData?.Password is not null ? (loginData?.Password?.Split('|')[1].ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen)).ToEncryptPassword(loginData?.Password?.Split('|')[0]) : loginData?.Password;
+
+            var urlData = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbNewTokenUrl, ServiceName.LOGINSERVICE);
+
+            var request = new WebApiRequestSettings<FisUserPasswordValidateRequest>
+            {
+                URL = urlData?.ESBUrl,
+                PostParameter = loginData,
+                Timeout = _appSettings.Timeout,
+                XAuthToken = authenticationRequest.XAuthToken,
+                RequesterId = authenticationRequest.ReturnId(),
+                RequestId = authenticationRequest.RequestId,
+                TokenId = authenticationRequest.TokenId
+            };
+
+            var result = await _webApiRequestService.PostAsync<FisUserPasswordValidateResponse, FisUserPasswordValidateRequest>(request);
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            if (result.StatusCode is 503)
+                responseMessage = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.ServerUnavailable.GetIntValue());
+            else if (result.StatusCode is not 200 && result.StatusCode is not 503)
+                responseMessage = await _esbMessageService.GetEsbMessage(string.Empty, ResponseCode.RemoteServerError.GetStringValue(), result.ErrorMessage);
+
+
+            outRespnse.ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : ResponseCode.Success.GetIntValue();
+            outRespnse.ResponseMessage = isNotValid ? responseMessage.CorrectedMessage : string.Empty;
+            outRespnse.MessageType = !isNotValid ? string.Empty : outRespnse.MessageType;
+            outRespnse.ResponseData = isNotValid ? responseMessage.CorrectedMessage : result.Data.ToJsonSerialize();
+
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+            var messageType = checkValidReturnCode ? MessageTypeId.LoginSuccess.GetIntValue() : MessageTypeId.LoginUnSuccess.GetIntValue();
+
+            var isAccessToken = result?.Data?.AccessToken is not null;
+
+            #region IF Return Code Not Zero
+            var esbMessageResponse = result?.Data is not null && !checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, messageType, result.Data.ReturnCode) : null;
+            outRespnse.ResponseMessage = esbMessageResponse is not null ? esbMessageResponse.StandardMessageDesc : outRespnse.ResponseMessage;
+            outRespnse.MessageType = esbMessageResponse is not null ? esbMessageResponse.MessageType : outRespnse.MessageType;
+            var esbMessageMaster = result?.Data is null || !checkValidReturnCode ? await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.UnableToParseLogin.GetIntValue()) : null;
+            outRespnse.ResponseMessage = esbMessageMaster is not null ? esbMessageMaster.CorrectedMessage : outRespnse.ResponseMessage;
+            outRespnse.MessageType = esbMessageMaster is not null ? MessageType.Exclam.GetStringValue() : outRespnse.MessageType;
+            outRespnse.ResponseCode = esbMessageResponse is not null || esbMessageMaster is not null ? ResponseCode.Failure.GetIntValue() : outRespnse.ResponseCode;
+
+            if (esbMessageResponse is not null || esbMessageMaster is not null)
+                return outRespnse;
+
+            #endregion
+
+            #region IF Access Token Is Null
+            esbMessageMaster = !isAccessToken ? await _esbMessageService.GetEsbMessageByIdAsync(MessageTypeId.ServerError.GetIntValue()) : null;
+            outRespnse.ResponseMessage = esbMessageMaster is not null ? esbMessageMaster.CorrectedMessage : outRespnse.ResponseMessage;
+            outRespnse.MessageType = esbMessageMaster is not null ? MessageType.Exclam.GetStringValue() : outRespnse.MessageType;
+
+            if (esbMessageMaster is not null)
+                return outRespnse;
+
+            #endregion
+
+            #region IF Access Token Is Not NULL And Save GeoUser Data
+
+            var glAccount = result?.Data?.BalancesList?.Length > 0 ? result?.Data?.BalancesList[0].AccountNo : string.Empty;
+
+            #endregion
 
 
             throw new NotImplementedException();

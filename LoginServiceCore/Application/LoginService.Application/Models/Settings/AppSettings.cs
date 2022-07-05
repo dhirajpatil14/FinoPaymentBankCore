@@ -11,5 +11,7 @@
         public string ESBCBSMessagesByCache { get; set; }
         public int SessionExpired { get; set; }
         public int LatitudeLongitude { get; set; }
+        public int NoOfFinger { get; set; }
+        public int Threshold { get; set; }
     }
 }

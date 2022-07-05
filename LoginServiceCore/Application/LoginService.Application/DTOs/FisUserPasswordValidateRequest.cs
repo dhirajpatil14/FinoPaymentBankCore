@@ -1,5 +1,4 @@
-﻿using Common.Application.Model;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace LoginService.Application.DTOs
 {
@@ -27,13 +26,13 @@ namespace LoginService.Application.DTOs
         public object XauthToken { get; set; }
 
         [JsonProperty("biometric_fp")]
-        public string BiometricFp { get; set; }
+        public BiometricFp BiometricFp { get; set; }
 
         [JsonProperty("otp")]
-        public string Otp { get; set; }
+        public Otp Otp { get; set; }
 
         [JsonProperty("Aadhaar")]
-        public Aadhaar Aadhaar { get; set; }
+        public dynamic Aadhaar { get; set; }
 
         [JsonProperty("ECBBlockEncryption")]
         public bool EcbBlockEncryption { get; set; }
@@ -42,8 +41,14 @@ namespace LoginService.Application.DTOs
         public string EncType { get; set; }
     }
 
+    public partial class BiometricFp
+    {
 
+    }
+    public partial class Otp
+    {
 
+    }
 
     public partial class GeoLocation
     {
@@ -58,6 +63,7 @@ namespace LoginService.Application.DTOs
         [JsonProperty("Channel")]
         public long Channel { get; set; }
 
+        [JsonIgnore]
         [JsonProperty("IP")]
         public string Ip { get; set; }
 
@@ -81,11 +87,11 @@ namespace LoginService.Application.DTOs
 
         [JsonProperty("MAC_DeviceID")]
 
-        public long MacDeviceId { get; set; }
+        public string MacDeviceId { get; set; }
 
         [JsonProperty("CellID")]
 
-        public long CellId { get; set; }
+        public string CellId { get; set; }
 
         [JsonProperty("DeviceModel")]
         public string DeviceModel { get; set; }

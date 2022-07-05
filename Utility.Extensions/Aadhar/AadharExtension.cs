@@ -1,5 +1,4 @@
 ﻿using Common.Application.Interface;
-using Common.Application.Model;
 using Common.Application.Model.XML;
 using System;
 using System.IO;
@@ -15,7 +14,7 @@ namespace Utility.Extensions.Aadhar
         /// <summary>
         /// For Authentication
         /// </summary>
-        public static async Task<string> GetAadharXmlAsync(this Aadhaar aadhaar, IEkycAuaService ekycAuaService)
+        public static async Task<string> GetAadharXmlAsync(dynamic aadhaar, IEkycAuaService ekycAuaService)
         {
             var decodeXML = aadhaar?.RequestData?.PidData?.Value.ToBase64Decode();
             var uidResponse = decodeXML.ToParseOtpRd();
@@ -58,7 +57,7 @@ namespace Utility.Extensions.Aadhar
                 UI_Ref_Number = aadhaar.UiRefNumber is not null ? aadhaar?.UiRefNumber : string.Empty,
                 Tran_Identifier = aadhaar.UiRefNumber is not null ? aadhaar?.TranIdentifier : string.Empty
             };
-            XmlSerializer xsSubmit = new XmlSerializer(typeof(AuthXmlCreationLevelAuaRd));
+            XmlSerializer xsSubmit = new(typeof(AuthXmlCreationLevelAuaRd));
 
             using (StringWriter sww = new())
             using (XmlWriter writer = XmlWriter.Create(sww))
@@ -84,6 +83,7 @@ namespace Utility.Extensions.Aadhar
             }
             return string.Empty;
         }
+
 
         internal static string AuthTxn()
         {

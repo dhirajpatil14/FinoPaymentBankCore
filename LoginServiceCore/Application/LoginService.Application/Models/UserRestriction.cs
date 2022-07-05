@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 
 namespace LoginService.Application.Models
 {
@@ -11,7 +12,7 @@ namespace LoginService.Application.Models
         public string IPAddress { get; set; }
 
         [JsonProperty("CellId")]
-        public int? CellID { get; set; }
+        public string CellID { get; set; }
 
         [JsonProperty("DeviceId")]
         public string DeviceId { get; set; }
@@ -20,12 +21,17 @@ namespace LoginService.Application.Models
         public string MCC { get; set; }
 
         [JsonProperty("Latitude")]
-        public double? Latitude { get; set; }
+        public string Latitude { get; set; }
 
         [JsonProperty("Longitude")]
-        public double? Longitude { get; set; }
+        public string Longitude { get; set; }
 
         [JsonProperty("Status")]
         public bool Status { get; set; }
+
+        [JsonProperty("UpdatedDate")]
+        public DateTime UpdatedDate { get; set; }
+
+
     }
 }

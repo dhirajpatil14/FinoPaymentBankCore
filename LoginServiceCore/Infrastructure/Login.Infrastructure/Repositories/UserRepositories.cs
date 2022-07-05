@@ -7,7 +7,6 @@ using LoginService.Application.DTOs;
 using LoginService.Application.Models;
 using Microsoft.Extensions.Options;
 using SQL.Helper;
-using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,35 +39,34 @@ namespace Login.Infrastructure.Repositories
         {
             var parameter = new
             {
-                fisUserPasswordValidateRequest?.SystemInfo?.Ip,
-                fisUserPasswordValidateRequest?.SystemInfo?.CellId,
-                fisUserPasswordValidateRequest?.SystemInfo?.MacDeviceId,
-                fisUserPasswordValidateRequest?.SystemInfo?.Mcc,
-                fisUserPasswordValidateRequest?.GeoLocation?.Lattitude,
-                fisUserPasswordValidateRequest?.GeoLocation?.Longitude
+                Ip = fisUserPasswordValidateRequest?.SystemInfo?.Ip?.ToString(),
+                CellId = fisUserPasswordValidateRequest?.SystemInfo?.CellId.ToString(),
+                MacDeviceId = fisUserPasswordValidateRequest?.SystemInfo?.MacDeviceId.ToString(),
+                Mcc = fisUserPasswordValidateRequest?.SystemInfo?.Mcc.ToString(),
+                Lattitude = fisUserPasswordValidateRequest?.GeoLocation?.Lattitude.ToString(),
+                Longitude = fisUserPasswordValidateRequest?.GeoLocation?.Longitude.ToString()
             };
 
             var geoCoordinate = new GeoCoordinate.NetStandard2.GeoCoordinate(fisUserPasswordValidateRequest.GeoLocation.Longitude, fisUserPasswordValidateRequest.GeoLocation.Longitude);
-            if (!geoCoordinate.IsUnknown)
+            if (geoCoordinate.IsUnknown)
             {
-                var lat = Convert.ToDouble(fisUserPasswordValidateRequest?.GeoLocation?.Lattitude.ToString().Substring(0, latlong));
-                var longt = Convert.ToDouble(fisUserPasswordValidateRequest?.GeoLocation?.Longitude.ToString().Substring(0, latlong));
-                fisUserPasswordValidateRequest.GeoLocation.Lattitude = lat;
-                fisUserPasswordValidateRequest.GeoLocation.Longitude = longt;
-            }
-            else
-            {
+
+                ////var lat = Convert.ToDouble(fisUserPasswordValidateRequest?.GeoLocation?.Lattitude.ToString().Substring(0, latlong));
+                ////var longt = Convert.ToDouble(fisUserPasswordValidateRequest?.GeoLocation?.Longitude.ToString().Substring(0, latlong));
+                //fisUserPasswordValidateRequest.GeoLocation.Lattitude = lat;
+                //fisUserPasswordValidateRequest.GeoLocation.Longitude = longt;
                 fisUserPasswordValidateRequest.GeoLocation.Lattitude = 0;
                 fisUserPasswordValidateRequest.GeoLocation.Longitude = 0;
             }
 
+
             StringBuilder query = new();
             query.Append("SELECT * FROM tblUserRestriction WITH (NOLOCK) WHERE Status= 1 AND ( ");
-            query.Append(fisUserPasswordValidateRequest?.SystemInfo?.Ip is not "" ? $"IPAddress = @Ip " : "");
-            query.Append(fisUserPasswordValidateRequest?.SystemInfo?.Ip is not "" && fisUserPasswordValidateRequest?.SystemInfo?.CellId is not 0 ? $" OR CellID=@CellId" : fisUserPasswordValidateRequest?.SystemInfo?.CellId is not 0 ? $" CellID=@CellId" : "");
-            query.Append(fisUserPasswordValidateRequest?.SystemInfo?.MacDeviceId is not 0 && (fisUserPasswordValidateRequest?.SystemInfo?.Ip is not "" || fisUserPasswordValidateRequest?.SystemInfo?.CellId is not 0) ? $" OR DeviceId=@MacDeviceId" : fisUserPasswordValidateRequest?.SystemInfo?.MacDeviceId is not 0 ? $" DeviceId=@MacDeviceId" : "");
-            query.Append(fisUserPasswordValidateRequest?.SystemInfo?.Mcc is not "" && (fisUserPasswordValidateRequest?.SystemInfo?.Ip is not "" || fisUserPasswordValidateRequest?.SystemInfo?.CellId is not 0 || fisUserPasswordValidateRequest?.SystemInfo?.MacDeviceId is not 0) ? $" OR MCC=@Mcc" : fisUserPasswordValidateRequest?.SystemInfo?.Mcc is not "" ? $" MCC=@Mcc" : "");
-            query.Append(fisUserPasswordValidateRequest?.GeoLocation?.Lattitude is not 0 && fisUserPasswordValidateRequest?.GeoLocation?.Longitude is not 0 && (fisUserPasswordValidateRequest?.SystemInfo?.Ip is not "" || fisUserPasswordValidateRequest?.SystemInfo?.CellId is not 0 || fisUserPasswordValidateRequest?.SystemInfo?.MacDeviceId is not 0 || fisUserPasswordValidateRequest?.SystemInfo?.Mcc is not "") ? $" OR ( Latitude=@Lattitude AND Longitude=@Longitude )" : fisUserPasswordValidateRequest?.GeoLocation?.Lattitude is not 0 && fisUserPasswordValidateRequest?.GeoLocation?.Longitude is not 0 ? $" Latitude=@Lattitude AND Longitude=@Longitude " : "");
+            query.Append(fisUserPasswordValidateRequest?.SystemInfo?.Ip is not "" && fisUserPasswordValidateRequest?.SystemInfo?.Ip is not null ? $"IPAddress = @Ip " : "");
+            query.Append(fisUserPasswordValidateRequest?.SystemInfo?.Ip is not "" && fisUserPasswordValidateRequest?.SystemInfo?.Ip is not null && !string.IsNullOrEmpty(fisUserPasswordValidateRequest?.SystemInfo?.CellId) ? $" OR CellID=@CellId" : !string.IsNullOrEmpty(fisUserPasswordValidateRequest?.SystemInfo?.CellId) ? $" CellID=@CellId" : "");
+            query.Append(!string.IsNullOrEmpty(fisUserPasswordValidateRequest?.SystemInfo?.MacDeviceId) && (fisUserPasswordValidateRequest?.SystemInfo?.Ip is not "" || fisUserPasswordValidateRequest?.SystemInfo?.Ip is not null || !string.IsNullOrEmpty(fisUserPasswordValidateRequest?.SystemInfo?.CellId)) ? $" OR DeviceId=@MacDeviceId" : !string.IsNullOrEmpty(fisUserPasswordValidateRequest?.SystemInfo?.MacDeviceId) ? $" DeviceId=@MacDeviceId" : "");
+            query.Append(fisUserPasswordValidateRequest?.SystemInfo?.Mcc is not "" && (fisUserPasswordValidateRequest?.SystemInfo?.Ip is not "" || fisUserPasswordValidateRequest?.SystemInfo?.Ip is not null || !string.IsNullOrEmpty(fisUserPasswordValidateRequest?.SystemInfo?.CellId) || !string.IsNullOrEmpty(fisUserPasswordValidateRequest?.SystemInfo?.MacDeviceId)) ? $" OR MCC=@Mcc" : fisUserPasswordValidateRequest?.SystemInfo?.Mcc is not "" ? $" MCC=@Mcc" : "");
+            query.Append(fisUserPasswordValidateRequest?.GeoLocation?.Lattitude is not 0 && fisUserPasswordValidateRequest?.GeoLocation?.Longitude is not 0 && (fisUserPasswordValidateRequest?.SystemInfo?.Ip is not "" || fisUserPasswordValidateRequest?.SystemInfo?.Ip is not null || !string.IsNullOrEmpty(fisUserPasswordValidateRequest?.SystemInfo?.CellId) || !string.IsNullOrEmpty(fisUserPasswordValidateRequest?.SystemInfo?.MacDeviceId) || fisUserPasswordValidateRequest?.SystemInfo?.Mcc is not "") ? $" OR ( Latitude=@Lattitude AND Longitude=@Longitude )" : fisUserPasswordValidateRequest?.GeoLocation?.Lattitude is not 0 && fisUserPasswordValidateRequest?.GeoLocation?.Longitude is not 0 ? $" Latitude=@Lattitude AND Longitude=@Longitude " : "");
             query.Append(" ) ");
             var config = new DataDbConfigSettings<object>
             {
