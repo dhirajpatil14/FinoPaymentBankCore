@@ -17,6 +17,8 @@ namespace Common.Enums
         [IntValueAttribute(1012)]
         InvalidResponse = 1012,
         [IntValueAttribute(405)]
-        NotAllowed = 405
+        NotAllowed = 405,
+        [IntValueAttribute(102)]
+        UserDetailsNotFound = 102
     }
 }

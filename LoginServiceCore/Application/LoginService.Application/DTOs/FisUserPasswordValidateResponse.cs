@@ -68,7 +68,7 @@ namespace LoginService.Application.DTOs
     public partial class UserDetails
     {
         [JsonProperty("identifier")]
-        public long Identifier { get; set; }
+        public long? Identifier { get; set; }
 
         [JsonProperty("name")]
         public string Name { get; set; }

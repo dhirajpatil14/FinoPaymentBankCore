@@ -1,5 +1,6 @@
 ﻿using Common.Application.Interface;
 using Common.Application.Model;
+using Common.Application.Model.Settings;
 using Common.Enums;
 using Data.Db.Service.Interface;
 using Loggers.Logs;
@@ -7,12 +8,10 @@ using LoginService.Application.Contracts.Identity;
 using LoginService.Application.Contracts.Repositories;
 using LoginService.Application.DTOs;
 using LoginService.Application.Models;
-using LoginService.Application.Models.Settings;
 using Microsoft.Extensions.Options;
 using Shared.Services.ESBCBSMessageService;
 using Shared.Services.ESBMessageService;
 using Shared.Services.ESBURLService;
-using SQL.Helper;
 using System;
 using System.Linq;
 using System.Net;
@@ -44,9 +43,7 @@ namespace Login.Identity.Service
         private readonly AppSettings _appSettings;
 
 
-
-
-        public AuthenticationService(IWebApiRequestService webApiRequestService, IUserRepositories userRepositories, IEkycAuaService ekycAuaService, ILoggerService loggerService, IDataDbConfigurationService dataDbConfigurationService, IOptions<AppSettings> appSettings, IOptions<SqlConnectionStrings> sqlConnectionStrings, EsbUrlMemoryService esbUrlMemoryService, EsbMessageService esbMessageService, EsbCbsMessageService esbCbsMessageService)
+        public AuthenticationService(IWebApiRequestService webApiRequestService, IUserRepositories userRepositories, IEkycAuaService ekycAuaService, ILoggerService loggerService, IDataDbConfigurationService dataDbConfigurationService, IOptions<AppSettings> appSettings, EsbUrlMemoryService esbUrlMemoryService, EsbMessageService esbMessageService, EsbCbsMessageService esbCbsMessageService)
         {
             _webApiRequestService = webApiRequestService;
             _userRepositories = userRepositories;
@@ -155,6 +152,9 @@ namespace Login.Identity.Service
             };
             outRespnse.ResponseCode = ResponseCode.Failure.GetIntValue();
             outRespnse.MessageType = MessageType.Exclam.GetStringValue();
+            outRespnse.SessionId = authenticationRequest.SessionId;
+            outRespnse.SessionExpiryTime = authenticationRequest.SessionExpiryTime;
+
 
             if (isUserRestricted)
                 return outRespnse;
@@ -235,13 +235,313 @@ namespace Login.Identity.Service
             #endregion
 
             #region IF Access Token Is Not NULL And Save GeoUser Data
-
-            var glAccount = result?.Data?.BalancesList?.Length > 0 ? result?.Data?.BalancesList[0].AccountNo : string.Empty;
-
+            var isSave = await SaveUserGeoInfoAsync(loginData, authenticationRequest.RequestId, result?.Data?.UserDetails?.UserClass?.Code, result?.Data?.BalancesList?.Length > 0 ? result?.Data?.BalancesList[0].AccountNo : string.Empty);
             #endregion
 
+            #region IF User Details Not Found
+            var branchCodeNotExist = result?.Data?.UserDetails?.UserClass?.Code is null ? await _esbMessageService.GetEsbMessageByIdAsync(ResponseCode.UserDetailsNotFound.GetIntValue()) : null;
+            outRespnse.ResponseCode = branchCodeNotExist is not null ? ResponseCode.Failure.GetIntValue() : outRespnse.ResponseCode;
+            outRespnse.ResponseMessage = branchCodeNotExist is not null ? branchCodeNotExist.CorrectedMessage : outRespnse.ResponseMessage;
+            outRespnse.MessageType = branchCodeNotExist is not null ? MessageType.Exclam.GetStringValue() : outRespnse.MessageType;
+            outRespnse.ResponseData = "{\"Login_Data\":" + outRespnse.ResponseData + "}";
 
-            throw new NotImplementedException();
+            if (branchCodeNotExist is not null)
+                return outRespnse;
+            #endregion
+
+            #region Get User Type
+            var userType = await _userRepositories.GetUserType(result?.Data?.UserDetails?.UserClass?.Code);
+            #endregion
+
+            //Start-RN2041 casa addendum addition
+            #region Check EAgreement & Check CASAaddendum
+            var checkEAgreement = userType is not null && userType?.UserRole > 0 && userType?.EAgreement == 1 ? await _userRepositories.CheckEagreement(result?.Data?.UserDetails?.Name, result?.Data?.UserDetails?.Identifier?.ToString(), _appSettings.AgreementExpiryday) : 0;
+            var checkcasAaddendum = userType is not null && userType?.UserRole > 0 && userType?.EAgreement == 1 ? await _userRepositories.CheckCASAaddendum(result?.Data?.UserDetails?.Identifier?.ToString()) : 0;
+            #endregion
+
+            #region Check FilebaseCasa
+            var checkFilebaseCasa = await _userRepositories.CheckFilebaseCasa(result?.Data?.UserDetails?.Identifier?.ToString());
+            #endregion
+
+            #region Check Survey
+            var checkSurvey = userType?.Survey is 1 ? await _userRepositories.CheckSurvey(loginData?.SystemInfo?.Channel, result?.Data?.UserDetails?.UserClass?.Code, loginData?.ClientId, authenticationRequest?.TellerId) : 0;
+            #endregion
+
+            #region Check Category Code
+            var checkCategoryCode = await _userRepositories.CheckCategoryCode(result?.Data?.UserDetails?.Identifier?.ToString());
+            #endregion
+
+            #region Check Offer Consent
+            var checkOfferConsent = await _userRepositories.CheckOfferConsent(result?.Data?.UserDetails?.Identifier?.ToString());
+            #endregion
+
+            #region Check Rewrd Points
+            var checkRewrdPoints = await _userRepositories.CheckLoyaltyRewards(result?.Data?.UserDetails?.Identifier?.ToString());
+            #endregion
+
+            #region Get Last Download date
+
+            var lstDownload = await _userRepositories.GetLastDownload();
+            var checkZeroeDate = await _userRepositories.GetGLZeroizeDateTime(loginData.UserId);
+            var dataVersion = string.Empty;
+            switch (loginData.SystemInfo.Channel)
+            {
+                case "2":
+
+                    #region Get ZeroizeDateTime
+
+                    var LoginResponseData = new CommonChannelIdTwo
+                    {
+                        LoginData = outRespnse.ResponseData,
+                        SessionId = authenticationRequest.SessionId,
+                        NoOfFinger = _appSettings.NoOfFinger.ToString(),
+                        Threshold = _appSettings.Threshold.ToString(),
+                        UserTypeId = userType.UserTypeId.ToString(),
+                        UserRole = userType.UserRole.ToString(),
+                        EAgreement = userType.EAgreement.ToString(),
+                        CASAeAgreement = userType.CASAEagreement.ToString(),
+                        RewardPoints = checkRewrdPoints.ToString(),
+                        EAgreementChanged = checkEAgreement.ToString(),
+                        CASAaddendum = checkcasAaddendum.ToString(),
+                        FilebaseCasa = checkFilebaseCasa.ToString(),
+                        ESurvey = checkSurvey.ToString(),
+                        ChannelID = loginData.SystemInfo.Channel.ToString(),
+                        ZeroizationDateTime = checkZeroeDate.ToString(),
+                        StrConsent = checkOfferConsent.ConsentYN,
+                        StrOffer = checkOfferConsent.OfferYN,
+                        LastDownloadDate = lstDownload.ToString(),
+                        CategoryCode = checkCategoryCode.ToString()
+                    };
+
+                    outRespnse.ResponseData = LoginResponseData.ToJsonSerialize();
+
+                    #endregion
+                    //line 1096
+                    break;
+                case "1":
+                    //required base logic impliment inside GetDBVersion
+                    var dBVersion = _appSettings.IsCacheFromDB is 1 ? await _userRepositories.GetDbVersion(new DbVersion { MasterVersion = "MastersVersion" }) : string.Empty;
+                    //Need To Add Base logic
+
+                    //Get Master Version
+                    dataVersion = _appSettings.IsCacheFromDB is not 1 ? await _userRepositories.GetVersionFromCache("MastersVersion", true) : string.Empty;
+                    dataVersion = $"{dataVersion} |";
+
+
+                    //Get Mobile Version
+                    var mobileVersion = await _userRepositories.GetVersionFromCache($"ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}", false);
+                    var verId = mobileVersion is not null ? await _userRepositories.GetMobileVersion($"ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}") : null;
+                    dataVersion = mobileVersion is not null ? $"{dataVersion}ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}#{verId}~" : dataVersion;
+                    dataVersion = mobileVersion is null ? $"{dataVersion}ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
+
+                    //Get Profile Type
+                    var profileType = await _userRepositories.GetProfileType($"ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}");
+                    var profileTypeId = profileType is not null ? await _userRepositories.GetProfileTypeCache($"ProfileTypeMasterData") : null;
+                    dataVersion = profileTypeId is not null ? $"{dataVersion}ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}#{profileTypeId}~" : dataVersion;
+                    dataVersion = profileTypeId is null ? $"{dataVersion}ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
+
+                    //1207
+                    var productTranscation = await _userRepositories.GetProductTranscation($"ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}");
+                    var productType = productTranscation is not null ? _userRepositories.GetProductTranscationCache($"ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}") : null;
+                    dataVersion = productType is not null ? $"{dataVersion}ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}#{productType}~" : dataVersion;
+                    dataVersion = productType is null ? $"{dataVersion}ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
+
+
+                    var sequence = await _userRepositories.GetSequenceMap($"MobSequenceMasterList");
+                    var sequenceMap = sequence is not null ? _userRepositories.GetSquenceMapCache($"MobSequenceMasterList") : null;
+                    dataVersion = sequenceMap is not null ? $"{dataVersion}MobSequenceMasterList#{sequenceMap}~" : dataVersion;
+                    dataVersion = sequenceMap is null ? $"{dataVersion}MobSequenceMasterList#0000~" : dataVersion;
+
+
+                    var mobileTabControl = await _userRepositories.GetMobileTabControl($"MobileTabCntrl");
+                    var mobileTab = mobileTabControl is not null ? _userRepositories.GetMobileTabControlCache($"MobileTabCntrl") : null;
+                    dataVersion = mobileTab is not null ? $"{dataVersion}MobileTabCntrl#{mobileTab}~" : dataVersion;
+                    dataVersion = mobileTab is null ? $"{dataVersion}MobileTabCntrl#0000~" : dataVersion;
+
+
+                    var iinCacheData = await _userRepositories.GetIinCacheData($"IINMasterMob");
+                    var iinCache = iinCacheData is not null ? _userRepositories.GetIinCache($"IINMasterMob") : null;
+                    dataVersion = iinCache is not null ? $"{dataVersion}IINMasterMob#{iinCache}~" : dataVersion;
+                    dataVersion = iinCache is null ? $"{dataVersion}IINMasterMob#0000~" : dataVersion;
+
+
+                    var printFormatData = await _userRepositories.GetPrintData($"MstPrintFormat1");
+                    var printCache = printFormatData is not null ? _userRepositories.GetPrintCache("MstPrintFormat1") : null;
+                    dataVersion = printCache is not null ? $"{dataVersion}MstPrintFormat1#{printCache}~" : dataVersion;
+                    dataVersion = printCache is null ? $"{dataVersion}MstPrintFormat1#0000~" : dataVersion;
+
+
+                    var crossSellingData = await _userRepositories.GetCrossSellData($"mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}");
+                    var crossCache = crossSellingData is not null ? _userRepositories.GetCrossSellCache($"mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}") : null;
+                    dataVersion = crossCache is not null ? $"{dataVersion}mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}#{crossCache}~" : dataVersion;
+                    dataVersion = crossCache is null ? $"{dataVersion}mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
+
+
+                    dataVersion = $"{dataVersion}{await _userRepositories.GetProductTypesAsync("MobileTabCntrl")}";
+
+                    dataVersion = dataVersion.Remove(dataVersion.Length - 1);
+
+                    #region FOS DATA
+                    var fosData = new FosAppVersion();
+
+                    var authenticaterType = loginData?.ClientId.ToString() == AuthenticatorType.FINOTLR.GetStringValue() || loginData?.ClientId.ToString() == AuthenticatorType.FINOMB.GetStringValue() ? AuthenticatorType.FINOTLR : loginData?.ClientId.ToString() == AuthenticatorType.FINOMER.GetStringValue() || loginData?.ClientId.ToString() == AuthenticatorType.FINOMERNP.GetStringValue() ? AuthenticatorType.FINOMER : AuthenticatorType.FINOMER;
+
+                    if (loginData?.ClientId.ToString() == AuthenticatorType.FINOTLR.GetStringValue() || loginData?.ClientId.ToString() == AuthenticatorType.FINOMB.GetStringValue())
+                    {
+                        loginData.ClientId = AuthenticatorType.FINOTLR.GetStringValue();
+                        fosData = await _userRepositories.GetFosVersion(AuthenticatorType.FINOTLR.GetStringValue(), $"FOSAppVersionNew{AuthenticatorType.FINOTLR.GetStringValue()}{loginData.SystemInfo.Channel}");
+                    }
+                    else if (loginData?.ClientId.ToString() == AuthenticatorType.FINOMER.GetStringValue() || loginData?.ClientId.ToString() == AuthenticatorType.FINOMERNP.GetStringValue())
+                    {
+                        loginData.ClientId = AuthenticatorType.FINOMER.GetStringValue();
+                        fosData = await _userRepositories.GetFosVersion(AuthenticatorType.FINOMER.GetStringValue(), $"MERAppVersionNew{AuthenticatorType.FINOMER.GetStringValue()}{loginData.SystemInfo.Channel}");
+                    }
+                    else
+                    {
+                        loginData.ClientId = AuthenticatorType.FINOIPS.GetStringValue();
+                        fosData = await _userRepositories.GetFosVersion(AuthenticatorType.FINOIPS.GetStringValue(), $"MERAppVersionNew{AuthenticatorType.FINOIPS.GetStringValue()}{loginData.SystemInfo.Channel}");
+                    }
+                    #endregion
+
+                    #region Get Certificate Expiry Date
+                    var expiryDate = await _userRepositories.GetAuaExpiryData(1, 11);
+                    #endregion
+
+                    #region Get FOS MOBILE VERSION
+                    var fosMobileVersion = await _userRepositories.GetMobileVersionDataAsync("mstMobileVersion");
+                    #endregion
+
+
+
+
+                    var LoginResponseOne = new CommonChannelIdOne
+                    {
+                        LoginData = outRespnse.ResponseData,
+                        UserId = loginData?.UserId,
+                        UserTypeId = userType.UserTypeId.ToString(),
+                        UserRole = userType.UserRole.ToString(),
+                        EAgreement = userType.EAgreement.ToString(),
+                        CASAeAgreement = userType.CASAEagreement.ToString(),
+                        RewardPoints = checkRewrdPoints.ToString(),
+                        EAgreementChanged = checkEAgreement.ToString(),
+                        CASAaddendum = checkcasAaddendum.ToString(),
+                        FilebaseCasa = checkFilebaseCasa.ToString(),
+                        ESurvey = checkSurvey.ToString(),
+                        CertificateExpiryDate = expiryDate,
+                        MandatoryVersion = fosData.MandatoryVersion,
+                        CurrentVersion = fosData.CurrentVersion,
+                        EvMandat = fosMobileVersion.EvMandat,
+                        EvCurrent = fosMobileVersion.EvCurrent,
+                        MorpMandat = fosMobileVersion.MorpMandat,
+                        MorpCurrent = fosMobileVersion.MorpCurrent,
+                        ZeroizationDateTime = checkZeroeDate,
+                        ChannelID = loginData.SystemInfo.Channel,
+                        MastersVersion = dataVersion,
+                        StrConsent = checkOfferConsent.ConsentYN,
+                        StrOffer = checkOfferConsent.OfferYN,
+                        LastDownloadDate = lstDownload.ToString(),
+                        CategoryCode = checkCategoryCode.ToString()
+                    };
+
+                    outRespnse.ResponseData = LoginResponseOne.ToJsonSerialize();
+                    break;
+
+                case "3":
+                    if (loginData?.ClientId.ToString() == AuthenticatorType.FINOPDS.GetStringValue())
+                    {
+
+                        fosData = await _userRepositories.GetFosVersion(AuthenticatorType.FINOPDS.GetStringValue(), $"PDSAppVersion{AuthenticatorType.FINOPDS.GetStringValue()}{loginData.SystemInfo.Channel}");
+
+                        var LoginResponseThree = new CommonChannelIdThree
+                        {
+                            LoginData = outRespnse.ResponseData,
+                            UserId = loginData?.UserId,
+                            UserTypeId = userType.UserTypeId.ToString(),
+                            UserRole = userType.UserRole.ToString(),
+                            EAgreement = userType.EAgreement.ToString(),
+                            CASAeAgreement = userType.CASAEagreement.ToString(),
+                            RewardPoints = checkRewrdPoints.ToString(),
+                            EAgreementChanged = checkEAgreement.ToString(),
+                            CASAaddendum = checkcasAaddendum.ToString(),
+                            FilebaseCasa = checkFilebaseCasa.ToString(),
+                            ESurvey = checkSurvey.ToString(),
+                            CertificateExpiryDate = string.Empty,
+                            MandatoryVersion = fosData.MandatoryVersion,
+                            CurrentVersion = fosData.CurrentVersion,
+                            ZeroizationDateTime = checkZeroeDate,
+                            ChannelID = loginData.SystemInfo.Channel,
+                            MastersVersion = dataVersion,
+                            StrConsent = checkOfferConsent.ConsentYN,
+                            StrOffer = checkOfferConsent.OfferYN,
+                            LastDownloadDate = lstDownload.ToString(),
+                            CategoryCode = checkCategoryCode.ToString()
+                        };
+                        outRespnse.ResponseData = LoginResponseThree.ToJsonSerialize();
+                    }
+                    break;
+                case "6":
+                    if (loginData?.ClientId.ToString() == AuthenticatorType.FINOINGE.GetStringValue())
+                    {
+                        fosData = await _userRepositories.GetFosVersion(AuthenticatorType.FINOINGE.GetStringValue(), $"INGEAppVersion{AuthenticatorType.FINOINGE.GetStringValue()}{loginData.SystemInfo.Channel}");
+                        var LoginResponseSix = new CommonChannelIdThree
+                        {
+                            LoginData = outRespnse.ResponseData,
+                            UserId = loginData?.UserId,
+                            UserTypeId = userType.UserTypeId.ToString(),
+                            UserRole = userType.UserRole.ToString(),
+                            EAgreement = userType.EAgreement.ToString(),
+                            CASAeAgreement = userType.CASAEagreement.ToString(),
+                            RewardPoints = checkRewrdPoints.ToString(),
+                            EAgreementChanged = checkEAgreement.ToString(),
+                            CASAaddendum = checkcasAaddendum.ToString(),
+                            FilebaseCasa = checkFilebaseCasa.ToString(),
+                            ESurvey = checkSurvey.ToString(),
+                            CertificateExpiryDate = string.Empty,
+                            MandatoryVersion = fosData.MandatoryVersion,
+                            CurrentVersion = fosData.CurrentVersion,
+                            ZeroizationDateTime = checkZeroeDate,
+                            ChannelID = loginData.SystemInfo.Channel,
+                            MastersVersion = dataVersion,
+                            StrConsent = checkOfferConsent.ConsentYN,
+                            StrOffer = checkOfferConsent.OfferYN,
+                            LastDownloadDate = lstDownload.ToString(),
+                            CategoryCode = checkCategoryCode.ToString()
+                        };
+                        outRespnse.ResponseData = LoginResponseSix.ToJsonSerialize();
+                    }
+                    break;
+
+                default:
+                    fosData = await _userRepositories.GetFosVersion(AuthenticatorType.FINOMER.GetStringValue(), $"FINOMERAppVersion{AuthenticatorType.FINOMER.GetStringValue()}{loginData.SystemInfo.Channel}");
+                    var LoginResponseDefault = new CommonChannelIdThree
+                    {
+                        LoginData = outRespnse.ResponseData,
+                        UserId = loginData?.UserId,
+                        UserTypeId = userType.UserTypeId.ToString(),
+                        UserRole = userType.UserRole.ToString(),
+                        EAgreement = userType.EAgreement.ToString(),
+                        CASAeAgreement = userType.CASAEagreement.ToString(),
+                        RewardPoints = checkRewrdPoints.ToString(),
+                        EAgreementChanged = checkEAgreement.ToString(),
+                        CASAaddendum = checkcasAaddendum.ToString(),
+                        FilebaseCasa = checkFilebaseCasa.ToString(),
+                        ESurvey = checkSurvey.ToString(),
+                        CertificateExpiryDate = string.Empty,
+                        MandatoryVersion = fosData.MandatoryVersion,
+                        CurrentVersion = fosData.CurrentVersion,
+                        ZeroizationDateTime = checkZeroeDate,
+                        ChannelID = loginData.SystemInfo.Channel,
+                        MastersVersion = dataVersion,
+                        StrConsent = checkOfferConsent.ConsentYN,
+                        StrOffer = checkOfferConsent.OfferYN,
+                        LastDownloadDate = lstDownload.ToString(),
+                        CategoryCode = checkCategoryCode.ToString()
+                    };
+                    outRespnse.ResponseData = LoginResponseDefault.ToJsonSerialize();
+                    break;
+            }
+            #endregion
+            return outRespnse;
         }
 
         internal async Task<Boolean> RestrictUserAccess(FisUserPasswordValidateRequest fisUserPasswordValidateRequest)
@@ -265,5 +565,40 @@ namespace Login.Identity.Service
 
             return isRestricted;
         }
+
+        internal async Task<int> SaveUserGeoInfoAsync(FisUserPasswordValidateRequest loginData, string requestId, string code, string glAccount)
+        {
+            var userGeoLocation = new GeoUserLocation
+            {
+                UserName = loginData?.UserId,
+                Lattitude = loginData?.SystemInfo?.Lattitude.ToString(),
+                Longitude = loginData?.SystemInfo?.Longitude.ToString(),
+                PostalCode = loginData?.SystemInfo?.PostalCode,
+                IPAddress = loginData?.SystemInfo?.Ip,
+                TimeStamp = DateTime.Now,
+                MacDeviceId = loginData?.SystemInfo?.MacDeviceId,
+                CellId = loginData?.SystemInfo?.CellId,
+                Channel = loginData?.SystemInfo?.Channel,
+                ServiceProvider = loginData?.SystemInfo?.Isp,
+                DeviceModel = loginData?.SystemInfo?.DeviceModel,
+                DeviceOS = loginData?.SystemInfo?.DeviceOs,
+                Mcc = loginData?.SystemInfo?.Mcc,
+                Mnc = loginData?.SystemInfo?.Mnc,
+                LanguageSupported = loginData?.SystemInfo?.LanguageSupported,
+                AuthenticationType = loginData?.Password,
+                Version = loginData?.SystemInfo?.Version,
+                BrowserInfo = loginData?.SystemInfo?.Browser,
+                UniqueRequestID = requestId,
+                FPTemplate = $"FPTemplate",
+                UserTypeName = code,
+                AppDescName = loginData?.ClientId,
+                GLAccount = glAccount
+            };
+            return await _userRepositories.AddUserGeoAsync(userGeoLocation);
+        }
+
+
+
+
     }
 }
