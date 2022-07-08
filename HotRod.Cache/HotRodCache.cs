@@ -28,6 +28,7 @@ namespace HotRod.Cache
         protected void ConnectAsync()
         {
             InfinispanDG.AddHost(_cacheSettings.CacheServerName, _cacheSettings.CacheServerPort, false);
+
             _ = InfinispanDG.ForceReturnValue;
         }
         public void Initlization(string ContainerName)
@@ -63,6 +64,20 @@ namespace HotRod.Cache
         public async Task<string> PutCacheAsync(string key, string value)
         {
             return await Cache.Put(key, value);
+        }
+        #endregion
+
+
+        #region Get Version
+        /// <summary>
+        /// Get Cache Value
+        /// </summary>
+        /// <param name="key">using key get value</param>
+        /// <returns></returns>
+        public async Task<string> GetVersionAsync(string key)
+        {
+            var version = await Cache.GetWithVersion(key);
+            return version.Version.ToString();
         }
         #endregion
 

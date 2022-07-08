@@ -1,6 +1,6 @@
-﻿using HotRod.Cache.Settings;
+﻿using Common.Application.Model.Settings;
+using HotRod.Cache.Settings;
 using Loggers.Logs;
-using LoginService.Application.Models.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

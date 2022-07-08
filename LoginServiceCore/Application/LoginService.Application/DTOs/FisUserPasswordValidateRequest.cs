@@ -61,7 +61,7 @@ namespace LoginService.Application.DTOs
     public partial class SystemInfo
     {
         [JsonProperty("Channel")]
-        public long Channel { get; set; }
+        public string Channel { get; set; }
 
         [JsonIgnore]
         [JsonProperty("IP")]

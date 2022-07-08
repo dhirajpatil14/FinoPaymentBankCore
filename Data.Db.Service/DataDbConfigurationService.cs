@@ -76,6 +76,35 @@ namespace Data.Db.Service
             return await dBService.QueryFirstOrDefaultAsync<TResponce, TRequest>(ConnectionString: configSettings.DbConnection, sql: query, parameter: configSettings.Request);
         }
 
+        public async Task<int> UpdateDataAsync<TRequest>(DataDbConfigSettings<TRequest> configSettings) where TRequest : new()
+        {
+            //var _sqlConfiguration = new DataDbQueryConfiguration(configSettings.TableEnums);
+            //string query = configSettings.PlainQuery;
+            // var columns = configSettings.Request.GetColumns(_sqlConfiguration, fetchJsonProperties: true);
+            //var colvalue = configSettings.Request.GetColumns(_sqlConfiguration, fetchJsonProperties: false);
+
+            //var valuesArray = new List<string>(columns.Count());
+            //valuesArray = valuesArray.InsertQueryValuesFragment(_sqlConfiguration.ParameterNotation, colvalue);
+
+
+
+
+            //var columns = configSettings.Request.GetColumns(_sqlConfiguration, ignoreIdProperty: true);
+            //var colvalue = configSettings.Request.GetColumns(_sqlConfiguration, fetchJsonProperties: false);
+            //var valuesArray = new List<string>(columns.Count());
+            //var setFragment = valuesArray.UpdateQuerySetFragment(_sqlConfiguration.ParameterNotation);
+
+            //var query = _sqlConfiguration.UpdateRoleQuery
+            //                             .ReplaceUpdateQueryParameters(_sqlConfiguration.SchemaName,
+            //                                                           _sqlConfiguration.TableName,
+            //                                                           setFragment,
+            //                                                           $"{_sqlConfiguration.ParameterNotation}Id");
+
+
+
+            return await dBService.ExecuteAsync(ConnectionString: configSettings.DbConnection, sql: configSettings.PlainQuery, parameter: configSettings.Request);
+        }
+
 
     }
 }

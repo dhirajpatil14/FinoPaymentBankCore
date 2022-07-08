@@ -9,8 +9,8 @@
             TableColumnStartNotation = "[";
             TableColumnEndNotation = "]";
             InsertQuery = "INSERT INTO %SCHEMA%.%TABLENAME% %COLUMNS% VALUES(%VALUES%)";
-            SelectQuery = "SELECT * FROM %SCHEMA%.%TABLENAME%";
-            UpdateQuery = "";
+            SelectQuery = "SELECT * FROM %SCHEMA%.%TABLENAME% with (NOLOCK) ";
+            UpdateQuery = "UPDATE %SCHEMA%.%TABLENAME% %SETVALUES% WHERE %WHERESETVALUE%";
             DeleteQuery = "";
 
         }

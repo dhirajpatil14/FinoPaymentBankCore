@@ -8,6 +8,8 @@ namespace Data.Db.Service.Interface
     {
         Task<int> AddDataAsync<TRequest>(DataDbConfigSettings<TRequest> configSettings) where TRequest : new();
 
+        Task<int> UpdateDataAsync<TRequest>(DataDbConfigSettings<TRequest> configSettings) where TRequest : new();
+
         Task<TResponce> GetDataAsync<TRequest, TResponce>(DataDbConfigSettings<TRequest> configSettings) where TRequest : new();
 
 
