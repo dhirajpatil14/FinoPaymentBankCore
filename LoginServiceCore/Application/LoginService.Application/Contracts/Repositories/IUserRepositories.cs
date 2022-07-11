@@ -77,7 +77,7 @@ namespace LoginService.Application.Contracts.Repositories
 
         Task<MobileVersion> GetMobileVersionDataAsync(string cacheName);
 
-
+        Task<string> GetMobileVersionComman(string cacheName);
 
     }
 }

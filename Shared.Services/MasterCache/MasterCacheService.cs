@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Shared.Services.MasterCache
 {
-    public class MasterCacheService
+    public class MasterCacheService : IMasterCacheService
     {
         private readonly IDataDbConfigurationService _dataDbConfigurationService;
         private readonly SqlConnectionStrings _sqlConnectionStrings;
@@ -85,6 +85,28 @@ namespace Shared.Services.MasterCache
 
             return await _dataDbConfigurationService.GetDataAsync<MobileVersion, MobileVersion>(configSettings: config);
         }
+
+        public virtual async Task<int> UpdateMasterCacheAsync(string cacheName, string cacheValue, string version)
+        {
+            var parameter = new
+            {
+                CacheName = cacheName,
+                CacheValue = cacheValue,
+                Version = version
+            };
+
+            string query = $"IF EXISTS(SELECT* FROM MasterCache WITH (NOLOCK) WHERE MasterCacheKey=@CacheName) UPDATE MasterCache SET Value =@CacheValue ,[Version] = @Version, UpdateDate = getDate()  WHERE MasterCacheKey =@CacheName  ELSE INSERT INTO MasterCache(MasterCacheKey, Value, UpdateDate, [Version]) VALUES(@CacheName, @cacheValue, getDate(), @version)";
+
+            var config = new DataDbConfigSettings<object>
+            {
+                PlainQuery = query,
+                Request = parameter,
+                DbConnection = _sqlConnectionStrings.PBMasterConnection
+            };
+
+            return await _dataDbConfigurationService.UpdateDataAsync<object>(config);
+        }
+
 
     }
 }

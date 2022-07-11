@@ -148,7 +148,8 @@ namespace Login.Identity.Service
             var outRespnse = new OutResponse
             {
                 ResponseMessage = isUserRestricted ? "User not authorized to proceed !" : string.Empty,
-                ResponseData = isUserRestricted ? "{\"Login_Data\":null}" : string.Empty
+                // ResponseData = isUserRestricted ? "{\"Login_Data\":null}" : string.Empty
+                ResponseData = isUserRestricted ? new LoginDataResponse().ToJsonSerialize() : string.Empty
             };
             outRespnse.ResponseCode = ResponseCode.Failure.GetIntValue();
             outRespnse.MessageType = MessageType.Exclam.GetStringValue();
@@ -203,7 +204,7 @@ namespace Login.Identity.Service
             outRespnse.ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : ResponseCode.Success.GetIntValue();
             outRespnse.ResponseMessage = isNotValid ? responseMessage.CorrectedMessage : string.Empty;
             outRespnse.MessageType = !isNotValid ? string.Empty : outRespnse.MessageType;
-            outRespnse.ResponseData = isNotValid ? responseMessage.CorrectedMessage : result.Data.ToJsonSerialize();
+            outRespnse.ResponseData = isNotValid ? responseMessage?.CorrectedMessage : result?.Data?.ToJsonSerialize();
 
             var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
             var messageType = checkValidReturnCode ? MessageTypeId.LoginSuccess.GetIntValue() : MessageTypeId.LoginUnSuccess.GetIntValue();
@@ -243,7 +244,8 @@ namespace Login.Identity.Service
             outRespnse.ResponseCode = branchCodeNotExist is not null ? ResponseCode.Failure.GetIntValue() : outRespnse.ResponseCode;
             outRespnse.ResponseMessage = branchCodeNotExist is not null ? branchCodeNotExist.CorrectedMessage : outRespnse.ResponseMessage;
             outRespnse.MessageType = branchCodeNotExist is not null ? MessageType.Exclam.GetStringValue() : outRespnse.MessageType;
-            outRespnse.ResponseData = "{\"Login_Data\":" + outRespnse.ResponseData + "}";
+            //outRespnse.ResponseData = "{\"Login_Data\":" + outRespnse.ResponseData + "}";
+            outRespnse.ResponseData = new LoginDataResponse { LoginData = outRespnse.ResponseData }.ToJsonSerialize();
 
             if (branchCodeNotExist is not null)
                 return outRespnse;
@@ -288,8 +290,6 @@ namespace Login.Identity.Service
             {
                 case "2":
 
-                    #region Get ZeroizeDateTime
-
                     var LoginResponseData = new CommonChannelIdTwo
                     {
                         LoginData = outRespnse.ResponseData,
@@ -315,13 +315,14 @@ namespace Login.Identity.Service
 
                     outRespnse.ResponseData = LoginResponseData.ToJsonSerialize();
 
-                    #endregion
                     //line 1096
                     break;
                 case "1":
                     //required base logic impliment inside GetDBVersion
-                    var dBVersion = _appSettings.IsCacheFromDB is 1 ? await _userRepositories.GetDbVersion(new DbVersion { MasterVersion = "MastersVersion" }) : string.Empty;
-                    //Need To Add Base logic
+                    var dbVersion = _appSettings.IsCacheFromDB is 1 ? await _userRepositories.GetDbVersion(new DbVersion { MasterVersion = "MastersVersion" }) : null;
+                    dataVersion = $"{dataVersion}{dbVersion}";
+                    dataVersion = dataVersion.Remove(dbVersion.Length - 1);
+
 
                     //Get Master Version
                     dataVersion = _appSettings.IsCacheFromDB is not 1 ? await _userRepositories.GetVersionFromCache("MastersVersion", true) : string.Empty;
@@ -329,52 +330,65 @@ namespace Login.Identity.Service
 
 
                     //Get Mobile Version
-                    var mobileVersion = await _userRepositories.GetVersionFromCache($"ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}", false);
-                    var verId = mobileVersion is not null ? await _userRepositories.GetMobileVersion($"ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}") : null;
-                    dataVersion = mobileVersion is not null ? $"{dataVersion}ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}#{verId}~" : dataVersion;
-                    dataVersion = mobileVersion is null ? $"{dataVersion}ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
+
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}")}";
+                    //var mobileVersion = await _userRepositories.GetVersionFromCache($"ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}", false);
+                    //var verId = mobileVersion is not null ? await _userRepositories.GetMobileVersion($"ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}") : null;
+                    //dataVersion = mobileVersion is not null ? $"{dataVersion}ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}#{verId}~" : dataVersion;
+                    //dataVersion = mobileVersion is null ? $"{dataVersion}ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
 
                     //Get Profile Type
-                    var profileType = await _userRepositories.GetProfileType($"ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}");
-                    var profileTypeId = profileType is not null ? await _userRepositories.GetProfileTypeCache($"ProfileTypeMasterData") : null;
-                    dataVersion = profileTypeId is not null ? $"{dataVersion}ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}#{profileTypeId}~" : dataVersion;
-                    dataVersion = profileTypeId is null ? $"{dataVersion}ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
+
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}")}";
+                    //var profileType = await _userRepositories.GetProfileType($"ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}");
+                    //var profileTypeId = profileType is not null ? await _userRepositories.GetProfileTypeCache($"ProfileTypeMasterData") : null;
+                    //dataVersion = profileTypeId is not null ? $"{dataVersion}ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}#{profileTypeId}~" : dataVersion;
+                    //dataVersion = profileTypeId is null ? $"{dataVersion}ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
 
                     //1207
-                    var productTranscation = await _userRepositories.GetProductTranscation($"ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}");
-                    var productType = productTranscation is not null ? _userRepositories.GetProductTranscationCache($"ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}") : null;
-                    dataVersion = productType is not null ? $"{dataVersion}ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}#{productType}~" : dataVersion;
-                    dataVersion = productType is null ? $"{dataVersion}ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}")}";
+
+                    //var productTranscation = await _userRepositories.GetProductTranscation($"ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}");
+                    //var productType = productTranscation is not null ? _userRepositories.GetProductTranscationCache($"ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}") : null;
+                    //dataVersion = productType is not null ? $"{dataVersion}ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}#{productType}~" : dataVersion;
+                    //dataVersion = productType is null ? $"{dataVersion}ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
+
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"MobSequenceMasterList")}";
 
 
-                    var sequence = await _userRepositories.GetSequenceMap($"MobSequenceMasterList");
-                    var sequenceMap = sequence is not null ? _userRepositories.GetSquenceMapCache($"MobSequenceMasterList") : null;
-                    dataVersion = sequenceMap is not null ? $"{dataVersion}MobSequenceMasterList#{sequenceMap}~" : dataVersion;
-                    dataVersion = sequenceMap is null ? $"{dataVersion}MobSequenceMasterList#0000~" : dataVersion;
+                    //var sequence = await _userRepositories.GetSequenceMap($"MobSequenceMasterList");
+                    //var sequenceMap = sequence is not null ? _userRepositories.GetSquenceMapCache($"MobSequenceMasterList") : null;
+                    //dataVersion = sequenceMap is not null ? $"{dataVersion}MobSequenceMasterList#{sequenceMap}~" : dataVersion;
+                    //dataVersion = sequenceMap is null ? $"{dataVersion}MobSequenceMasterList#0000~" : dataVersion;
+
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"MobileTabCntrl")}";
 
 
-                    var mobileTabControl = await _userRepositories.GetMobileTabControl($"MobileTabCntrl");
-                    var mobileTab = mobileTabControl is not null ? _userRepositories.GetMobileTabControlCache($"MobileTabCntrl") : null;
-                    dataVersion = mobileTab is not null ? $"{dataVersion}MobileTabCntrl#{mobileTab}~" : dataVersion;
-                    dataVersion = mobileTab is null ? $"{dataVersion}MobileTabCntrl#0000~" : dataVersion;
+                    //var mobileTabControl = await _userRepositories.GetMobileTabControl($"MobileTabCntrl");
+                    //var mobileTab = mobileTabControl is not null ? _userRepositories.GetMobileTabControlCache($"MobileTabCntrl") : null;
+                    //dataVersion = mobileTab is not null ? $"{dataVersion}MobileTabCntrl#{mobileTab}~" : dataVersion;
+                    //dataVersion = mobileTab is null ? $"{dataVersion}MobileTabCntrl#0000~" : dataVersion;
 
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"IINMasterMob")}";
 
-                    var iinCacheData = await _userRepositories.GetIinCacheData($"IINMasterMob");
-                    var iinCache = iinCacheData is not null ? _userRepositories.GetIinCache($"IINMasterMob") : null;
-                    dataVersion = iinCache is not null ? $"{dataVersion}IINMasterMob#{iinCache}~" : dataVersion;
-                    dataVersion = iinCache is null ? $"{dataVersion}IINMasterMob#0000~" : dataVersion;
+                    //var iinCacheData = await _userRepositories.GetIinCacheData($"IINMasterMob");
+                    //var iinCache = iinCacheData is not null ? _userRepositories.GetIinCache($"IINMasterMob") : null;
+                    //dataVersion = iinCache is not null ? $"{dataVersion}IINMasterMob#{iinCache}~" : dataVersion;
+                    //dataVersion = iinCache is null ? $"{dataVersion}IINMasterMob#0000~" : dataVersion;
 
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"MstPrintFormat1")}";
 
-                    var printFormatData = await _userRepositories.GetPrintData($"MstPrintFormat1");
-                    var printCache = printFormatData is not null ? _userRepositories.GetPrintCache("MstPrintFormat1") : null;
-                    dataVersion = printCache is not null ? $"{dataVersion}MstPrintFormat1#{printCache}~" : dataVersion;
-                    dataVersion = printCache is null ? $"{dataVersion}MstPrintFormat1#0000~" : dataVersion;
+                    //var printFormatData = await _userRepositories.GetPrintData($"MstPrintFormat1");
+                    //var printCache = printFormatData is not null ? _userRepositories.GetPrintCache("MstPrintFormat1") : null;
+                    //dataVersion = printCache is not null ? $"{dataVersion}MstPrintFormat1#{printCache}~" : dataVersion;
+                    //dataVersion = printCache is null ? $"{dataVersion}MstPrintFormat1#0000~" : dataVersion;
 
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}")}";
 
-                    var crossSellingData = await _userRepositories.GetCrossSellData($"mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}");
-                    var crossCache = crossSellingData is not null ? _userRepositories.GetCrossSellCache($"mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}") : null;
-                    dataVersion = crossCache is not null ? $"{dataVersion}mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}#{crossCache}~" : dataVersion;
-                    dataVersion = crossCache is null ? $"{dataVersion}mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
+                    //var crossSellingData = await _userRepositories.GetCrossSellData($"mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}");
+                    //var crossCache = crossSellingData is not null ? _userRepositories.GetCrossSellCache($"mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}") : null;
+                    //dataVersion = crossCache is not null ? $"{dataVersion}mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}#{crossCache}~" : dataVersion;
+                    //dataVersion = crossCache is null ? $"{dataVersion}mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
 
 
                     dataVersion = $"{dataVersion}{await _userRepositories.GetProductTypesAsync("MobileTabCntrl")}";

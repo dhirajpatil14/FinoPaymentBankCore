@@ -6,5 +6,8 @@ namespace Common.Enums
     {
         [StringValue("tblEAgreement")]
         EAgreement = 1,
+
+        [StringValue("tblGeoUserLocation")]
+        GeoUserLocation
     }
 }

@@ -17,13 +17,13 @@ namespace Common.Enums
         ReasonMaster = 4,
 
         [StringValue("mstUserType")]
-        USERTYPE = 4,
+        USERTYPE = 5,
 
         [StringValue("MasterCache")]
-        MasterCache = 5,
+        MasterCache = 6,
 
         [StringValue("mstMobileVersion")]
-        MobileVersion = 6,
+        MobileVersion = 7,
 
 
 

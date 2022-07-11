@@ -16,9 +16,9 @@ namespace HotRod.Cache.Connector
 
 
 
-        private readonly MasterCacheService _masterCacheService;
+        private readonly IMasterCacheService _masterCacheService;
 
-        public CacheConnector(IOptions<AppSettings> appSettings, IOptions<SqlConnectionStrings> sqlConnectionStrings, HotRodCache hotRodCache, MasterCacheService masterCacheService)
+        public CacheConnector(IOptions<AppSettings> appSettings, IOptions<SqlConnectionStrings> sqlConnectionStrings, HotRodCache hotRodCache, IMasterCacheService masterCacheService)
         {
             _appSettings = appSettings.Value;
             _hotRodCache = hotRodCache;
@@ -31,6 +31,13 @@ namespace HotRod.Cache.Connector
             //need to work on this method 
             var cacheValue = _appSettings.IsSession is 1 || _appSettings.IntByCache is 1 ? await _hotRodCache.GetCacheAsync(cacheName) : null;
             cacheValue = cacheValue is null && _appSettings.IsSession is not 1 && _appSettings.IntByCache is not 1 ? (await _masterCacheService.GetMasterByCacheNameAsync(cacheName)).Value : await _hotRodCache.GetCacheAsync(cacheName);
+
+            var versions = await GetCacheVersion(cacheName);
+
+            if (cacheValue is null && _appSettings.IsSession is not 1 && _appSettings.IntByCache is not 1)
+                return cacheValue;
+            else
+                await _masterCacheService.UpdateMasterCacheAsync(cacheName, cacheValue, versions);
 
             if (masterVersion)
             {

@@ -87,7 +87,7 @@ namespace Login.Infrastructure.Repositories
         {
             var config = new DataDbConfigSettings<GeoUserLocation>
             {
-                TableEnums = PBMaster.ReasonMaster,
+                TableEnums = PBTranscation.GeoUserLocation,
                 Request = geoUserLocation,
                 DbConnection = _sqlConnectionStrings.PBtransactionInfoConnection
             };
@@ -194,7 +194,7 @@ namespace Login.Infrastructure.Repositories
                 SurveyId = 0,
                 TellerID = tellerId
             };
-            var querySurveMapper = $"select top 1 ms.SurveyId from mstSurvey ms with(nolock) inner join mstSurveyMapper msm with(nolock) on ms.SurveyId=msm.SurveyId where msm.ChannelId= and msm.UserClass=@UserClass and msm.AppId=@AppId and convert(int,convert(varchar(10),GETDATE(),112)) between convert(int,convert(varchar(10),Startdate,112)) and convert(int,convert(varchar(10),Enddate,112))";
+            var querySurveMapper = $"select top 1 ms.SurveyId from mstSurvey ms with(nolock) inner join mstSurveyMapper msm with(nolock) on ms.SurveyId=msm.SurveyId where msm.ChannelId=@ChannelId and msm.UserClass=@UserClass and msm.AppId=@AppId and convert(int,convert(varchar(10),GETDATE(),112)) between convert(int,convert(varchar(10),Startdate,112)) and convert(int,convert(varchar(10),Enddate,112))";
 
             var config = new DataDbConfigSettings<object>
             {
@@ -260,7 +260,9 @@ namespace Login.Infrastructure.Repositories
                 Request = parameter,
                 DbConnection = _sqlConnectionStrings.PBtransactionInfoConnection
             };
-            return await _dataDbConfigurationService.GetDataAsync<object, OfferConsent>(configSettings: config);
+            var data = await _dataDbConfigurationService.GetDataAsync<object, OfferConsent>(configSettings: config);
+
+            return data ?? new OfferConsent();
         }
 
         public async Task<string> CheckLoyaltyRewards(string merchantId)
@@ -279,7 +281,8 @@ namespace Login.Infrastructure.Repositories
                 DbConnection = _sqlConnectionStrings.PBtransactionInfoConnection
             };
             //check condition if data is present assign value other wise set empty
-            return await _dataDbConfigurationService.GetDataAsync<object, string>(configSettings: config);
+            var data = await _dataDbConfigurationService.GetDataAsync<object, string>(configSettings: config);
+            return data ?? string.Empty;
         }
 
         public async Task<string> GetLastDownload()
@@ -300,7 +303,7 @@ namespace Login.Infrastructure.Repositories
             {
                 PlainQuery = query.ToString(),
                 Request = { },
-                DbConnection = _sqlConnectionStrings.PBtransactionInfoConnection
+                DbConnection = _sqlConnectionStrings.PBMasterConnection
             };
             //check condition if data is present assign value other wise set empty
             return await _dataDbConfigurationService.GetDataAsync<object, string>(configSettings: config);
@@ -377,9 +380,9 @@ namespace Login.Infrastructure.Repositories
                 Request = { },
                 DbConnection = _sqlConnectionStrings.PBMasterConnection
             };
-            var data = await _dataDbConfigurationService.GetDatasAsync<object, string>(configSettings: config);
 
-            return string.Empty;
+            var data = await _dataDbConfigurationService.GetDatasAsync<object, MasterCaches>(configSettings: config);
+            return data is not null ? string.Join("", data.Where(xx => xx.MasterCacheKey is not "MastersVersion").Select(c => $"{c.MasterCacheKey}#{c.Version}~")) : null;
         }
 
         public async Task<string> GetVersionFromCache(string cacheName, bool isFetchMasterVersion)
@@ -520,6 +523,13 @@ namespace Login.Infrastructure.Repositories
             return version is null ? await _cacheConnector.GetMobileVersionAsync(cacheName) : version.ToJsonDeSerialize<MobileVersion>();
         }
 
+
+        public async Task<string> GetMobileVersionComman(string cacheName)
+        {
+            var versions = await _cacheConnector.GetCache(cacheName, true);
+            var vId = versions is not null ? await GetCacheVersion(cacheName) : null;
+            return versions is not null ? $"{cacheName}#{vId}~" : $"{cacheName}#0000~";
+        }
 
 
 
