@@ -55,7 +55,6 @@ namespace Login.Identity.Service
             _appSettings = appSettings.Value;
         }
 
-
         public async Task<OutResponse> ValidateUserAuthenticationAsync(AuthenticationRequest authenticationRequest)
         {
             var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<FisUserValidateRequest>();
@@ -301,10 +300,10 @@ namespace Login.Identity.Service
                         EAgreement = userType.EAgreement.ToString(),
                         CASAeAgreement = userType.CASAEagreement.ToString(),
                         RewardPoints = checkRewrdPoints.ToString(),
-                        EAgreementChanged = checkEAgreement.ToString(),
-                        CASAaddendum = checkcasAaddendum.ToString(),
-                        FilebaseCasa = checkFilebaseCasa.ToString(),
-                        ESurvey = checkSurvey.ToString(),
+                        EAgreementChanged = checkEAgreement,
+                        CASAaddendum = checkcasAaddendum,
+                        FilebaseCasa = checkFilebaseCasa,
+                        ESurvey = checkSurvey,
                         ChannelID = loginData.SystemInfo.Channel.ToString(),
                         ZeroizationDateTime = checkZeroeDate.ToString(),
                         StrConsent = checkOfferConsent.ConsentYN,
@@ -325,7 +324,7 @@ namespace Login.Identity.Service
 
 
                     //Get Master Version
-                    dataVersion = _appSettings.IsCacheFromDB is not 1 ? await _userRepositories.GetVersionFromCache("MastersVersion", true) : string.Empty;
+                    dataVersion = _appSettings.IsCacheFromDB is not 1 ? await _userRepositories.GetVersionFromCache("MastersVersion", true) : dataVersion;
                     dataVersion = $"{dataVersion} |";
 
 
@@ -425,9 +424,6 @@ namespace Login.Identity.Service
                     var fosMobileVersion = await _userRepositories.GetMobileVersionDataAsync("mstMobileVersion");
                     #endregion
 
-
-
-
                     var LoginResponseOne = new CommonChannelIdOne
                     {
                         LoginData = outRespnse.ResponseData,
@@ -437,10 +433,10 @@ namespace Login.Identity.Service
                         EAgreement = userType.EAgreement.ToString(),
                         CASAeAgreement = userType.CASAEagreement.ToString(),
                         RewardPoints = checkRewrdPoints.ToString(),
-                        EAgreementChanged = checkEAgreement.ToString(),
-                        CASAaddendum = checkcasAaddendum.ToString(),
-                        FilebaseCasa = checkFilebaseCasa.ToString(),
-                        ESurvey = checkSurvey.ToString(),
+                        EAgreementChanged = checkEAgreement,
+                        CASAaddendum = checkcasAaddendum,
+                        FilebaseCasa = checkFilebaseCasa,
+                        ESurvey = checkSurvey,
                         CertificateExpiryDate = expiryDate,
                         MandatoryVersion = fosData.MandatoryVersion,
                         CurrentVersion = fosData.CurrentVersion,
@@ -475,10 +471,10 @@ namespace Login.Identity.Service
                             EAgreement = userType.EAgreement.ToString(),
                             CASAeAgreement = userType.CASAEagreement.ToString(),
                             RewardPoints = checkRewrdPoints.ToString(),
-                            EAgreementChanged = checkEAgreement.ToString(),
-                            CASAaddendum = checkcasAaddendum.ToString(),
-                            FilebaseCasa = checkFilebaseCasa.ToString(),
-                            ESurvey = checkSurvey.ToString(),
+                            EAgreementChanged = checkEAgreement,
+                            CASAaddendum = checkcasAaddendum,
+                            FilebaseCasa = checkFilebaseCasa,
+                            ESurvey = checkSurvey,
                             CertificateExpiryDate = string.Empty,
                             MandatoryVersion = fosData.MandatoryVersion,
                             CurrentVersion = fosData.CurrentVersion,
@@ -506,10 +502,10 @@ namespace Login.Identity.Service
                             EAgreement = userType.EAgreement.ToString(),
                             CASAeAgreement = userType.CASAEagreement.ToString(),
                             RewardPoints = checkRewrdPoints.ToString(),
-                            EAgreementChanged = checkEAgreement.ToString(),
-                            CASAaddendum = checkcasAaddendum.ToString(),
-                            FilebaseCasa = checkFilebaseCasa.ToString(),
-                            ESurvey = checkSurvey.ToString(),
+                            EAgreementChanged = checkEAgreement,
+                            CASAaddendum = checkcasAaddendum,
+                            FilebaseCasa = checkFilebaseCasa,
+                            ESurvey = checkSurvey,
                             CertificateExpiryDate = string.Empty,
                             MandatoryVersion = fosData.MandatoryVersion,
                             CurrentVersion = fosData.CurrentVersion,
@@ -536,10 +532,10 @@ namespace Login.Identity.Service
                         EAgreement = userType.EAgreement.ToString(),
                         CASAeAgreement = userType.CASAEagreement.ToString(),
                         RewardPoints = checkRewrdPoints.ToString(),
-                        EAgreementChanged = checkEAgreement.ToString(),
-                        CASAaddendum = checkcasAaddendum.ToString(),
-                        FilebaseCasa = checkFilebaseCasa.ToString(),
-                        ESurvey = checkSurvey.ToString(),
+                        EAgreementChanged = checkEAgreement,
+                        CASAaddendum = checkcasAaddendum,
+                        FilebaseCasa = checkFilebaseCasa,
+                        ESurvey = checkSurvey,
                         CertificateExpiryDate = string.Empty,
                         MandatoryVersion = fosData.MandatoryVersion,
                         CurrentVersion = fosData.CurrentVersion,

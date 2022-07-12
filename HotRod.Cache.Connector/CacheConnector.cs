@@ -22,6 +22,7 @@ namespace HotRod.Cache.Connector
         {
             _appSettings = appSettings.Value;
             _hotRodCache = hotRodCache;
+            _hotRodCache.Initlization(_hotRodCache._cacheSettings.CacheSessionContainerName);
             _masterCacheService = masterCacheService;
 
         }
@@ -42,7 +43,7 @@ namespace HotRod.Cache.Connector
             if (masterVersion)
             {
                 var data = cacheValue is "" or null ? await _masterCacheService.GetMasterByCacheNameAsync(cacheName) : null;
-                if (data is not null)
+                if (data is not null && data.Value is not null)
                 {
                     await _hotRodCache.PutCacheAsync(data?.MasterCacheKey, data?.Value);
                     return data?.Value;
@@ -59,7 +60,7 @@ namespace HotRod.Cache.Connector
             if (cache is null && _appSettings.IntByCache is not 1)
             {
                 cache = await _masterCacheService.GetMasterByCacheNameAsync(cacheName);
-                if (cache is not null && cache.Version is not 0)
+                if (cache is not null && cache.Version is not "0")
                 {
                     return cache?.Version.ToString();
                 }

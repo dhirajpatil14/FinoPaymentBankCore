@@ -29,16 +29,16 @@ namespace LoginService.Application.Models
         public string RewardPoints { get; set; }
 
         [JsonProperty("EAgreementChanged")]
-        public string EAgreementChanged { get; set; }
+        public int EAgreementChanged { get; set; }
 
         [JsonProperty("CASAaddendum")]
-        public string CASAaddendum { get; set; }
+        public int CASAaddendum { get; set; }
 
         [JsonProperty("FilebaseCasa")]
-        public string FilebaseCasa { get; set; }
+        public int FilebaseCasa { get; set; }
 
         [JsonProperty("eSurvey")]
-        public string ESurvey { get; set; }
+        public int ESurvey { get; set; }
 
         [JsonProperty("zeroizationDateTime")]
         public string ZeroizationDateTime { get; set; }
@@ -47,7 +47,7 @@ namespace LoginService.Application.Models
         public string ChannelID { get; set; }
 
         [JsonProperty("CurrentDateTime")]
-        private string CurrentDateTime { get; set; } = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+        public string CurrentDateTime { get; set; } = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
 
         [JsonProperty("StrConsent")]
         public string StrConsent { get; set; }
