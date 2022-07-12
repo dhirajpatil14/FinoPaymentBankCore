@@ -33,7 +33,7 @@ namespace LoginService.API.Integration.Tests.Controllers
                 TellerId = "100032353",
                 MethodId = 1,
                 IsEncrypt = false,
-                RequestData = "{\"user_id\":\"K7CFFkt/XuWxCJZLlXpFQg==\",\"client_id\":\"FINOMER\",\"ECBBlockEncryption\":true}"
+                RequestData = "{\"user_id\":\"Gipxpl7iWL62b/ldd5suEA==\",\"client_id\":\"FINOMER\",\"ECBBlockEncryption\":true}"
             };
 
             var eventJson = @userRequest.ToJsonSerialize();
@@ -43,6 +43,80 @@ namespace LoginService.API.Integration.Tests.Controllers
             var responseString = await response.Content.ReadAsStringAsync();
             var result = responseString.ToJsonDeSerialize<OutResponse>();
             result.ResponseCode.ShouldBeEquivalentTo(0);
+        }
+
+        [Fact]
+        public async Task CheckValidReturnCode()
+        {
+            var client = _factory.CreateDefaultClient();
+
+            var @userRequest = new AuthenticationRequest()
+            {
+                RequestId = "100032353_6292022153038769",
+                TellerId = "100032353",
+                MethodId = 1,
+                IsEncrypt = false,
+                RequestData = "{\"user_id\":\"K7CFFkt/==1\",\"client_id\":\"FINOMER\",\"ECBBlockEncryption\":true}"
+            };
+
+            var eventJson = @userRequest.ToJsonSerialize();
+            HttpContent content = new StringContent(eventJson, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{apiUrl}Authenticate", content);
+            response.IsSuccessStatusCode.Equals(1);
+            var responseString = await response.Content.ReadAsStringAsync();
+            var result = responseString.ToJsonDeSerialize<OutResponse>();
+            result.ResponseCode.ShouldBeEquivalentTo(0);
+        }
+        [Fact]
+        public async Task Incorrect_UserId_ReturnCode_NotValid()
+        {
+            var client = _factory.CreateDefaultClient();
+
+            var @userRequest = new AuthenticationRequest()
+            {
+                RequestId = "100032353_6292022153038769",
+                TellerId = "100032353",
+                MethodId = 1,
+                IsEncrypt = false,
+                RequestData = "{\"user_id\":\"LmTzLdp6IF5kHqiShhkkAw==\",\"client_id\":\"FINOMER\",\"ECBBlockEncryption\":true}"
+                
+            };
+
+            var eventJson = @userRequest.ToJsonSerialize();
+            HttpContent content = new StringContent(eventJson, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{apiUrl}Authenticate", content);
+            //response.IsSuccessStatusCode.Equals(1);
+            var responseString = await response.Content.ReadAsStringAsync();
+            var result = responseString.ToJsonDeSerialize<OutResponse>();
+            result.ResponseData.ShouldNotBeEmpty();
+            response.RequestMessage.Equals("User not found");
+
+            //result.ResponseCode.Equals(0);
+            //result.ResponseCode.ShouldBeEquivalentTo(0);
+        }
+
+        [Fact]
+        
+        public async Task ResponseData_null_ReturnCode_NotValid()
+        {
+            var client = _factory.CreateDefaultClient();
+
+            var @userRequest = new AuthenticationRequest()
+            {
+                RequestId = "100032353_6292022153038769",
+                TellerId = "100032353",
+                MethodId = 1,
+                IsEncrypt = false,
+                RequestData = "{\"user_id\":\"Gipxpl7iWL62b/ldd5suEA==\",\"client_id\":\"FINOTLR\",\"ECBBlockEncryption\":true}"
+            };
+
+            var eventJson = @userRequest.ToJsonSerialize();
+            HttpContent content = new StringContent(eventJson, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{apiUrl}Authenticate", content);
+            //response.IsSuccessStatusCode.Equals(1);
+            var responseString = await response.Content.ReadAsStringAsync();
+            var result = responseString.ToJsonDeSerialize<OutResponse>();
+            result.ResponseData.IsEmpty();
         }
     }
 }
