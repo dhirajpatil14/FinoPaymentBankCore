@@ -12,10 +12,10 @@ namespace Common.Application.Model
         public string Value { get; set; }
 
         [JsonProperty("UpdateDate")]
-        public DateTime UpdateDate { get; set; }
+        public DateTime? UpdateDate { get; set; } = null;
 
         [JsonProperty("Version")]
-        public int? Version { get; set; }
+        public string Version { get; set; }
 
         [JsonProperty("MobileVersion")]
         public int? MobileVersion { get; set; }

@@ -348,7 +348,8 @@ namespace Login.Infrastructure.Repositories
         {
             var res = await GetLendingVersion();
 
-            var dataLeading = res.Aggregate(string.Empty, (current, next) => " select '" + "MobileTabCntrl" + current + "' union all " + next);
+            var dataLeading = res.Aggregate(string.Empty, (current, next) => string.Format(" select '" + "MobileTabCntrl{1}' union all{0}", current, next));
+
 
             string query = " create table #temp ( " +
                            " MasterCacheKey nvarchar(100) ) " +
@@ -480,7 +481,7 @@ namespace Login.Infrastructure.Repositories
                 var leadingCache = await GetCache($"{cacheName}{type}");
                 if (leadingCache is not null)
                 {
-                    var versionId = GetCacheVersion($"{cacheName}{type}");
+                    var versionId = await GetCacheVersion($"{cacheName}{type}");
                     versions = $"{versions}{cacheName}{versionId}{type}#{versionId}~";
                 }
                 else

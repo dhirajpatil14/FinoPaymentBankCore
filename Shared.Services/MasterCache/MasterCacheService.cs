@@ -21,18 +21,14 @@ namespace Shared.Services.MasterCache
 
         public virtual async Task<MasterCaches> GetMasterByCacheNameAsync(string cacheName)
         {
-            var parameter = new
-            {
-                MasterCacheKey = cacheName
-            };
-            var config = new DataDbConfigSettings<object>
+            var config = new DataDbConfigSettings<MasterCaches>
             {
                 TableEnums = PBMaster.MasterCache,
-                Request = parameter,
+                Request = new MasterCaches { MasterCacheKey = cacheName },
                 DbConnection = _sqlConnectionStrings.PBMasterConnection
             };
 
-            return await _dataDbConfigurationService.GetDataAsync<object, MasterCaches>(configSettings: config);
+            return await _dataDbConfigurationService.GetDataAsync<MasterCaches, MasterCaches>(configSettings: config);
         }
 
         public virtual async Task<int> UpdateMasterCacheByMasterKey(string version, string masterCacheKey)
