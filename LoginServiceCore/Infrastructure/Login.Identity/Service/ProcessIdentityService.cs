@@ -52,13 +52,109 @@ namespace Login.Identity.Service
 
                 switch (authenticationRequest.MethodId)
                 {
-
+                    #region Validate User Authentication 
                     case 1:
                         outResponse = await _authenticationService?.ValidateUserAuthenticationAsync(authenticationRequest);
                         break;
+                    #endregion
+
+                    #region Validate User    
                     case 2:
-                        outResponse = await _authenticationService?.ValidateUser(authenticationRequest);
+                        outResponse = await _authenticationService?.ValidateUserAsync(authenticationRequest);
                         break;
+                    #endregion
+
+                    #region  Logout User    
+                    case 3:
+                        break;
+                    #endregion
+
+                    #region Check Auth Context Details
+                    case 4:
+                        break;
+                    #endregion
+
+                    #region Fetch Finger Print Service 
+                    case 5:
+                        break;
+                    #endregion
+
+                    #region Validate Token
+                    case 6:
+                        break;
+                    #endregion
+
+                    #region User Unlock 
+                    case 7:
+                        break;
+                    #endregion
+
+                    #region Get Secret Question
+                    case 8:
+                        break;
+                    #endregion
+
+                    #region Update Secret Question
+                    case 9:
+                        break;
+                    #endregion
+
+                    #region User FP Authentication
+                    case 10:
+                        break;
+                    #endregion
+
+                    #region Validate User Secret Question
+                    case 11:
+                        break;
+                    #endregion
+
+                    #region This Is Used to get enryption key
+                    case 12:
+                        break;
+                    #endregion
+
+                    #region This Is Used to reset password and validate secret question
+                    case 13:
+                        break;
+                    #endregion
+
+                    #region This Is Used to change password
+                    case 14:
+                        break;
+                    #endregion
+
+                    #region This Is Used to fetch all secret questions
+                    case 15:
+                        break;
+                    #endregion
+
+                    #region This Is Used to Get User Details
+                    case 16:
+                        break;
+                    #endregion
+
+                    #region This Is Used to fetch Management Health
+                    case 17:
+                        break;
+                    #endregion
+
+                    #region This Is Used to update Merchant Details
+                    case 18:
+                        break;
+                    #endregion
+
+                    #region Get User Survey
+                    case 19:
+                        break;
+                    #endregion
+
+                    #region This Is Used to Check Authman Policy Check
+                    case 20:
+
+                        break;
+                    #endregion
+
                     default:
                         break;
                 }

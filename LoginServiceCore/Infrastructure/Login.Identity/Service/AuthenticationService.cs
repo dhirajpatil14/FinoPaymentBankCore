@@ -1,4 +1,5 @@
-﻿using Common.Application.Interface;
+﻿using Common.Application.Dto;
+using Common.Application.Interface;
 using Common.Application.Model;
 using Common.Application.Model.Settings;
 using Common.Enums;
@@ -59,6 +60,8 @@ namespace Login.Identity.Service
         {
             var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<FisUserValidateRequest>();
 
+
+
             replyData.UserId = replyData.EcbBlockEncryption ? replyData.UserId.ToDecryptEcbBlock(_appSettings.DecryptKey)
                 : replyData.UserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen);
 
@@ -90,7 +93,7 @@ namespace Login.Identity.Service
                 ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : ResponseCode.Success.GetIntValue(),
                 ResponseMessage = isNotValid ? esbMessagesdata.CorrectedMessage : string.Empty,
                 MessageType = isNotValid ? MessageType.Exclam.GetStringValue() : string.Empty,
-                ResponseData = isNotValid ? esbMessagesdata.CorrectedMessage : result.Data.ToJsonSerialize()
+                ResponseData = result.Data.ToJsonSerialize()
             };
             var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
 
@@ -139,7 +142,7 @@ namespace Login.Identity.Service
             return outRespnse;
         }
 
-        public async Task<OutResponse> ValidateUser(AuthenticationRequest authenticationRequest)
+        public async Task<OutResponse> ValidateUserAsync(AuthenticationRequest authenticationRequest)
         {
             var loginData = authenticationRequest.RequestData.ToJsonDeSerialize<FisUserPasswordValidateRequest>();
             var isUserRestricted = await RestrictUserAccess(loginData);
@@ -554,6 +557,142 @@ namespace Login.Identity.Service
             return outRespnse;
         }
 
+        public async Task<OutResponse> VerifyUserIdAsync(AuthenticationRequest authenticationRequest)
+        {
+            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            replyData.UserId = replyData.EcbBlockEncryption ? replyData.UserId.ToDecryptEcbBlock(_appSettings.DecryptKey)
+               : replyData.UserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen);
+
+            replyData.OldUserId = replyData.EcbBlockEncryption ? replyData.OldUserId.ToDecryptEcbBlock(_appSettings.DecryptKey)
+                 : replyData.OldUserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen);
+
+
+
+            var outRespnse = replyData.UserId == replyData.OldUserId ? await ValidateUserAsync(authenticationRequest) : await GetUserAuthman(authenticationRequest, AuthmanOptions.GenerateOTP);
+            //need to parse Object
+            //objJSONHelper.NewtonSoftJsonDeSerializer<dynamic>(objOutResponse.ResponseData);
+            //var test = outRespnse?.ResponseCode is 1 && replyData?.Data?.ReturnCode is 300 ?
+
+
+            return new OutResponse();
+        }
+
+
+        internal async Task<OutResponse> GetUserAuthman(AuthenticationRequest authenticationRequest, AuthmanOptions authmanOptions)
+        {
+            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            replyData.UserId = replyData.EcbBlockEncryption && AuthmanOptions.GenerateOTP == authmanOptions ? replyData.UserId.ToDecryptEcbBlock(_appSettings.DecryptKey) : replyData.EcbBlockEncryption && AuthmanOptions.GenerateOTP == authmanOptions ? replyData.AuthProfile.UserId.ToDecryptEcbBlock(_appSettings.DecryptKey) : replyData.UserId;
+            replyData.UserId = !replyData.EcbBlockEncryption && AuthmanOptions.GenerateOTP == authmanOptions ? replyData.UserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen) : !replyData.EcbBlockEncryption && AuthmanOptions.GenerateOTP == authmanOptions ? replyData.AuthProfile.UserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen) : replyData.UserId;
+
+            var urlData = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbCheckAuthenticationUrl, ServiceName.LOGINSERVICE);
+
+            var request = new WebApiRequestSettings<dynamic>
+            {
+                URL = urlData?.ESBUrl,
+                PostParameter = replyData,
+                Timeout = _appSettings.Timeout,
+                XAuthToken = authenticationRequest.XAuthToken,
+                RequesterId = authenticationRequest.ReturnId(),
+                RequestId = authenticationRequest.RequestId
+            };
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            var esbMessagesdata = new EsbMessages();
+            if (result.StatusCode is 503)
+                esbMessagesdata = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.ServerUnavailable.GetIntValue());
+            else if (result.StatusCode is not 200 && result.StatusCode is not 503)
+                esbMessagesdata = await _esbMessageService.GetEsbMessage(string.Empty, ResponseCode.RemoteServerError.GetStringValue(), result.ErrorMessage);
+
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                ResponseMessage = isNotValid ? esbMessagesdata.CorrectedMessage : string.Empty,
+                MessageType = isNotValid ? MessageType.Exclam.GetStringValue() : string.Empty,
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+            if (!checkValidReturnCode)
+                return outRespnse;
+
+            if (checkValidReturnCode && replyData.EncryptionKey is not null && AuthmanOptions.GenerateOTP == authmanOptions)
+            {
+                var userRole = result.Data.UserRoles.LastOrDefault();
+                var userType = await _userRepositories.GetUserType(userRole);
+                var isLoginOTP = userType?.LoginOTP is false and false;
+
+                if (isLoginOTP)
+                {
+                    var esbcbsMessage = await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.AuthenticateSuccess.GetIntValue(), result.Data.ReturnCode);
+                    outRespnse.ResponseMessage = esbcbsMessage.StandardMessageDesc;
+                    outRespnse.MessageType = esbcbsMessage.MessageType;
+                    outRespnse.SessionExpiryTime = SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired);
+                    outRespnse.AuthmanFlag = true;
+                }
+                else
+                {
+                    #region SendOTP
+                    var otpData = new OtpRequest { MethodId = 1, CustomerMobileNo = result.Data.MobileNo, NotifyParam = new NotifyParameter { TemplateId = 523 } };
+                    var otpRequestData = authenticationRequest.Clone();
+                    otpRequestData.MethodId = 1; otpRequestData.IsEncrypt = false;
+                    otpRequestData.RequestData = otpData.ToJsonSerialize();
+
+                    var otpEsbUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbLoginSendOTP, ServiceName.LOGINSERVICE);
+                    var otpRequest = new WebApiRequestSettings<dynamic>
+                    {
+                        URL = otpEsbUrl?.ESBUrl,
+                        PostParameter = otpRequestData,
+                        Timeout = _appSettings.Timeout,
+                        XAuthToken = authenticationRequest.XAuthToken,
+                        RequesterId = authenticationRequest.ReturnId(),
+                        RequestId = authenticationRequest.RequestId
+                    };
+
+                    var otpResult = await _webApiRequestService.PostAsync<dynamic, dynamic>(otpRequest);
+
+                    isNotValid = otpResult.StatusCode is not (int)HttpStatusCode.OK;
+
+                    esbMessagesdata = new EsbMessages();
+                    if (otpResult.StatusCode is 503)
+                        esbMessagesdata = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.ServerUnavailable.GetIntValue());
+                    else if (otpResult.StatusCode is not 200 && otpResult.StatusCode is not 503)
+                        esbMessagesdata = await _esbMessageService.GetEsbMessage(string.Empty, ResponseCode.RemoteServerError.GetStringValue(), result.ErrorMessage);
+
+                    outRespnse = new OutResponse
+                    {
+                        RequestId = otpRequestData.RequestId,
+                        ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                        ResponseMessage = isNotValid ? esbMessagesdata.CorrectedMessage : string.Empty,
+                        MessageType = isNotValid ? MessageType.Exclam.GetStringValue() : MessageType.Info.GetStringValue(),
+                        AuthmanFlag = !!isNotValid,
+                        ResponseData = otpResult.Data.ToJsonSerialize()
+                    };
+
+                    #endregion
+                }
+            }
+            else
+            {
+                var esbcbsMessage = await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.AuthenticateUnSuccess.GetIntValue(), result.Data.ReturnCode);
+                outRespnse.ResponseCode = ResponseCode.Failure.GetIntValue();
+                outRespnse.ResponseMessage = esbcbsMessage.StandardMessageDesc;
+                outRespnse.MessageType = esbcbsMessage.MessageType;
+            }
+
+            if (result?.Data is null && !checkValidReturnCode)
+            {
+                outRespnse.ResponseMessage = $"Unable to parse Authman response.";
+                outRespnse.MessageType = MessageType.Exclam.GetStringValue();
+            }
+
+            return outRespnse;
+        }
+
+
         internal async Task<Boolean> RestrictUserAccess(FisUserPasswordValidateRequest fisUserPasswordValidateRequest)
         {
 
@@ -606,9 +745,5 @@ namespace Login.Identity.Service
             };
             return await _userRepositories.AddUserGeoAsync(userGeoLocation);
         }
-
-
-
-
     }
 }

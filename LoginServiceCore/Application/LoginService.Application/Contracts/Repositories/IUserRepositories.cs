@@ -16,6 +16,9 @@ namespace LoginService.Application.Contracts.Repositories
 
         Task<UserType> GetUserType(string userType);
 
+
+
+
         Task<int> CheckEagreement(string merchantName, string merchantId, int expiryday);
 
         Task<int> CheckCASAaddendum(string merchantId);

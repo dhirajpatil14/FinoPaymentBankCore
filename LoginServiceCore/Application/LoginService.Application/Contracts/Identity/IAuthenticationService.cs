@@ -8,6 +8,8 @@ namespace LoginService.Application.Contracts.Identity
     {
         Task<OutResponse> ValidateUserAuthenticationAsync(AuthenticationRequest authenticationRequest);
 
-        Task<OutResponse> ValidateUser(AuthenticationRequest authenticationRequest);
+        Task<OutResponse> ValidateUserAsync(AuthenticationRequest authenticationRequest);
+
+        Task<OutResponse> VerifyUserIdAsync(AuthenticationRequest authenticationRequest);
     }
 }

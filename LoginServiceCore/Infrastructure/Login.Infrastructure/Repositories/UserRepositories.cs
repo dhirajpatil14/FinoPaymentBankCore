@@ -106,6 +106,8 @@ namespace Login.Infrastructure.Repositories
             return await _dataDbConfigurationService.GetDataAsync<UserType, UserType>(configSettings: config);
         }
 
+
+
         public async Task<int> CheckEagreement(string merchantName, string merchantId, int expiryday)
         {
             var parameter = new
