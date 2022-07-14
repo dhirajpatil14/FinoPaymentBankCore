@@ -37,9 +37,6 @@ namespace Login.Identity.Service
             }
             else
             {
-
-
-
                 if (authenticationRequest.IsEncrypt)
                 {
                     var decriptData = authenticationRequest?.RequestData?.ToDecryptOpenSSL(authenticationRequest.SessionId);

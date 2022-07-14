@@ -94,7 +94,7 @@ namespace Login.Infrastructure.Repositories
             return await _dataDbConfigurationService.AddDataAsync<GeoUserLocation>(configSettings: config);
         }
 
-        public async Task<UserType> GetUserType(string userType)
+        public async Task<UserType> GetUserTypeAsync(string userType)
         {
             var config = new DataDbConfigSettings<UserType>
             {
@@ -106,9 +106,7 @@ namespace Login.Infrastructure.Repositories
             return await _dataDbConfigurationService.GetDataAsync<UserType, UserType>(configSettings: config);
         }
 
-
-
-        public async Task<int> CheckEagreement(string merchantName, string merchantId, int expiryday)
+        public async Task<int> CheckEagreementAsync(string merchantName, string merchantId, int expiryday)
         {
             var parameter = new
             {
@@ -130,7 +128,7 @@ namespace Login.Infrastructure.Repositories
             return data is not null ? 1 : 0;
         }
 
-        public async Task<int> CheckCASAaddendum(string merchantId)
+        public async Task<int> CheckCASAaddendumAsync(string merchantId)
         {
             var parameter = new
             {
@@ -149,7 +147,7 @@ namespace Login.Infrastructure.Repositories
             return data?.CASAaddendum ?? 0;
         }
 
-        public async Task<int> CheckFilebaseCasa(string merchantId)
+        public async Task<int> CheckFilebaseCasaAsync(string merchantId)
         {
             var parameter = new
             {
@@ -186,7 +184,7 @@ namespace Login.Infrastructure.Repositories
             return await _dataDbConfigurationService.GetDataAsync<object, int>(configSettings: config);
         }
 
-        public async Task<int> CheckSurvey(string channelId, string userClass, string appId, string tellerId)
+        public async Task<int> CheckSurveyAsync(string channelId, string userClass, string appId, string tellerId)
         {
             var parameterSurveMapper = new
             {
@@ -223,7 +221,7 @@ namespace Login.Infrastructure.Repositories
             return 0;
         }
 
-        public async Task<int> CheckCategoryCode(string merchantId)
+        public async Task<int> CheckCategoryCodeAsync(string merchantId)
         {
             var parameter = new
             {
@@ -242,7 +240,7 @@ namespace Login.Infrastructure.Repositories
             return data is 10 ? 10 : 0;
         }
 
-        public async Task<OfferConsent> CheckOfferConsent(string merchantId)
+        public async Task<OfferConsent> CheckOfferConsentAsync(string merchantId)
         {
             var parameter = new
             {
@@ -267,7 +265,7 @@ namespace Login.Infrastructure.Repositories
             return data ?? new OfferConsent();
         }
 
-        public async Task<string> CheckLoyaltyRewards(string merchantId)
+        public async Task<string> CheckLoyaltyRewardsAsync(string merchantId)
         {
             var parameter = new
             {
@@ -287,7 +285,7 @@ namespace Login.Infrastructure.Repositories
             return data ?? string.Empty;
         }
 
-        public async Task<string> GetLastDownload()
+        public async Task<string> GetLastDownloadAsync()
         {
 
             var query = " declare  @iLastDownload varchar(100)=''; " +
@@ -312,7 +310,7 @@ namespace Login.Infrastructure.Repositories
 
         }
 
-        public async Task<string> GetGLZeroizeDateTime(string userId)
+        public async Task<string> GetGLZeroizeDateTimeAsync(string userId)
         {
             var parameter = new
             {
@@ -330,7 +328,7 @@ namespace Login.Infrastructure.Repositories
             return await _dataDbConfigurationService.GetDataAsync<object, string>(configSettings: config);
         }
 
-        public async Task<IEnumerable<string>> GetLendingVersion()
+        public async Task<IEnumerable<string>> GetLendingVersionAsync()
         {
             var query = "SELECT type FROM mstProductType  with (NOLOCK) where LendingFlag=1 order by 1";
             var config = new DataDbConfigSettings<object>
@@ -346,9 +344,9 @@ namespace Login.Infrastructure.Repositories
 
         }
 
-        public async Task<string> GetDbVersion(DbVersion dbVersion)
+        public async Task<string> GetDbVersionAsync(DbVersion dbVersion)
         {
-            var res = await GetLendingVersion();
+            var res = await GetLendingVersionAsync();
 
             var dataLeading = res.Aggregate(string.Empty, (current, next) => string.Format(" select '" + "MobileTabCntrl{1}' union all{0}", current, next));
 
@@ -388,102 +386,100 @@ namespace Login.Infrastructure.Repositories
             return data is not null ? string.Join("", data.Where(xx => xx.MasterCacheKey is not "MastersVersion").Select(c => $"{c.MasterCacheKey}#{c.Version}~")) : null;
         }
 
-        public async Task<string> GetVersionFromCache(string cacheName, bool isFetchMasterVersion)
+        public async Task<string> GetVersionFromCacheAsync(string cacheName, bool isFetchMasterVersion)
         {
             var versions = await _cacheConnector.GetCache(cacheName, isFetchMasterVersion);
             return versions;
         }
-        public async Task<string> GetMobileVersion(string cacheName)
-        {
-            return await GetCacheVersion(cacheName);
+        //public async Task<string> GetMobileVersion(string cacheName)
+        //{
+        //    return await GetCacheVersion(cacheName);
 
-        }
+        //}
 
-        public async Task<string> GetProfileType(string cacheName)
-        {
-            return await GetCache(cacheName);
+        //public async Task<string> GetProfileType(string cacheName)
+        //{
+        //    return await GetCache(cacheName);
 
-        }
+        //}
 
-        public async Task<string> GetProfileTypeCache(string cacheName)
-        {
-            return await GetCacheVersion(cacheName);
-        }
+        //public async Task<string> GetProfileTypeCache(string cacheName)
+        //{
+        //    return await GetCacheVersion(cacheName);
+        //}
 
+        //public async Task<string> GetProductTranscation(string cacheName)
+        //{
+        //    return await GetCache(cacheName);
+        //}
 
+        //public async Task<string> GetProductTranscationCache(string cacheName)
+        //{
+        //    return await GetCacheVersion(cacheName);
+        //}
 
-        public async Task<string> GetProductTranscation(string cacheName)
-        {
-            return await GetCache(cacheName);
-        }
+        //public async Task<string> GetSequenceMap(string cacheName)
+        //{
+        //    return await GetCache(cacheName);
+        //}
 
-        public async Task<string> GetProductTranscationCache(string cacheName)
-        {
-            return await GetCacheVersion(cacheName);
-        }
+        //public async Task<string> GetSquenceMapCache(string cacheName)
+        //{
+        //    return await GetCacheVersion(cacheName);
+        //}
 
-        public async Task<string> GetSequenceMap(string cacheName)
-        {
-            return await GetCache(cacheName);
-        }
+        //public async Task<string> GetMobileTabControl(string cacheName)
+        //{
+        //    return await GetCache(cacheName);
+        //}
 
-        public async Task<string> GetSquenceMapCache(string cacheName)
-        {
-            return await GetCacheVersion(cacheName);
-        }
+        //public async Task<string> GetMobileTabControlCache(string cacheName)
+        //{
+        //    return await GetCacheVersion(cacheName);
+        //}
 
-        public async Task<string> GetMobileTabControl(string cacheName)
-        {
-            return await GetCache(cacheName);
-        }
+        //public async Task<string> GetIinCacheData(string cacheName)
+        //{
+        //    return await GetCache(cacheName);
+        //}
 
-        public async Task<string> GetMobileTabControlCache(string cacheName)
-        {
-            return await GetCacheVersion(cacheName);
-        }
-
-        public async Task<string> GetIinCacheData(string cacheName)
-        {
-            return await GetCache(cacheName);
-        }
-
-        public async Task<string> GetIinCache(string cacheName)
-        {
-            return await GetCacheVersion(cacheName);
-        }
+        //public async Task<string> GetIinCache(string cacheName)
+        //{
+        //    return await GetCacheVersion(cacheName);
+        //}
 
 
-        public async Task<string> GetPrintData(string cacheName)
-        {
-            return await GetCache(cacheName);
-        }
-        public async Task<string> GetPrintCache(string cacheName)
-        {
-            return await GetCacheVersion(cacheName);
-        }
+        //public async Task<string> GetPrintData(string cacheName)
+        //{
+        //    return await GetCache(cacheName);
+        //}
+        //public async Task<string> GetPrintCache(string cacheName)
+        //{
+        //    return await GetCacheVersion(cacheName);
+        //}
 
-        public async Task<string> GetCrossSellData(string cacheName)
-        {
-            return await GetCache(cacheName);
-        }
+        //public async Task<string> GetCrossSellData(string cacheName)
+        //{
+        //    return await GetCache(cacheName);
+        //}
 
-        public async Task<string> GetCrossSellCache(string cacheName)
-        {
-            return await GetCacheVersion(cacheName);
-        }
+        //public async Task<string> GetCrossSellCache(string cacheName)
+        //{
+        //    return await GetCacheVersion(cacheName);
+        //}
 
 
         public async Task<string> GetProductTypesAsync(string cacheName)
         {
-            var datas = await GetLendingVersion();
+            var datas = await GetLendingVersionAsync();
             var versions = string.Empty;
 
             foreach (string type in datas)
             {
-                var leadingCache = await GetCache($"{cacheName}{type}");
+                var leadingCache = await GetCacheAsync($"{cacheName}{type}");
                 if (leadingCache is not null)
                 {
-                    var versionId = await GetCacheVersion($"{cacheName}{type}");
+                    var versionId = await GetCacheVersionAsync($"{cacheName}{type}");
                     versions = $"{versions}{cacheName}{versionId}{type}#{versionId}~";
                 }
                 else
@@ -495,13 +491,13 @@ namespace Login.Infrastructure.Repositories
             return versions;
         }
 
-        public async Task<FosAppVersion> GetFosVersion(string authenticator, string cacheName)
+        public async Task<FosAppVersion> GetFosVersionAsync(string authenticator, string cacheName)
         {
-            var fosdata = await GetCache(cacheName);
-            return fosdata is null ? await GetFosVersionCache(authenticator, cacheName) : fosdata.ToJsonDeSerialize<FosAppVersion>();
+            var fosdata = await GetCacheAsync(cacheName);
+            return fosdata is null ? await GetFosVersionCacheAsync(authenticator, cacheName) : fosdata.ToJsonDeSerialize<FosAppVersion>();
         }
 
-        public async Task<string> GetAuaExpiryData(int status, int id)
+        public async Task<string> GetAuaExpiryDataAsync(int status, int id)
         {
             var parameter = new
             {
@@ -522,36 +518,31 @@ namespace Login.Infrastructure.Repositories
 
         public async Task<MobileVersion> GetMobileVersionDataAsync(string cacheName)
         {
-            var version = await GetCache(cacheName);
+            var version = await GetCacheAsync(cacheName);
             return version is null ? await _cacheConnector.GetMobileVersionAsync(cacheName) : version.ToJsonDeSerialize<MobileVersion>();
         }
 
-
-        public async Task<string> GetMobileVersionComman(string cacheName)
+        public async Task<string> GetMobileVersionCommanAsync(string cacheName)
         {
             var versions = await _cacheConnector.GetCache(cacheName, true);
-            var vId = versions is not null ? await GetCacheVersion(cacheName) : null;
+            var vId = versions is not null ? await GetCacheVersionAsync(cacheName) : null;
             return versions is not null ? $"{cacheName}#{vId}~" : $"{cacheName}#0000~";
         }
 
-
-
-
-        internal async Task<FosAppVersion> GetFosVersionCache(string authenticator, string cacheName)
+        internal async Task<FosAppVersion> GetFosVersionCacheAsync(string authenticator, string cacheName)
         {
             return await _cacheConnector.GetFOSApplicationVersion(authenticator, cacheName);
         }
 
-        internal async Task<string> GetCache(string cacheName)
+        internal async Task<string> GetCacheAsync(string cacheName)
         {
             return await _cacheConnector.GetCache(cacheName, true);
         }
 
-        internal async Task<string> GetCacheVersion(string cacheName)
+        internal async Task<string> GetCacheVersionAsync(string cacheName)
         {
             return await _cacheConnector.GetCacheVersion(cacheName);
         }
-
 
     }
 }
