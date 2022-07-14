@@ -43,7 +43,6 @@ namespace Shared.Services.ESBCBSMessageService
             }
         }
 
-
         protected async Task<IEnumerable<EsbCbsMessages>> GetESBCBSMessageListAsync()
         {
             var dataValue = GetorNullAsync();
@@ -89,7 +88,6 @@ namespace Shared.Services.ESBCBSMessageService
             return messageView;
         }
 
-
         protected virtual IEnumerable<EsbCbsMessages> GetorNullAsync()
         {
             lock (_cacheEsbCbsMessages)
@@ -117,5 +115,6 @@ namespace Shared.Services.ESBCBSMessageService
                 _cacheEsbCbsMessages.Remove(KEY);
             }
         }
+
     }
 }

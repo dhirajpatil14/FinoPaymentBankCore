@@ -568,12 +568,11 @@ namespace Login.Identity.Service
                  : replyData.OldUserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen);
 
 
-
             var outRespnse = replyData.UserId == replyData.OldUserId ? await ValidateUserAsync(authenticationRequest) : await GetUserAuthmanAsync(authenticationRequest, AuthmanOptions.GenerateOTP);
+
             //need to parse Object
             //objJSONHelper.NewtonSoftJsonDeSerializer<dynamic>(objOutResponse.ResponseData);
             //var test = outRespnse?.ResponseCode is 1 && replyData?.Data?.ReturnCode is 300 ?
-
 
             return new OutResponse();
         }

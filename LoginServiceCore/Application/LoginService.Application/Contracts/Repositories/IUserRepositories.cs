@@ -40,35 +40,6 @@ namespace LoginService.Application.Contracts.Repositories
 
         public Task<string> GetVersionFromCacheAsync(string cacheName, bool isFetchMaster);
 
-        // Task<string> GetMobileVersion(string cacheName);
-
-        //Task<string> GetProfileType(string cacheName);
-
-        //Task<string> GetProfileTypeCache(string cacheName);
-
-        //Task<string> GetProductTranscation(string cacheName);
-        //Task<string> GetProductTranscationCache(string cacheName);
-
-        //Task<string> GetSequenceMap(string cacheName);
-
-        //Task<string> GetSquenceMapCache(string cacheName);
-
-        //Task<string> GetMobileTabControl(string cacheName);
-
-        //Task<string> GetMobileTabControlCache(string cacheName);
-
-        //Task<string> GetIinCacheData(string cacheName);
-
-        //Task<string> GetIinCache(string cacheName);
-
-        //Task<string> GetPrintData(string cacheName);
-
-        //Task<string> GetPrintCache(string cacheName);
-
-        //Task<string> GetCrossSellData(string cacheName);
-
-        //Task<string> GetCrossSellCache(string cacheName);
-
         Task<string> GetProductTypesAsync(string cacheName);
 
         Task<FosAppVersion> GetFosVersionAsync(string authenticator, string cacheName);
