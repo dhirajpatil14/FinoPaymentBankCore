@@ -60,22 +60,12 @@ namespace Login.Identity.Service
         {
             var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<FisUserValidateRequest>();
 
-
-
             replyData.UserId = replyData.EcbBlockEncryption ? replyData.UserId.ToDecryptEcbBlock(_appSettings.DecryptKey)
                 : replyData.UserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen);
 
             var urlData = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbCheckAuthenticationUrl, ServiceName.LOGINSERVICE);
 
-            var request = new WebApiRequestSettings<FisUserValidateRequest>
-            {
-                URL = urlData?.ESBUrl,
-                PostParameter = replyData,
-                Timeout = _appSettings.Timeout,
-                XAuthToken = authenticationRequest.XAuthToken,
-                RequesterId = authenticationRequest.ReturnId(),
-                RequestId = authenticationRequest.RequestId
-            };
+            var request = GetWebRequestSettings<FisUserValidateRequest>(urlData?.ESBUrl, replyData, authenticationRequest);
 
             var result = await _webApiRequestService.PostAsync<FisUserValidateResponse, FisUserValidateRequest>(request);
 
@@ -183,18 +173,10 @@ namespace Login.Identity.Service
 
             var urlData = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbNewTokenUrl, ServiceName.LOGINSERVICE);
 
-            var request = new WebApiRequestSettings<FisUserPasswordValidateRequest>
-            {
-                URL = urlData?.ESBUrl,
-                PostParameter = loginData,
-                Timeout = _appSettings.Timeout,
-                XAuthToken = authenticationRequest.XAuthToken,
-                RequesterId = authenticationRequest.ReturnId(),
-                RequestId = authenticationRequest.RequestId,
-                TokenId = authenticationRequest.TokenId
-            };
+            var request = GetWebRequestSettings<FisUserPasswordValidateRequest>(urlData?.ESBUrl, loginData, authenticationRequest);
 
             var result = await _webApiRequestService.PostAsync<FisUserPasswordValidateResponse, FisUserPasswordValidateRequest>(request);
+
             var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
 
             if (result.StatusCode is 503)
@@ -577,6 +559,209 @@ namespace Login.Identity.Service
             return new OutResponse();
         }
 
+        public async Task<OutResponse> LogOutUserAsync(AuthenticationRequest logOutRequest)
+        {
+            var replyData = logOutRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            replyData.access_token = logOutRequest.XAuthToken;
+            //logOutRequest.RequestData = replyData.ToJsonSerialize();
+            var logOutUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbLogoutUrl, ServiceName.LOGINSERVICE);
+
+            var request = GetWebRequestSettings<dynamic>(logOutUrl?.ESBUrl, replyData, logOutRequest);
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+            var isLogOut = result.Data?.ResponseData is "Successfully Logout";
+
+            var esbMessagesdata = isLogOut ? await _esbMessageService.GetEsbMessageByIdAsync(MessageTypeId.LogoutSuccessful.GetIntValue()) : await _esbMessageService.GetEsbMessageByIdAsync(MessageTypeId.LogoutFailed.GetIntValue());
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                SessionExpiryTime = SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired),
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : !isLogOut ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                ResponseMessage = esbMessagesdata.CorrectedMessage,
+                ResponseMessage_Hindi = esbMessagesdata.HindiMessage,
+                MessageType = isNotValid || !isLogOut ? MessageType.Exclam.GetStringValue() : MessageType.Info.GetStringValue(),
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> GetAuthContextAsync(AuthenticationRequest authContextRequest)
+        {
+            var replyData = authContextRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            var authContextUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbAuthContextUrl, ServiceName.LOGINSERVICE);
+
+            var request = GetWebRequestSettings<dynamic>(authContextUrl?.ESBUrl, replyData, authContextRequest);
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+
+            var esbMessagesdata = checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.AuthContextDetailsSuccess.GetIntValue(), result.Data.ReturnCode) : await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.AuthContextDetailsFailed.GetIntValue(), result.Data.ReturnCode);
+
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                SessionExpiryTime = checkValidReturnCode ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : string.Empty,
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : !checkValidReturnCode ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                ResponseMessage = esbMessagesdata.CorrectedMessage,
+                ResponseMessage_Hindi = esbMessagesdata.HindiMessage,
+                MessageType = esbMessagesdata.MessageType,
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> GetEsbFpAsync(AuthenticationRequest esbFpRequest)
+        {
+            var replyData = esbFpRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            var esbFpUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbFpVerificationUrl, ServiceName.LOGINSERVICE);
+
+
+            var request = GetWebRequestSettings<dynamic>(esbFpUrl?.ESBUrl, replyData, esbFpRequest);
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+
+            var esbMessageAlert = checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.FpVerificationSuccess.GetIntValue(), result.Data.ReturnCode) : null;
+
+            var esbMessageFaield = !checkValidReturnCode ? await _esbMessageService.GetEsbMessageByIdAsync(MessageTypeId.FpVerificationFailed.GetIntValue()) : null;
+
+
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                SessionExpiryTime = checkValidReturnCode ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : string.Empty,
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : (!checkValidReturnCode) ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                ResponseMessage = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.CorrectedMessage : (esbMessageFaield is not null && !checkValidReturnCode) ? esbMessageFaield.CorrectedMessage : string.Empty,
+                ResponseMessage_Hindi = !checkValidReturnCode ? esbMessageFaield.HindiMessage : string.Empty,
+                MessageType = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.MessageType : !checkValidReturnCode ?? MessageType.Exclam.GetStringValue(),
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+
+            return outRespnse;
+
+        }
+
+        public async Task<OutResponse> ValidateTokenAsync(AuthenticationRequest authenticationRequest)
+        {
+
+            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            var esbFpUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbValidateTokenUrl, ServiceName.LOGINSERVICE);
+            var request = GetWebRequestSettings<dynamic>(esbFpUrl?.ESBUrl, replyData, authenticationRequest);
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+
+            var esbMessageAlert = checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TokenValidationSuccess.GetIntValue(), result.Data.ReturnCode) : await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TokenValidationFailed.GetIntValue(), result.Data.ReturnCode);
+
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                SessionExpiryTime = checkValidReturnCode ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : string.Empty,
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : checkValidReturnCode ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = esbMessageAlert.CorrectedMessage,
+                MessageType = esbMessageAlert.MessageType,
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> UserUnlockAsync(AuthenticationRequest authenticationRequest)
+        {
+            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            var esbUnlockUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.ESBUnlockUserDetailsUrl, ServiceName.LOGINSERVICE);
+
+            var request = GetWebRequestSettings<dynamic>(esbUnlockUrl?.ESBUrl, replyData, authenticationRequest);
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+
+            var esbMessageAlert = checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.UserUnlockSuccess.GetIntValue(), result.Data.ReturnCode) : null;
+
+            var esbMessageFaield = !checkValidReturnCode ? await _esbMessageService.GetEsbMessageByIdAsync(MessageTypeId.UserUnlockFailed.GetIntValue()) : null;
+
+
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                SessionExpiryTime = checkValidReturnCode ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : string.Empty,
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : (!checkValidReturnCode) ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                ResponseMessage = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.CorrectedMessage : (esbMessageFaield is not null && !checkValidReturnCode) ? esbMessageFaield.CorrectedMessage : string.Empty,
+                ResponseMessage_Hindi = !checkValidReturnCode ? esbMessageFaield.HindiMessage : string.Empty,
+                MessageType = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.MessageType : !checkValidReturnCode ?? MessageType.Exclam.GetStringValue(),
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> GetSecretQuestionAsync(AuthenticationRequest authenticationRequest)
+        {
+            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            var esbUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbGetSecretQuestion, ServiceName.LOGINSERVICE);
+
+            var request = GetWebRequestSettings<dynamic>(esbUrl?.ESBUrl, replyData, authenticationRequest);
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+
+            var esbMessageAlert = checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.GetSecretQuestionSuccess.GetIntValue(), result.Data.ReturnCode) : null;
+
+            var esbMessageFaield = !checkValidReturnCode ? await _esbMessageService.GetEsbMessageByIdAsync(MessageTypeId.GetSecretQuestionFailed.GetIntValue()) : null;
+
+
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                SessionExpiryTime = checkValidReturnCode ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : string.Empty,
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : (!checkValidReturnCode) ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                ResponseMessage = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.CorrectedMessage : (esbMessageFaield is not null && !checkValidReturnCode) ? esbMessageFaield.CorrectedMessage : string.Empty,
+                ResponseMessage_Hindi = !checkValidReturnCode ? esbMessageFaield.HindiMessage : string.Empty,
+                MessageType = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.MessageType : !checkValidReturnCode ?? MessageType.Exclam.GetStringValue(),
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+
+            return outRespnse;
+        }
+
+        #region Internal Method
+
+        internal WebApiRequestSettings<T1> GetWebRequestSettings<T1>(string esbUrl, T1 data, AuthenticationRequest request) where T1 : new()
+        {
+            return new WebApiRequestSettings<T1>
+            {
+                URL = esbUrl,
+                PostParameter = data,
+                Timeout = _appSettings.Timeout,
+                XAuthToken = request.XAuthToken,
+                RequesterId = request.ReturnId(),
+                RequestId = request.RequestId,
+                TokenId = request.TokenId
+            };
+        }
+
         internal async Task<OutResponse> GetUserAuthmanAsync(AuthenticationRequest authenticationRequest, AuthmanOptions authmanOptions)
         {
             var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
@@ -742,5 +927,7 @@ namespace Login.Identity.Service
             };
             return await _userRepositories.AddUserGeoAsync(userGeoLocation);
         }
+
+        #endregion
     }
 }

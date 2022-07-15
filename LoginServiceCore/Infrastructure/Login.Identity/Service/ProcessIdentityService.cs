@@ -63,36 +63,43 @@ namespace Login.Identity.Service
 
                     #region  Logout User    
                     case 3:
+                        outResponse = await _authenticationService?.LogOutUserAsync(authenticationRequest);
                         break;
                     #endregion
 
                     #region Check Auth Context Details
                     case 4:
+                        outResponse = await _authenticationService?.GetAuthContextAsync(authenticationRequest);
                         break;
                     #endregion
 
                     #region Fetch Finger Print Service 
                     case 5:
+                        outResponse = await _authenticationService.GetEsbFpAsync(authenticationRequest);
                         break;
                     #endregion
 
                     #region Validate Token
                     case 6:
+                        outResponse = await _authenticationService.ValidateTokenAsync(authenticationRequest);
                         break;
                     #endregion
 
                     #region User Unlock 
                     case 7:
+                        outResponse = await _authenticationService.UserUnlockAsync(authenticationRequest);
                         break;
                     #endregion
 
                     #region Get Secret Question
                     case 8:
+                        outResponse = await _authenticationService.GetSecretQuestionAsync(authenticationRequest);
                         break;
                     #endregion
 
                     #region Update Secret Question
                     case 9:
+
                         break;
                     #endregion
 
@@ -148,7 +155,7 @@ namespace Login.Identity.Service
 
                     #region This Is Used to Check Authman Policy Check
                     case 20:
-
+                        outResponse = await _authenticationService.VerifyUserIdAsync(authenticationRequest);
                         break;
                     #endregion
 
