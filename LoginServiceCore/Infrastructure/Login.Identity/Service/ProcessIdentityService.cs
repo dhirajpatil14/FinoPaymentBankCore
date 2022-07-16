@@ -37,9 +37,6 @@ namespace Login.Identity.Service
             }
             else
             {
-
-
-
                 if (authenticationRequest.IsEncrypt)
                 {
                     var decriptData = authenticationRequest?.RequestData?.ToDecryptOpenSSL(authenticationRequest.SessionId);
@@ -52,13 +49,116 @@ namespace Login.Identity.Service
 
                 switch (authenticationRequest.MethodId)
                 {
-
+                    #region Validate User Authentication 
                     case 1:
                         outResponse = await _authenticationService?.ValidateUserAuthenticationAsync(authenticationRequest);
                         break;
+                    #endregion
+
+                    #region Validate User    
                     case 2:
-                        outResponse = await _authenticationService?.ValidateUser(authenticationRequest);
+                        outResponse = await _authenticationService?.ValidateUserAsync(authenticationRequest);
                         break;
+                    #endregion
+
+                    #region  Logout User    
+                    case 3:
+                        outResponse = await _authenticationService?.LogOutUserAsync(authenticationRequest);
+                        break;
+                    #endregion
+
+                    #region Check Auth Context Details
+                    case 4:
+                        outResponse = await _authenticationService?.GetAuthContextAsync(authenticationRequest);
+                        break;
+                    #endregion
+
+                    #region Fetch Finger Print Service 
+                    case 5:
+                        outResponse = await _authenticationService.GetEsbFpAsync(authenticationRequest);
+                        break;
+                    #endregion
+
+                    #region Validate Token
+                    case 6:
+                        outResponse = await _authenticationService.ValidateTokenAsync(authenticationRequest);
+                        break;
+                    #endregion
+
+                    #region User Unlock 
+                    case 7:
+                        outResponse = await _authenticationService.UserUnlockAsync(authenticationRequest);
+                        break;
+                    #endregion
+
+                    #region Get Secret Question
+                    case 8:
+                        outResponse = await _authenticationService.GetSecretQuestionAsync(authenticationRequest);
+                        break;
+                    #endregion
+
+                    #region Update Secret Question
+                    case 9:
+
+                        break;
+                    #endregion
+
+                    #region User FP Authentication
+                    case 10:
+                        break;
+                    #endregion
+
+                    #region Validate User Secret Question
+                    case 11:
+                        break;
+                    #endregion
+
+                    #region This Is Used to get enryption key
+                    case 12:
+                        break;
+                    #endregion
+
+                    #region This Is Used to reset password and validate secret question
+                    case 13:
+                        break;
+                    #endregion
+
+                    #region This Is Used to change password
+                    case 14:
+                        break;
+                    #endregion
+
+                    #region This Is Used to fetch all secret questions
+                    case 15:
+                        break;
+                    #endregion
+
+                    #region This Is Used to Get User Details
+                    case 16:
+                        break;
+                    #endregion
+
+                    #region This Is Used to fetch Management Health
+                    case 17:
+                        break;
+                    #endregion
+
+                    #region This Is Used to update Merchant Details
+                    case 18:
+                        break;
+                    #endregion
+
+                    #region Get User Survey
+                    case 19:
+                        break;
+                    #endregion
+
+                    #region This Is Used to Check Authman Policy Check
+                    case 20:
+                        outResponse = await _authenticationService.VerifyUserIdAsync(authenticationRequest);
+                        break;
+                    #endregion
+
                     default:
                         break;
                 }

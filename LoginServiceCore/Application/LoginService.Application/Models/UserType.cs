@@ -22,5 +22,10 @@ namespace LoginService.Application.Models
         [JsonProperty("UserTypeName")]
         public string UserTypeName { get; set; }
 
+
+        [JsonProperty("LoginOTP")]
+        public bool? LoginOTP { get; set; } = null;
+
+
     }
 }

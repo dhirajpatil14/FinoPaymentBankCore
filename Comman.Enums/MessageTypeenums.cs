@@ -6,5 +6,8 @@ namespace Common.Enums
     {
         [StringValueAttribute("Exclam")]
         Exclam = 0,
+        [StringValueAttribute("Info")]
+        Info = 0
+
     }
 }

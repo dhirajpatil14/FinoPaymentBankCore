@@ -14,70 +14,41 @@ namespace LoginService.Application.Contracts.Repositories
 
         Task<int> AddUserGeoAsync(GeoUserLocation geoUserLocation);
 
-        Task<UserType> GetUserType(string userType);
+        Task<UserType> GetUserTypeAsync(string userType);
 
-        Task<int> CheckEagreement(string merchantName, string merchantId, int expiryday);
+        Task<int> CheckEagreementAsync(string merchantName, string merchantId, int expiryday);
 
-        Task<int> CheckCASAaddendum(string merchantId);
+        Task<int> CheckCASAaddendumAsync(string merchantId);
 
-        Task<int> CheckFilebaseCasa(string merchantId);
+        Task<int> CheckFilebaseCasaAsync(string merchantId);
 
-        Task<int> CheckSurvey(string channelId, string userClass, string appId, string tellerId);
+        Task<int> CheckSurveyAsync(string channelId, string userClass, string appId, string tellerId);
 
-        Task<int> CheckCategoryCode(string merchantId);
+        Task<int> CheckCategoryCodeAsync(string merchantId);
 
-        Task<OfferConsent> CheckOfferConsent(string merchantId);
+        Task<OfferConsent> CheckOfferConsentAsync(string merchantId);
 
-        Task<string> CheckLoyaltyRewards(string merchantId);
+        Task<string> CheckLoyaltyRewardsAsync(string merchantId);
 
-        Task<string> GetLastDownload();
+        Task<string> GetLastDownloadAsync();
 
-        Task<string> GetGLZeroizeDateTime(string userId);
+        Task<string> GetGLZeroizeDateTimeAsync(string userId);
 
-        public Task<IEnumerable<string>> GetLendingVersion();
+        public Task<IEnumerable<string>> GetLendingVersionAsync();
 
-        public Task<string> GetDbVersion(DbVersion dbVersion);
+        public Task<string> GetDbVersionAsync(DbVersion dbVersion);
 
-        public Task<string> GetVersionFromCache(string cacheName, bool isFetchMaster);
-
-        Task<string> GetMobileVersion(string cacheName);
-
-        Task<string> GetProfileType(string cacheName);
-
-        Task<string> GetProfileTypeCache(string cacheName);
-
-        Task<string> GetProductTranscation(string cacheName);
-        Task<string> GetProductTranscationCache(string cacheName);
-
-        Task<string> GetSequenceMap(string cacheName);
-
-        Task<string> GetSquenceMapCache(string cacheName);
-
-        Task<string> GetMobileTabControl(string cacheName);
-
-        Task<string> GetMobileTabControlCache(string cacheName);
-
-        Task<string> GetIinCacheData(string cacheName);
-
-        Task<string> GetIinCache(string cacheName);
-
-        Task<string> GetPrintData(string cacheName);
-
-        Task<string> GetPrintCache(string cacheName);
-
-        Task<string> GetCrossSellData(string cacheName);
-
-        Task<string> GetCrossSellCache(string cacheName);
+        public Task<string> GetVersionFromCacheAsync(string cacheName, bool isFetchMaster);
 
         Task<string> GetProductTypesAsync(string cacheName);
 
-        Task<FosAppVersion> GetFosVersion(string authenticator, string cacheName);
+        Task<FosAppVersion> GetFosVersionAsync(string authenticator, string cacheName);
 
-        Task<string> GetAuaExpiryData(int status, int id);
+        Task<string> GetAuaExpiryDataAsync(int status, int id);
 
         Task<MobileVersion> GetMobileVersionDataAsync(string cacheName);
 
-        Task<string> GetMobileVersionComman(string cacheName);
+        Task<string> GetMobileVersionCommanAsync(string cacheName);
 
     }
 }

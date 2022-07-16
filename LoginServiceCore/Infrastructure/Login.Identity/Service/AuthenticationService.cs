@@ -1,4 +1,5 @@
-﻿using Common.Application.Interface;
+﻿using Common.Application.Dto;
+using Common.Application.Interface;
 using Common.Application.Model;
 using Common.Application.Model.Settings;
 using Common.Enums;
@@ -64,15 +65,7 @@ namespace Login.Identity.Service
 
             var urlData = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbCheckAuthenticationUrl, ServiceName.LOGINSERVICE);
 
-            var request = new WebApiRequestSettings<FisUserValidateRequest>
-            {
-                URL = urlData?.ESBUrl,
-                PostParameter = replyData,
-                Timeout = _appSettings.Timeout,
-                XAuthToken = authenticationRequest.XAuthToken,
-                RequesterId = authenticationRequest.ReturnId(),
-                RequestId = authenticationRequest.RequestId
-            };
+            var request = GetWebRequestSettings<FisUserValidateRequest>(urlData?.ESBUrl, replyData, authenticationRequest);
 
             var result = await _webApiRequestService.PostAsync<FisUserValidateResponse, FisUserValidateRequest>(request);
 
@@ -90,7 +83,7 @@ namespace Login.Identity.Service
                 ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : ResponseCode.Success.GetIntValue(),
                 ResponseMessage = isNotValid ? esbMessagesdata.CorrectedMessage : string.Empty,
                 MessageType = isNotValid ? MessageType.Exclam.GetStringValue() : string.Empty,
-                ResponseData = isNotValid ? esbMessagesdata.CorrectedMessage : result.Data.ToJsonSerialize()
+                ResponseData = result.Data.ToJsonSerialize()
             };
             var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
 
@@ -139,7 +132,7 @@ namespace Login.Identity.Service
             return outRespnse;
         }
 
-        public async Task<OutResponse> ValidateUser(AuthenticationRequest authenticationRequest)
+        public async Task<OutResponse> ValidateUserAsync(AuthenticationRequest authenticationRequest)
         {
             var loginData = authenticationRequest.RequestData.ToJsonDeSerialize<FisUserPasswordValidateRequest>();
             var isUserRestricted = await RestrictUserAccess(loginData);
@@ -180,18 +173,10 @@ namespace Login.Identity.Service
 
             var urlData = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbNewTokenUrl, ServiceName.LOGINSERVICE);
 
-            var request = new WebApiRequestSettings<FisUserPasswordValidateRequest>
-            {
-                URL = urlData?.ESBUrl,
-                PostParameter = loginData,
-                Timeout = _appSettings.Timeout,
-                XAuthToken = authenticationRequest.XAuthToken,
-                RequesterId = authenticationRequest.ReturnId(),
-                RequestId = authenticationRequest.RequestId,
-                TokenId = authenticationRequest.TokenId
-            };
+            var request = GetWebRequestSettings<FisUserPasswordValidateRequest>(urlData?.ESBUrl, loginData, authenticationRequest);
 
             var result = await _webApiRequestService.PostAsync<FisUserPasswordValidateResponse, FisUserPasswordValidateRequest>(request);
+
             var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
 
             if (result.StatusCode is 503)
@@ -251,39 +236,39 @@ namespace Login.Identity.Service
             #endregion
 
             #region Get User Type
-            var userType = await _userRepositories.GetUserType(result?.Data?.UserDetails?.UserClass?.Code);
+            var userType = await _userRepositories.GetUserTypeAsync(result?.Data?.UserDetails?.UserClass?.Code);
             #endregion
 
             //Start-RN2041 casa addendum addition
             #region Check EAgreement & Check CASAaddendum
-            var checkEAgreement = userType is not null && userType?.UserRole > 0 && userType?.EAgreement == 1 ? await _userRepositories.CheckEagreement(result?.Data?.UserDetails?.Name, result?.Data?.UserDetails?.Identifier?.ToString(), _appSettings.AgreementExpiryday) : 0;
-            var checkcasAaddendum = userType is not null && userType?.UserRole > 0 && userType?.EAgreement == 1 ? await _userRepositories.CheckCASAaddendum(result?.Data?.UserDetails?.Identifier?.ToString()) : 0;
+            var checkEAgreement = userType is not null && userType?.UserRole > 0 && userType?.EAgreement == 1 ? await _userRepositories.CheckEagreementAsync(result?.Data?.UserDetails?.Name, result?.Data?.UserDetails?.Identifier?.ToString(), _appSettings.AgreementExpiryday) : 0;
+            var checkcasAaddendum = userType is not null && userType?.UserRole > 0 && userType?.EAgreement == 1 ? await _userRepositories.CheckCASAaddendumAsync(result?.Data?.UserDetails?.Identifier?.ToString()) : 0;
             #endregion
 
             #region Check FilebaseCasa
-            var checkFilebaseCasa = await _userRepositories.CheckFilebaseCasa(result?.Data?.UserDetails?.Identifier?.ToString());
+            var checkFilebaseCasa = await _userRepositories.CheckFilebaseCasaAsync(result?.Data?.UserDetails?.Identifier?.ToString());
             #endregion
 
             #region Check Survey
-            var checkSurvey = userType?.Survey is 1 ? await _userRepositories.CheckSurvey(loginData?.SystemInfo?.Channel, result?.Data?.UserDetails?.UserClass?.Code, loginData?.ClientId, authenticationRequest?.TellerId) : 0;
+            var checkSurvey = userType?.Survey is 1 ? await _userRepositories.CheckSurveyAsync(loginData?.SystemInfo?.Channel, result?.Data?.UserDetails?.UserClass?.Code, loginData?.ClientId, authenticationRequest?.TellerId) : 0;
             #endregion
 
             #region Check Category Code
-            var checkCategoryCode = await _userRepositories.CheckCategoryCode(result?.Data?.UserDetails?.Identifier?.ToString());
+            var checkCategoryCode = await _userRepositories.CheckCategoryCodeAsync(result?.Data?.UserDetails?.Identifier?.ToString());
             #endregion
 
             #region Check Offer Consent
-            var checkOfferConsent = await _userRepositories.CheckOfferConsent(result?.Data?.UserDetails?.Identifier?.ToString());
+            var checkOfferConsent = await _userRepositories.CheckOfferConsentAsync(result?.Data?.UserDetails?.Identifier?.ToString());
             #endregion
 
             #region Check Rewrd Points
-            var checkRewrdPoints = await _userRepositories.CheckLoyaltyRewards(result?.Data?.UserDetails?.Identifier?.ToString());
+            var checkRewrdPoints = await _userRepositories.CheckLoyaltyRewardsAsync(result?.Data?.UserDetails?.Identifier?.ToString());
             #endregion
 
             #region Get Last Download date
 
-            var lstDownload = await _userRepositories.GetLastDownload();
-            var checkZeroeDate = await _userRepositories.GetGLZeroizeDateTime(loginData.UserId);
+            var lstDownload = await _userRepositories.GetLastDownloadAsync();
+            var checkZeroeDate = await _userRepositories.GetGLZeroizeDateTimeAsync(loginData.UserId);
             var dataVersion = string.Empty;
             switch (loginData.SystemInfo.Channel)
             {
@@ -318,19 +303,19 @@ namespace Login.Identity.Service
                     break;
                 case "1":
                     //required base logic impliment inside GetDBVersion
-                    var dbVersion = _appSettings.IsCacheFromDB is 1 ? await _userRepositories.GetDbVersion(new DbVersion { MasterVersion = "MastersVersion" }) : null;
+                    var dbVersion = _appSettings.IsCacheFromDB is 1 ? await _userRepositories.GetDbVersionAsync(new DbVersion { MasterVersion = "MastersVersion" }) : null;
                     dataVersion = $"{dataVersion}{dbVersion}";
                     dataVersion = dataVersion.Remove(dbVersion.Length - 1);
 
 
                     //Get Master Version
-                    dataVersion = _appSettings.IsCacheFromDB is not 1 ? await _userRepositories.GetVersionFromCache("MastersVersion", true) : dataVersion;
+                    dataVersion = _appSettings.IsCacheFromDB is not 1 ? await _userRepositories.GetVersionFromCacheAsync("MastersVersion", true) : dataVersion;
                     dataVersion = $"{dataVersion} |";
 
 
                     //Get Mobile Version
 
-                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}")}";
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionCommanAsync($"ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}")}";
                     //var mobileVersion = await _userRepositories.GetVersionFromCache($"ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}", false);
                     //var verId = mobileVersion is not null ? await _userRepositories.GetMobileVersion($"ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}") : null;
                     //dataVersion = mobileVersion is not null ? $"{dataVersion}ProfileTypeDataMenu{userType.UserTypeId}{loginData.SystemInfo.Channel}#{verId}~" : dataVersion;
@@ -338,21 +323,21 @@ namespace Login.Identity.Service
 
                     //Get Profile Type
 
-                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}")}";
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionCommanAsync($"ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}")}";
                     //var profileType = await _userRepositories.GetProfileType($"ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}");
                     //var profileTypeId = profileType is not null ? await _userRepositories.GetProfileTypeCache($"ProfileTypeMasterData") : null;
                     //dataVersion = profileTypeId is not null ? $"{dataVersion}ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}#{profileTypeId}~" : dataVersion;
                     //dataVersion = profileTypeId is null ? $"{dataVersion}ProfileTypeMasterData{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
 
                     //1207
-                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}")}";
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionCommanAsync($"ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}")}";
 
                     //var productTranscation = await _userRepositories.GetProductTranscation($"ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}");
                     //var productType = productTranscation is not null ? _userRepositories.GetProductTranscationCache($"ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}") : null;
                     //dataVersion = productType is not null ? $"{dataVersion}ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}#{productType}~" : dataVersion;
                     //dataVersion = productType is null ? $"{dataVersion}ProductTransMap{userType.UserTypeId}{loginData.SystemInfo.Channel}#0000~" : dataVersion;
 
-                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"MobSequenceMasterList")}";
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionCommanAsync($"MobSequenceMasterList")}";
 
 
                     //var sequence = await _userRepositories.GetSequenceMap($"MobSequenceMasterList");
@@ -360,7 +345,7 @@ namespace Login.Identity.Service
                     //dataVersion = sequenceMap is not null ? $"{dataVersion}MobSequenceMasterList#{sequenceMap}~" : dataVersion;
                     //dataVersion = sequenceMap is null ? $"{dataVersion}MobSequenceMasterList#0000~" : dataVersion;
 
-                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"MobileTabCntrl")}";
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionCommanAsync($"MobileTabCntrl")}";
 
 
                     //var mobileTabControl = await _userRepositories.GetMobileTabControl($"MobileTabCntrl");
@@ -368,21 +353,21 @@ namespace Login.Identity.Service
                     //dataVersion = mobileTab is not null ? $"{dataVersion}MobileTabCntrl#{mobileTab}~" : dataVersion;
                     //dataVersion = mobileTab is null ? $"{dataVersion}MobileTabCntrl#0000~" : dataVersion;
 
-                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"IINMasterMob")}";
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionCommanAsync($"IINMasterMob")}";
 
                     //var iinCacheData = await _userRepositories.GetIinCacheData($"IINMasterMob");
                     //var iinCache = iinCacheData is not null ? _userRepositories.GetIinCache($"IINMasterMob") : null;
                     //dataVersion = iinCache is not null ? $"{dataVersion}IINMasterMob#{iinCache}~" : dataVersion;
                     //dataVersion = iinCache is null ? $"{dataVersion}IINMasterMob#0000~" : dataVersion;
 
-                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"MstPrintFormat1")}";
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionCommanAsync($"MstPrintFormat1")}";
 
                     //var printFormatData = await _userRepositories.GetPrintData($"MstPrintFormat1");
                     //var printCache = printFormatData is not null ? _userRepositories.GetPrintCache("MstPrintFormat1") : null;
                     //dataVersion = printCache is not null ? $"{dataVersion}MstPrintFormat1#{printCache}~" : dataVersion;
                     //dataVersion = printCache is null ? $"{dataVersion}MstPrintFormat1#0000~" : dataVersion;
 
-                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionComman($"mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}")}";
+                    dataVersion = $"{ dataVersion}{await _userRepositories.GetMobileVersionCommanAsync($"mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}")}";
 
                     //var crossSellingData = await _userRepositories.GetCrossSellData($"mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}");
                     //var crossCache = crossSellingData is not null ? _userRepositories.GetCrossSellCache($"mstCrossSelling{userType.UserTypeId}{loginData.SystemInfo.Channel}") : null;
@@ -402,22 +387,22 @@ namespace Login.Identity.Service
                     if (loginData?.ClientId.ToString() == AuthenticatorType.FINOTLR.GetStringValue() || loginData?.ClientId.ToString() == AuthenticatorType.FINOMB.GetStringValue())
                     {
                         loginData.ClientId = AuthenticatorType.FINOTLR.GetStringValue();
-                        fosData = await _userRepositories.GetFosVersion(AuthenticatorType.FINOTLR.GetStringValue(), $"FOSAppVersionNew{AuthenticatorType.FINOTLR.GetStringValue()}{loginData.SystemInfo.Channel}");
+                        fosData = await _userRepositories.GetFosVersionAsync(AuthenticatorType.FINOTLR.GetStringValue(), $"FOSAppVersionNew{AuthenticatorType.FINOTLR.GetStringValue()}{loginData.SystemInfo.Channel}");
                     }
                     else if (loginData?.ClientId.ToString() == AuthenticatorType.FINOMER.GetStringValue() || loginData?.ClientId.ToString() == AuthenticatorType.FINOMERNP.GetStringValue())
                     {
                         loginData.ClientId = AuthenticatorType.FINOMER.GetStringValue();
-                        fosData = await _userRepositories.GetFosVersion(AuthenticatorType.FINOMER.GetStringValue(), $"MERAppVersionNew{AuthenticatorType.FINOMER.GetStringValue()}{loginData.SystemInfo.Channel}");
+                        fosData = await _userRepositories.GetFosVersionAsync(AuthenticatorType.FINOMER.GetStringValue(), $"MERAppVersionNew{AuthenticatorType.FINOMER.GetStringValue()}{loginData.SystemInfo.Channel}");
                     }
                     else
                     {
                         loginData.ClientId = AuthenticatorType.FINOIPS.GetStringValue();
-                        fosData = await _userRepositories.GetFosVersion(AuthenticatorType.FINOIPS.GetStringValue(), $"MERAppVersionNew{AuthenticatorType.FINOIPS.GetStringValue()}{loginData.SystemInfo.Channel}");
+                        fosData = await _userRepositories.GetFosVersionAsync(AuthenticatorType.FINOIPS.GetStringValue(), $"MERAppVersionNew{AuthenticatorType.FINOIPS.GetStringValue()}{loginData.SystemInfo.Channel}");
                     }
                     #endregion
 
                     #region Get Certificate Expiry Date
-                    var expiryDate = await _userRepositories.GetAuaExpiryData(1, 11);
+                    var expiryDate = await _userRepositories.GetAuaExpiryDataAsync(1, 11);
                     #endregion
 
                     #region Get FOS MOBILE VERSION
@@ -460,7 +445,7 @@ namespace Login.Identity.Service
                     if (loginData?.ClientId.ToString() == AuthenticatorType.FINOPDS.GetStringValue())
                     {
 
-                        fosData = await _userRepositories.GetFosVersion(AuthenticatorType.FINOPDS.GetStringValue(), $"PDSAppVersion{AuthenticatorType.FINOPDS.GetStringValue()}{loginData.SystemInfo.Channel}");
+                        fosData = await _userRepositories.GetFosVersionAsync(AuthenticatorType.FINOPDS.GetStringValue(), $"PDSAppVersion{AuthenticatorType.FINOPDS.GetStringValue()}{loginData.SystemInfo.Channel}");
 
                         var LoginResponseThree = new CommonChannelIdThree
                         {
@@ -492,7 +477,7 @@ namespace Login.Identity.Service
                 case "6":
                     if (loginData?.ClientId.ToString() == AuthenticatorType.FINOINGE.GetStringValue())
                     {
-                        fosData = await _userRepositories.GetFosVersion(AuthenticatorType.FINOINGE.GetStringValue(), $"INGEAppVersion{AuthenticatorType.FINOINGE.GetStringValue()}{loginData.SystemInfo.Channel}");
+                        fosData = await _userRepositories.GetFosVersionAsync(AuthenticatorType.FINOINGE.GetStringValue(), $"INGEAppVersion{AuthenticatorType.FINOINGE.GetStringValue()}{loginData.SystemInfo.Channel}");
                         var LoginResponseSix = new CommonChannelIdThree
                         {
                             LoginData = outRespnse.ResponseData,
@@ -522,7 +507,7 @@ namespace Login.Identity.Service
                     break;
 
                 default:
-                    fosData = await _userRepositories.GetFosVersion(AuthenticatorType.FINOMER.GetStringValue(), $"FINOMERAppVersion{AuthenticatorType.FINOMER.GetStringValue()}{loginData.SystemInfo.Channel}");
+                    fosData = await _userRepositories.GetFosVersionAsync(AuthenticatorType.FINOMER.GetStringValue(), $"FINOMERAppVersion{AuthenticatorType.FINOMER.GetStringValue()}{loginData.SystemInfo.Channel}");
                     var LoginResponseDefault = new CommonChannelIdThree
                     {
                         LoginData = outRespnse.ResponseData,
@@ -551,6 +536,342 @@ namespace Login.Identity.Service
                     break;
             }
             #endregion
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> VerifyUserIdAsync(AuthenticationRequest authenticationRequest)
+        {
+            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            replyData.UserId = replyData.EcbBlockEncryption ? replyData.UserId.ToDecryptEcbBlock(_appSettings.DecryptKey)
+               : replyData.UserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen);
+
+            replyData.OldUserId = replyData.EcbBlockEncryption ? replyData.OldUserId.ToDecryptEcbBlock(_appSettings.DecryptKey)
+                 : replyData.OldUserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen);
+
+
+            var outRespnse = replyData.UserId == replyData.OldUserId ? await ValidateUserAsync(authenticationRequest) : await GetUserAuthmanAsync(authenticationRequest, AuthmanOptions.GenerateOTP);
+
+            //need to parse Object
+            //objJSONHelper.NewtonSoftJsonDeSerializer<dynamic>(objOutResponse.ResponseData);
+            //var test = outRespnse?.ResponseCode is 1 && replyData?.Data?.ReturnCode is 300 ?
+
+            return new OutResponse();
+        }
+
+        public async Task<OutResponse> LogOutUserAsync(AuthenticationRequest logOutRequest)
+        {
+            var replyData = logOutRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            replyData.access_token = logOutRequest.XAuthToken;
+            //logOutRequest.RequestData = replyData.ToJsonSerialize();
+            var logOutUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbLogoutUrl, ServiceName.LOGINSERVICE);
+
+            var request = GetWebRequestSettings<dynamic>(logOutUrl?.ESBUrl, replyData, logOutRequest);
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+            var isLogOut = result.Data?.ResponseData is "Successfully Logout";
+
+            var esbMessagesdata = isLogOut ? await _esbMessageService.GetEsbMessageByIdAsync(MessageTypeId.LogoutSuccessful.GetIntValue()) : await _esbMessageService.GetEsbMessageByIdAsync(MessageTypeId.LogoutFailed.GetIntValue());
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                SessionExpiryTime = SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired),
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : !isLogOut ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                ResponseMessage = esbMessagesdata.CorrectedMessage,
+                ResponseMessage_Hindi = esbMessagesdata.HindiMessage,
+                MessageType = isNotValid || !isLogOut ? MessageType.Exclam.GetStringValue() : MessageType.Info.GetStringValue(),
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> GetAuthContextAsync(AuthenticationRequest authContextRequest)
+        {
+            var replyData = authContextRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            var authContextUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbAuthContextUrl, ServiceName.LOGINSERVICE);
+
+            var request = GetWebRequestSettings<dynamic>(authContextUrl?.ESBUrl, replyData, authContextRequest);
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+
+            var esbMessagesdata = checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.AuthContextDetailsSuccess.GetIntValue(), result.Data.ReturnCode) : await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.AuthContextDetailsFailed.GetIntValue(), result.Data.ReturnCode);
+
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                SessionExpiryTime = checkValidReturnCode ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : string.Empty,
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : !checkValidReturnCode ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                ResponseMessage = esbMessagesdata.CorrectedMessage,
+                ResponseMessage_Hindi = esbMessagesdata.HindiMessage,
+                MessageType = esbMessagesdata.MessageType,
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> GetEsbFpAsync(AuthenticationRequest esbFpRequest)
+        {
+            var replyData = esbFpRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            var esbFpUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbFpVerificationUrl, ServiceName.LOGINSERVICE);
+
+
+            var request = GetWebRequestSettings<dynamic>(esbFpUrl?.ESBUrl, replyData, esbFpRequest);
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+
+            var esbMessageAlert = checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.FpVerificationSuccess.GetIntValue(), result.Data.ReturnCode) : null;
+
+            var esbMessageFaield = !checkValidReturnCode ? await _esbMessageService.GetEsbMessageByIdAsync(MessageTypeId.FpVerificationFailed.GetIntValue()) : null;
+
+
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                SessionExpiryTime = checkValidReturnCode ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : string.Empty,
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : (!checkValidReturnCode) ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                ResponseMessage = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.CorrectedMessage : (esbMessageFaield is not null && !checkValidReturnCode) ? esbMessageFaield.CorrectedMessage : string.Empty,
+                ResponseMessage_Hindi = !checkValidReturnCode ? esbMessageFaield.HindiMessage : string.Empty,
+                MessageType = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.MessageType : !checkValidReturnCode ?? MessageType.Exclam.GetStringValue(),
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+
+            return outRespnse;
+
+        }
+
+        public async Task<OutResponse> ValidateTokenAsync(AuthenticationRequest authenticationRequest)
+        {
+
+            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            var esbFpUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbValidateTokenUrl, ServiceName.LOGINSERVICE);
+            var request = GetWebRequestSettings<dynamic>(esbFpUrl?.ESBUrl, replyData, authenticationRequest);
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+
+            var esbMessageAlert = checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TokenValidationSuccess.GetIntValue(), result.Data.ReturnCode) : await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TokenValidationFailed.GetIntValue(), result.Data.ReturnCode);
+
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                SessionExpiryTime = checkValidReturnCode ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : string.Empty,
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : checkValidReturnCode ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = esbMessageAlert.CorrectedMessage,
+                MessageType = esbMessageAlert.MessageType,
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> UserUnlockAsync(AuthenticationRequest authenticationRequest)
+        {
+            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            var esbUnlockUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.ESBUnlockUserDetailsUrl, ServiceName.LOGINSERVICE);
+
+            var request = GetWebRequestSettings<dynamic>(esbUnlockUrl?.ESBUrl, replyData, authenticationRequest);
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+
+            var esbMessageAlert = checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.UserUnlockSuccess.GetIntValue(), result.Data.ReturnCode) : null;
+
+            var esbMessageFaield = !checkValidReturnCode ? await _esbMessageService.GetEsbMessageByIdAsync(MessageTypeId.UserUnlockFailed.GetIntValue()) : null;
+
+
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                SessionExpiryTime = checkValidReturnCode ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : string.Empty,
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : (!checkValidReturnCode) ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                ResponseMessage = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.CorrectedMessage : (esbMessageFaield is not null && !checkValidReturnCode) ? esbMessageFaield.CorrectedMessage : string.Empty,
+                ResponseMessage_Hindi = !checkValidReturnCode ? esbMessageFaield.HindiMessage : string.Empty,
+                MessageType = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.MessageType : !checkValidReturnCode ?? MessageType.Exclam.GetStringValue(),
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> GetSecretQuestionAsync(AuthenticationRequest authenticationRequest)
+        {
+            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            var esbUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbGetSecretQuestion, ServiceName.LOGINSERVICE);
+
+            var request = GetWebRequestSettings<dynamic>(esbUrl?.ESBUrl, replyData, authenticationRequest);
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+
+            var esbMessageAlert = checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.GetSecretQuestionSuccess.GetIntValue(), result.Data.ReturnCode) : null;
+
+            var esbMessageFaield = !checkValidReturnCode ? await _esbMessageService.GetEsbMessageByIdAsync(MessageTypeId.GetSecretQuestionFailed.GetIntValue()) : null;
+
+
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                SessionExpiryTime = checkValidReturnCode ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : string.Empty,
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : (!checkValidReturnCode) ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                ResponseMessage = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.CorrectedMessage : (esbMessageFaield is not null && !checkValidReturnCode) ? esbMessageFaield.CorrectedMessage : string.Empty,
+                ResponseMessage_Hindi = !checkValidReturnCode ? esbMessageFaield.HindiMessage : string.Empty,
+                MessageType = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.MessageType : !checkValidReturnCode ?? MessageType.Exclam.GetStringValue(),
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+
+            return outRespnse;
+        }
+
+        #region Internal Method
+
+        internal WebApiRequestSettings<T1> GetWebRequestSettings<T1>(string esbUrl, T1 data, AuthenticationRequest request) where T1 : new()
+        {
+            return new WebApiRequestSettings<T1>
+            {
+                URL = esbUrl,
+                PostParameter = data,
+                Timeout = _appSettings.Timeout,
+                XAuthToken = request.XAuthToken,
+                RequesterId = request.ReturnId(),
+                RequestId = request.RequestId,
+                TokenId = request.TokenId
+            };
+        }
+
+        internal async Task<OutResponse> GetUserAuthmanAsync(AuthenticationRequest authenticationRequest, AuthmanOptions authmanOptions)
+        {
+            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            replyData.UserId = replyData.EcbBlockEncryption && AuthmanOptions.GenerateOTP == authmanOptions ? replyData.UserId.ToDecryptEcbBlock(_appSettings.DecryptKey) : replyData.EcbBlockEncryption && AuthmanOptions.GenerateOTP == authmanOptions ? replyData.AuthProfile.UserId.ToDecryptEcbBlock(_appSettings.DecryptKey) : replyData.UserId;
+            replyData.UserId = !replyData.EcbBlockEncryption && AuthmanOptions.GenerateOTP == authmanOptions ? replyData.UserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen) : !replyData.EcbBlockEncryption && AuthmanOptions.GenerateOTP == authmanOptions ? replyData.AuthProfile.UserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen) : replyData.UserId;
+
+            var urlData = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbCheckAuthenticationUrl, ServiceName.LOGINSERVICE);
+
+            var request = new WebApiRequestSettings<dynamic>
+            {
+                URL = urlData?.ESBUrl,
+                PostParameter = replyData,
+                Timeout = _appSettings.Timeout,
+                XAuthToken = authenticationRequest.XAuthToken,
+                RequesterId = authenticationRequest.ReturnId(),
+                RequestId = authenticationRequest.RequestId
+            };
+
+            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+
+            var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
+
+            var esbMessagesdata = new EsbMessages();
+            if (result.StatusCode is 503)
+                esbMessagesdata = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.ServerUnavailable.GetIntValue());
+            else if (result.StatusCode is not 200 && result.StatusCode is not 503)
+                esbMessagesdata = await _esbMessageService.GetEsbMessage(string.Empty, ResponseCode.RemoteServerError.GetStringValue(), result.ErrorMessage);
+
+            var outRespnse = new OutResponse
+            {
+                RequestId = request.RequestId,
+                ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                ResponseMessage = isNotValid ? esbMessagesdata.CorrectedMessage : string.Empty,
+                MessageType = isNotValid ? MessageType.Exclam.GetStringValue() : string.Empty,
+                ResponseData = result.Data.ToJsonSerialize()
+            };
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
+            if (!checkValidReturnCode)
+                return outRespnse;
+
+            if (checkValidReturnCode && replyData.EncryptionKey is not null && AuthmanOptions.GenerateOTP == authmanOptions)
+            {
+                var userRole = result.Data.UserRoles.LastOrDefault();
+                var userType = await _userRepositories.GetUserTypeAsync(userRole);
+                var isLoginOTP = userType?.LoginOTP is false and false;
+
+                if (isLoginOTP)
+                {
+                    var esbcbsMessage = await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.AuthenticateSuccess.GetIntValue(), result.Data.ReturnCode);
+                    outRespnse.ResponseMessage = esbcbsMessage.StandardMessageDesc;
+                    outRespnse.MessageType = esbcbsMessage.MessageType;
+                    outRespnse.SessionExpiryTime = SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired);
+                    outRespnse.AuthmanFlag = true;
+                }
+                else
+                {
+                    #region SendOTP
+                    var otpData = new OtpRequest { MethodId = 1, CustomerMobileNo = result.Data.MobileNo, NotifyParam = new NotifyParameter { TemplateId = 523 } };
+                    var otpRequestData = authenticationRequest.Clone();
+                    otpRequestData.MethodId = 1; otpRequestData.IsEncrypt = false;
+                    otpRequestData.RequestData = otpData.ToJsonSerialize();
+
+                    var otpEsbUrl = await _esbUrlMemoryService.GetEsbUrlByIdAsync(EsbUrls.EsbLoginSendOTP, ServiceName.LOGINSERVICE);
+                    var otpRequest = new WebApiRequestSettings<dynamic>
+                    {
+                        URL = otpEsbUrl?.ESBUrl,
+                        PostParameter = otpRequestData,
+                        Timeout = _appSettings.Timeout,
+                        XAuthToken = authenticationRequest.XAuthToken,
+                        RequesterId = authenticationRequest.ReturnId(),
+                        RequestId = authenticationRequest.RequestId
+                    };
+
+                    var otpResult = await _webApiRequestService.PostAsync<dynamic, dynamic>(otpRequest);
+
+                    isNotValid = otpResult.StatusCode is not (int)HttpStatusCode.OK;
+
+                    esbMessagesdata = new EsbMessages();
+                    if (otpResult.StatusCode is 503)
+                        esbMessagesdata = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.ServerUnavailable.GetIntValue());
+                    else if (otpResult.StatusCode is not 200 && otpResult.StatusCode is not 503)
+                        esbMessagesdata = await _esbMessageService.GetEsbMessage(string.Empty, ResponseCode.RemoteServerError.GetStringValue(), result.ErrorMessage);
+
+                    outRespnse = new OutResponse
+                    {
+                        RequestId = otpRequestData.RequestId,
+                        ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : ResponseCode.Success.GetIntValue(),
+                        ResponseMessage = isNotValid ? esbMessagesdata.CorrectedMessage : string.Empty,
+                        MessageType = isNotValid ? MessageType.Exclam.GetStringValue() : MessageType.Info.GetStringValue(),
+                        AuthmanFlag = !!isNotValid,
+                        ResponseData = otpResult.Data.ToJsonSerialize()
+                    };
+
+                    #endregion
+                }
+            }
+            else
+            {
+                var esbcbsMessage = await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.AuthenticateUnSuccess.GetIntValue(), result.Data.ReturnCode);
+                outRespnse.ResponseCode = ResponseCode.Failure.GetIntValue();
+                outRespnse.ResponseMessage = esbcbsMessage.StandardMessageDesc;
+                outRespnse.MessageType = esbcbsMessage.MessageType;
+            }
+
+            if (result?.Data is null && !checkValidReturnCode)
+            {
+                outRespnse.ResponseMessage = $"Unable to parse Authman response.";
+                outRespnse.MessageType = MessageType.Exclam.GetStringValue();
+            }
+
             return outRespnse;
         }
 
@@ -607,8 +928,6 @@ namespace Login.Identity.Service
             return await _userRepositories.AddUserGeoAsync(userGeoLocation);
         }
 
-
-
-
+        #endregion
     }
 }
