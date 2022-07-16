@@ -105,16 +105,19 @@ namespace Login.Identity.Service
 
                     #region User FP Authentication
                     case 10:
+                        outResponse = await _authenticationService.UserFpAuthenticationAsync(authenticationRequest);
                         break;
                     #endregion
 
                     #region Validate User Secret Question
                     case 11:
+                        outResponse = await _authenticationService.ValidateSecretQuestionAsync(authenticationRequest);
                         break;
                     #endregion
 
                     #region This Is Used to get enryption key
                     case 12:
+                        outResponse = await _authenticationService.GetEncryptionKeyAsync(authenticationRequest);
                         break;
                     #endregion
 

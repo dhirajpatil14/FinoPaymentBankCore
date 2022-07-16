@@ -61,7 +61,7 @@ namespace Shared.Services.ESBCBSMessageService
             return dataValue;
         }
 
-        public async Task<EsbCbsMessages> GetEsbCbsMessgeAsync(string esbMessageByCache, int messageId, int cbsId)
+        public async Task<EsbCbsMessages> GetEsbCbsMessgeAsync(string esbMessageByCache, int messageId, int? cbsId)
         {
 
             var data = GetorNullAsync();
