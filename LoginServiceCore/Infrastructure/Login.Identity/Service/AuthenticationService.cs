@@ -77,6 +77,15 @@ namespace Login.Identity.Service
             else if (result.StatusCode is not 200 && result.StatusCode is not 503)
                 esbMessagesdata = await _esbMessageService.GetEsbMessage(string.Empty, ResponseCode.RemoteServerError.GetStringValue(), result.ErrorMessage);
 
+            if (result.StatusCode is 503 || (result.StatusCode is not 200 && result.StatusCode is not 503))
+            {
+                //
+            }
+            else if (!isNotValid)
+            {
+                //
+            }
+
             var outRespnse = new OutResponse
             {
                 RequestId = request.RequestId,
@@ -85,6 +94,8 @@ namespace Login.Identity.Service
                 MessageType = isNotValid ? MessageType.Exclam.GetStringValue() : string.Empty,
                 ResponseData = result.Data.ToJsonSerialize()
             };
+
+            //
 
             var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
 
@@ -96,6 +107,7 @@ namespace Login.Identity.Service
             var esbcbsMessage = await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, messageType, result.Data.ReturnCode);
             outRespnse.ResponseMessage = esbcbsMessage.StandardMessageDesc;
             outRespnse.MessageType = esbcbsMessage.MessageType;
+
 
             outRespnse = await CommanBlockUserAsync(result?.Data, outRespnse, checkValidReturnCode);
 
