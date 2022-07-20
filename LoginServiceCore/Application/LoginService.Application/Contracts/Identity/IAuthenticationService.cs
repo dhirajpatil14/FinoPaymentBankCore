@@ -23,5 +23,12 @@ namespace LoginService.Application.Contracts.Identity
         Task<OutResponse> UserUnlockAsync(AuthenticationRequest authenticationRequest);
 
         Task<OutResponse> GetSecretQuestionAsync(AuthenticationRequest authenticationRequest);
+
+        Task<OutResponse> UserFpAuthenticationAsync(AuthenticationRequest authenticationRequest);
+
+        Task<OutResponse> ValidateSecretQuestionAsync(AuthenticationRequest authenticationRequest);
+
+        Task<OutResponse> GetEncryptionKeyAsync(AuthenticationRequest authenticationRequest);
+
     }
 }
