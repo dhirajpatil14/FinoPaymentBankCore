@@ -38,8 +38,6 @@ namespace LoginServiceCoreAPI
 
             services.UseCorsExtension(Configuration);
 
-            services.AddJsonCaseExtenstion();
-
             services.AddAuthentication();
 
             services.AddApplicationService();
