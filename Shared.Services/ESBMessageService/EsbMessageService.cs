@@ -134,7 +134,7 @@ namespace Shared.Services.ESBMessageService
         }
 
 
-        private async Task<EsbMessages> GetCorrectMessage(string esbMessage)
+        public async Task<EsbMessages> GetCorrectMessage(string esbMessage)
         {
             var messageKey = string.Empty;
             if (esbMessage.ToLower().Contains("server not responding"))
