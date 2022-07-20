@@ -442,7 +442,9 @@ namespace Login.Infrastructure.Repositories
         public async Task<MobileVersion> GetMobileVersionDataAsync(string cacheName)
         {
             var version = await GetCacheAsync(cacheName);
-            return version is null ? await _cacheConnector.GetMobileVersionAsync(cacheName) : version.ToJsonDeSerialize<MobileVersion>();
+            var firstDefault = version?.ToJsonDeSerialize<IEnumerable<MobileVersion>>();
+            var data = version is null ? await _cacheConnector.GetMobileVersionAsync(cacheName) : firstDefault.FirstOrDefault();
+            return data;
         }
 
         public async Task<string> GetMobileVersionCommanAsync(string cacheName)

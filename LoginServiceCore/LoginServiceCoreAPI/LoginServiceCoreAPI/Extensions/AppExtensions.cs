@@ -1,5 +1,6 @@
 ﻿using AspNet.Attributes;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LoginServiceCoreAPI.Extensions
 {
@@ -13,7 +14,10 @@ namespace LoginServiceCoreAPI.Extensions
         {
             // application.UseMiddleware<JwtMiddleware>();
         }
-
+        public static void AddJsonCaseExtenstion(this IServiceCollection services)
+        {
+            services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.PropertyNameCaseInsensitive = false);
+        }
 
     }
 }

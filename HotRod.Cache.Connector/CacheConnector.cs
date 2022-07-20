@@ -31,7 +31,7 @@ namespace HotRod.Cache.Connector
         {
             //need to work on this method 
             var cacheValue = _appSettings.IsSession is 1 || _appSettings.IntByCache is 1 ? await _hotRodCache.GetCacheAsync(cacheName) : null;
-            cacheValue = cacheValue is null && _appSettings.IsSession is not 1 && _appSettings.IntByCache is not 1 ? (await _masterCacheService.GetMasterByCacheNameAsync(cacheName)).Value : await _hotRodCache.GetCacheAsync(cacheName);
+            cacheValue = cacheValue is null && _appSettings.IsSession is not 1 && _appSettings.IntByCache is not 1 ? (await _masterCacheService.GetMasterByCacheNameAsync(cacheName)).Value : cacheValue;
 
             var versions = await GetCacheVersion(cacheName);
 
@@ -43,36 +43,47 @@ namespace HotRod.Cache.Connector
             if (masterVersion)
             {
                 var data = cacheValue is "" or null ? await _masterCacheService.GetMasterByCacheNameAsync(cacheName) : null;
-                if (data is not null && data.Value is not null)
+                if (data is not null && data?.Version is not null)
                 {
                     await _hotRodCache.PutCacheAsync(data?.MasterCacheKey, data?.Value);
                     return data?.Value;
                 }
 
             }
-            return cacheName;
+            return cacheValue;
         }
 
         public async Task<string> GetCacheVersion(string cacheName)
         {
-            var cache = _appSettings.IntByCache is 1 ? await _masterCacheService.GetMasterByCacheNameAsync(cacheName) : null;
-            var version = string.Empty;
-            if (cache is null && _appSettings.IntByCache is not 1)
+            var cache = await _masterCacheService.GetMasterByCacheNameAsync(cacheName);
+            if (cache is not null && cache?.Version is not "0")
             {
-                cache = await _masterCacheService.GetMasterByCacheNameAsync(cacheName);
-                if (cache is not null && cache.Version is not "0")
-                {
-                    return cache?.Version.ToString();
-                }
-                else
-                {
-                    version = await _hotRodCache.GetVersionAsync(cacheName);
-                    await _masterCacheService.UpdateMasterCacheByMasterKey(version, cacheName);
-
-                    return version;
-                }
+                return cache?.Version.ToString();
             }
-            return cache?.Version.ToString();
+            else
+            {
+                string version = await _hotRodCache.GetVersionAsync(cacheName);
+                await _masterCacheService.UpdateMasterCacheByMasterKey(version, cacheName);
+                return version;
+            }
+            //var cache = _appSettings.IntByCache is 1 ? await _masterCacheService.GetMasterByCacheNameAsync(cacheName) : null;
+            //var version = string.Empty;
+            //if (cache is null && _appSettings.IntByCache is not 1)
+            //{
+            //    cache = await _masterCacheService.GetMasterByCacheNameAsync(cacheName);
+            //    if (cache is not null && cache.Version is not "0")
+            //    {
+            //        return cache?.Version.ToString();
+            //    }
+            //    else
+            //    {
+            //        version = await _hotRodCache.GetVersionAsync(cacheName);
+            //        await _masterCacheService.UpdateMasterCacheByMasterKey(version, cacheName);
+
+            //        return version;
+            //    }
+            //}
+            //return cache?.Version.ToString();
 
         }
 

@@ -97,32 +97,8 @@ namespace Login.Identity.Service
             outRespnse.ResponseMessage = esbcbsMessage.StandardMessageDesc;
             outRespnse.MessageType = esbcbsMessage.MessageType;
 
+            outRespnse = await CommanBlockUserAsync(result?.Data, outRespnse, checkValidReturnCode);
 
-
-            var updatedMessage = !checkValidReturnCode && result?.Data?.ReturnCode == 300 &&
-                                  result?.Data?.BlockReasonCode is "11" &&
-                                 result?.Data?.ClientId is not "FINOMER" ? await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.BlockUser.GetIntValue()) : null;
-
-            if (updatedMessage is not null)
-            {
-                outRespnse.ResponseMessage = updatedMessage.CorrectedMessage;
-                outRespnse.ResponseMessage_Hindi = updatedMessage.HindiMessage;
-            }
-            else
-            {
-                var checkUserStatus = !checkValidReturnCode &&
-                                        result?.Data?.ReturnCode is 300 && result?.Data?.BlockReasonCode is not "11" && result?.Data?.ClientId is not "FINOTLR" ?
-                                        await _userRepositories.GetReasonsAsync(result?.Data?.BlockReasonCode) : null;
-
-                if (checkUserStatus is not null)
-                    outRespnse.ResponseMessage = checkUserStatus?.ResponseMessage;
-            }
-            if (result?.Data?.BlockReasonCode is not null)
-            {
-                var blockUserMessage = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.BlockUserPassword.GetIntValue());
-                outRespnse.ResponseMessage = blockUserMessage.CorrectedMessage;
-                outRespnse.ResponseMessage_Hindi = blockUserMessage.HindiMessage;
-            }
             if (result?.Data is null && !checkValidReturnCode)
             {
                 outRespnse.ResponseMessage = $"Unable to parse Authman response.";
@@ -154,7 +130,7 @@ namespace Login.Identity.Service
 
             outRespnse.RequestId = authenticationRequest.RequestId;
 
-            if (loginData.Aadhaar.RequestData is not null)
+            if (loginData?.Aadhaar?.RequestData is not null)
                 loginData.Aadhaar.RequestData = await AadharExtension.GetAadharXmlAsync(loginData.Aadhaar, _ekycAuaService);
 
 
@@ -542,7 +518,7 @@ namespace Login.Identity.Service
 
         public async Task<OutResponse> VerifyUserIdAsync(AuthenticationRequest authenticationRequest)
         {
-            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<FIsUserAuthmanPolicyRequest>();
 
             replyData.UserId = replyData.EcbBlockEncryption ? replyData.UserId.ToDecryptEcbBlock(_appSettings.DecryptKey)
                : replyData.UserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen);
@@ -551,20 +527,21 @@ namespace Login.Identity.Service
                  : replyData.OldUserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen);
 
 
-            var outRespnse = replyData.UserId == replyData.OldUserId ? await ValidateUserAsync(authenticationRequest) : await GetUserAuthmanAsync(authenticationRequest, AuthmanOptions.GenerateOTP);
+            var outRespnse = replyData.UserId == replyData.OldUserId ? await ValidateUserAsync(authenticationRequest) : await GetUserAuthmanAsync(authenticationRequest, replyData, AuthmanOptions.GenerateOTP);
 
-            //need to parse Object
-            //objJSONHelper.NewtonSoftJsonDeSerializer<dynamic>(objOutResponse.ResponseData);
-            //var test = outRespnse?.ResponseCode is 1 && replyData?.Data?.ReturnCode is 300 ?
+            var result = outRespnse.ResponseData.ToJsonDeSerialize<FisUserValidateResponse>();
 
-            return new OutResponse();
+            var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.ReturnCode);
+
+            outRespnse = await CommanBlockUserAsync(result, outRespnse, checkValidReturnCode);
+
+            return outRespnse;
         }
 
         public async Task<OutResponse> LogOutUserAsync(AuthenticationRequest logOutRequest)
         {
             var replyData = logOutRequest.RequestData.ToJsonDeSerialize<dynamic>();
             replyData.access_token = logOutRequest.XAuthToken;
-            //logOutRequest.RequestData = replyData.ToJsonSerialize();
 
             var logOutUrl = await GetEsbUrlAsync(EsbUrls.EsbLogoutUrl);
 
@@ -875,17 +852,13 @@ namespace Login.Identity.Service
             return outRespnse;
         }
 
-        internal async Task<OutResponse> GetUserAuthmanAsync(AuthenticationRequest authenticationRequest, AuthmanOptions authmanOptions)
+        internal async Task<OutResponse> GetUserAuthmanAsync(AuthenticationRequest authenticationRequest, FIsUserAuthmanPolicyRequest replyData, AuthmanOptions authmanOptions)
         {
-            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
-            replyData.UserId = replyData.EcbBlockEncryption && AuthmanOptions.GenerateOTP == authmanOptions ? replyData.UserId.ToDecryptEcbBlock(_appSettings.DecryptKey) : replyData.EcbBlockEncryption && AuthmanOptions.GenerateOTP == authmanOptions ? replyData.AuthProfile.UserId.ToDecryptEcbBlock(_appSettings.DecryptKey) : replyData.UserId;
-            replyData.UserId = !replyData.EcbBlockEncryption && AuthmanOptions.GenerateOTP == authmanOptions ? replyData.UserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen) : !replyData.EcbBlockEncryption && AuthmanOptions.GenerateOTP == authmanOptions ? replyData.AuthProfile.UserId.ToDecryptStringAES(_appSettings.DecryptKey, _appSettings.DecryptKeygen) : replyData.UserId;
-
 
             var esbUrl = await GetEsbUrlAsync(EsbUrls.EsbCheckAuthenticationUrl);
 
 
-            var request = new WebApiRequestSettings<dynamic>
+            var request = new WebApiRequestSettings<FIsUserAuthmanPolicyRequest>
             {
                 URL = esbUrl,
                 PostParameter = replyData,
@@ -895,7 +868,7 @@ namespace Login.Identity.Service
                 RequestId = authenticationRequest.RequestId
             };
 
-            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+            var result = await _webApiRequestService.PostAsync<FisUserValidateResponse, FIsUserAuthmanPolicyRequest>(request);
 
             var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
 
@@ -909,15 +882,15 @@ namespace Login.Identity.Service
             {
                 RequestId = request.RequestId,
                 ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : ResponseCode.Success.GetIntValue(),
-                ResponseMessage = isNotValid ? esbMessagesdata.CorrectedMessage : string.Empty,
+                ResponseMessage = isNotValid ? esbMessagesdata?.CorrectedMessage : string.Empty,
                 MessageType = isNotValid ? MessageType.Exclam.GetStringValue() : string.Empty,
-                ResponseData = result.Data.ToJsonSerialize()
+                ResponseData = result?.Data?.ToJsonSerialize()
             };
             var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
             if (!checkValidReturnCode)
                 return outRespnse;
 
-            if (checkValidReturnCode && replyData.EncryptionKey is not null && AuthmanOptions.GenerateOTP == authmanOptions)
+            if (checkValidReturnCode && result.Data.EncryptionKey is not null && AuthmanOptions.GenerateOTP == authmanOptions)
             {
                 var userRole = result.Data.UserRoles.LastOrDefault();
                 var userType = await _userRepositories.GetUserTypeAsync(userRole);
@@ -1045,8 +1018,36 @@ namespace Login.Identity.Service
             return await _userRepositories.AddUserGeoAsync(userGeoLocation);
         }
 
+        internal async Task<OutResponse> CommanBlockUserAsync(FisUserValidateResponse fisUserValidate, OutResponse outResponse, bool isValid = true)
+        {
+            var updatedMessage = !isValid && fisUserValidate?.ReturnCode == 300 &&
+                                 fisUserValidate?.BlockReasonCode is "11" &&
+                                fisUserValidate?.ClientId is not "FINOMER" ? await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.BlockUser.GetIntValue()) : null;
 
+            if (updatedMessage is not null)
+            {
+                outResponse.ResponseMessage = updatedMessage.CorrectedMessage;
+                outResponse.ResponseMessage_Hindi = updatedMessage.HindiMessage;
+            }
+            else
+            {
+                var checkUserStatus = !isValid &&
+                                        fisUserValidate?.ReturnCode is 300 && fisUserValidate?.BlockReasonCode is not "11" && fisUserValidate?.ClientId is not "FINOTLR" ?
+                                        await _userRepositories.GetReasonsAsync(fisUserValidate?.BlockReasonCode) : null;
 
+                if (checkUserStatus is not null)
+                    outResponse.ResponseMessage = checkUserStatus?.ResponseMessage;
+            }
+
+            if (fisUserValidate?.ReturnCode is 300 && fisUserValidate?.BlockReasonCode is null)
+            {
+                var blockUserMessage = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.BlockUserPassword.GetIntValue());
+                outResponse.ResponseMessage = blockUserMessage.CorrectedMessage;
+                outResponse.ResponseMessage_Hindi = blockUserMessage.HindiMessage;
+            }
+
+            return outResponse;
+        }
         #endregion
     }
 }

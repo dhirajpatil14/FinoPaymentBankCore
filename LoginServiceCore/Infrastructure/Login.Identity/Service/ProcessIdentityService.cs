@@ -156,9 +156,29 @@ namespace Login.Identity.Service
                         break;
                     #endregion
 
-                    #region This Is Used to Check Authman Policy Check
+                    #region Method 20 This Is Used to Check Authman Policy Check
                     case 20:
                         outResponse = await _authenticationService.VerifyUserIdAsync(authenticationRequest);
+                        break;
+                    #endregion
+
+                    #region This Is Used to Get Authman Policy with OTP
+                    case 21:
+                        break;
+                    #endregion
+
+                    #region This Is Used to Get Aadhar details data
+                    case 22:
+                        break;
+                    #endregion
+
+                    #region This Is Used to Submit Aadhar details data
+                    case 23:
+                        break;
+                    #endregion
+
+                    #region This Is Used to get blocked User Details-Teller/Branch
+                    case 24:
                         break;
                     #endregion
 
