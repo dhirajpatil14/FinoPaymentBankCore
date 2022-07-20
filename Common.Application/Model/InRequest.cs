@@ -22,5 +22,14 @@ namespace Common.Application.Model
         public string ProductCode { get; set; }
         [JsonPropertyName("ServiceID")]
         public int ServiceID { get; set; }
+
+        public string ReturnId()
+        {
+            if (!string.IsNullOrEmpty(this.RequestId))
+            {
+                return this.RequestId.Split('_')[0].ToString();
+            }
+            return string.Empty;
+        }
     }
 }

@@ -142,7 +142,7 @@ namespace Login.Identity.Service
 
             outRespnse.RequestId = authenticationRequest.RequestId;
 
-            if (loginData?.Aadhaar?.RequestData is not null)
+            if (loginData.Aadhaar.RequestData is not null)
                 loginData.Aadhaar.RequestData = await AadharExtension.GetAadharXmlAsync(loginData.Aadhaar, _ekycAuaService);
 
 

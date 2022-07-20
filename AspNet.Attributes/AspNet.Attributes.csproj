@@ -6,12 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Application.Behaviours\Application.Behaviours.csproj" />
     <ProjectReference Include="..\Common.Model\Common.Wrappers.csproj" />
+    <ProjectReference Include="..\Loggers.Logs\Loggers.Logs.csproj" />
+    <ProjectReference Include="..\Shared.Services\Shared.Services.csproj" />
     <ProjectReference Include="..\Utility.Extensions\Utility.Extensions.csproj" />
   </ItemGroup>
 
