@@ -184,17 +184,23 @@ namespace Login.Identity.Service
 
             var isAccessToken = result?.Data?.AccessToken is not null;
 
-            #region IF Return Code Not Zero
-            var esbMessageResponse = result?.Data is not null && !checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, messageType, result.Data.ReturnCode) : null;
+            #region IF Return Code  Zero or Not
+            var esbMessageResponse = result?.Data is not null && !checkValidReturnCode ? await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, messageType, result.Data.ReturnCode) : await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, messageType, result.Data.ReturnCode);
             outRespnse.ResponseMessage = esbMessageResponse is not null ? esbMessageResponse.StandardMessageDesc : outRespnse.ResponseMessage;
             outRespnse.MessageType = esbMessageResponse is not null ? esbMessageResponse.MessageType : outRespnse.MessageType;
             var esbMessageMaster = result?.Data is null || !checkValidReturnCode ? await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.UnableToParseLogin.GetIntValue()) : null;
             outRespnse.ResponseMessage = esbMessageMaster is not null ? esbMessageMaster.CorrectedMessage : outRespnse.ResponseMessage;
             outRespnse.MessageType = esbMessageMaster is not null ? MessageType.Exclam.GetStringValue() : outRespnse.MessageType;
-            outRespnse.ResponseCode = esbMessageResponse is not null || esbMessageMaster is not null ? ResponseCode.Failure.GetIntValue() : outRespnse.ResponseCode;
+            outRespnse.ResponseCode = esbMessageMaster is not null ? ResponseCode.Failure.GetIntValue() : outRespnse.ResponseCode;
 
-            if (esbMessageResponse is not null || esbMessageMaster is not null)
+            if (result?.Data is not null && !checkValidReturnCode && (esbMessageResponse is not null || esbMessageMaster is not null))
                 return outRespnse;
+
+            #endregion
+
+            #region IF Return Code Zero
+
+
 
             #endregion
 
@@ -525,6 +531,10 @@ namespace Login.Identity.Service
                     break;
             }
             #endregion
+
+
+
+
             return outRespnse;
         }
 
