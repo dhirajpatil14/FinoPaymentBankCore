@@ -34,11 +34,13 @@ namespace Utility.Extensions
                     exceptions.LineNumber = lineNumber;
                 }
                 exceptions.FileName = fileNames;
+                exceptions.Message = ex.GetExceptionMessage();
+
             }
             return exceptions;
         }
 
-        public static string GetExceptionMessage(this Exception ex)
+        private static string GetExceptionMessage(this Exception ex)
         {
             return ex.Message + "|" + (ex.InnerException != null ? ex.InnerException.ToString() + "|" + ex.InnerException.Message : String.Empty) + "|" + ex.Source + "|" + ex.StackTrace;
         }

@@ -128,7 +128,6 @@ namespace Login.Identity.Service
             var outRespnse = new OutResponse
             {
                 ResponseMessage = isUserRestricted ? "User not authorized to proceed !" : string.Empty,
-                // ResponseData = isUserRestricted ? "{\"Login_Data\":null}" : string.Empty
                 ResponseData = isUserRestricted ? new LoginDataResponse().ToJsonSerialize() : string.Empty
             };
             outRespnse.ResponseCode = ResponseCode.Failure.GetIntValue();
@@ -142,7 +141,7 @@ namespace Login.Identity.Service
 
             outRespnse.RequestId = authenticationRequest.RequestId;
 
-            if (loginData.Aadhaar.RequestData is not null)
+            if (loginData?.Aadhaar?.RequestData is not null)
                 loginData.Aadhaar.RequestData = await AadharExtension.GetAadharXmlAsync(loginData.Aadhaar, _ekycAuaService);
 
 
@@ -195,12 +194,6 @@ namespace Login.Identity.Service
 
             if (result?.Data is not null && !checkValidReturnCode && (esbMessageResponse is not null || esbMessageMaster is not null))
                 return outRespnse;
-
-            #endregion
-
-            #region IF Return Code Zero
-
-
 
             #endregion
 
@@ -402,6 +395,7 @@ namespace Login.Identity.Service
 
                     #region Get FOS MOBILE VERSION
                     var fosMobileVersion = await _userRepositories.GetMobileVersionDataAsync("mstMobileVersion");
+
                     #endregion
 
                     var LoginResponseOne = new CommonChannelIdOne
