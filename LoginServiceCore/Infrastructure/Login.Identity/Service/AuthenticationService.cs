@@ -69,6 +69,7 @@ namespace Login.Identity.Service
             var request = GetWebRequestSettings<FisUserValidateRequest>(urlData, replyData, authenticationRequest);
 
             await _loggerService.WriteCorelationLogAsync(new CorelationLoggerRequest { ServiceId = authenticationRequest.ServiceID, MethodId = authenticationRequest.MethodId, LayerId = LayerType.ESB.GetIntValue(), RequestFlag = true, ResponseFlag = false, CorelationRequest = authenticationRequest.RequestId, CorelationSession = authenticationRequest.SessionId, StatusCode = DefaultStatus.Default.GetIntValue(), ResponseMessage = "Authentication Service" });
+
             await _loggerService.WriteFillLogAsync(new FillLoggerRequest { RequestID = authenticationRequest.RequestId, TokenID = authenticationRequest.TokenId, TellerID = authenticationRequest.TellerId, UserID = authenticationRequest.ReturnId(), SessionID = authenticationRequest.SessionId, MethodId = authenticationRequest.MethodId, Module = new TraceCalling().ToModule(), Message = $"{CommonValues.ESBREQUEST} {authenticationRequest.RequestData}", PriorityId = LogPriority.BL2.GetIntValue() });
 
             var result = await _webApiRequestService.PostAsync<FisUserValidateResponse, FisUserValidateRequest>(request);
@@ -83,11 +84,11 @@ namespace Login.Identity.Service
                 esbMessagesdata = await _esbMessageService.GetEsbMessage(string.Empty, ResponseCode.RemoteServerError.GetStringValue(), result.ErrorMessage);
 
 
-            var islogService = isNotValid ? await _loggerService.WriteCorelationLogAsync(new CorelationLoggerRequest { ServiceId = authenticationRequest.ServiceID, MethodId = authenticationRequest.MethodId, LayerId = LayerType.ESB.GetIntValue(), RequestFlag = false, ResponseFlag = true, CorelationRequest = authenticationRequest.RequestId, CorelationSession = authenticationRequest.SessionId, StatusCode = EsbsMessages.ServerUnavailable.GetIntValue(), ResponseMessage = "ESB Server UnAvailable" }) : 0;
-
             var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
 
-            await _loggerService.WriteCorelationLogAsync(new CorelationLoggerRequest { ServiceId = authenticationRequest.ServiceID, MethodId = authenticationRequest.MethodId, LayerId = LayerType.ESB.GetIntValue(), RequestFlag = false, ResponseFlag = true, CorelationRequest = authenticationRequest.RequestId, CorelationSession = authenticationRequest.SessionId, StatusCode = checkValidReturnCode ? ResponseCode.Success.GetIntValue() : ResponseCode.Error.GetIntValue(), ResponseMessage = result.Data?.ToJsonSerialize() });
+            var islogService = isNotValid ? await _loggerService.WriteCorelationLogAsync(new CorelationLoggerRequest { ServiceId = authenticationRequest.ServiceID, MethodId = authenticationRequest.MethodId, LayerId = LayerType.ESB.GetIntValue(), RequestFlag = false, ResponseFlag = true, CorelationRequest = authenticationRequest.RequestId, CorelationSession = authenticationRequest.SessionId, StatusCode = EsbsMessages.ServerUnavailable.GetIntValue(), ResponseMessage = "ESB Server UnAvailable" }) : 0;
+
+            islogService = !isNotValid ? await _loggerService.WriteCorelationLogAsync(new CorelationLoggerRequest { ServiceId = authenticationRequest.ServiceID, MethodId = authenticationRequest.MethodId, LayerId = LayerType.ESB.GetIntValue(), RequestFlag = false, ResponseFlag = true, CorelationRequest = authenticationRequest.RequestId, CorelationSession = authenticationRequest.SessionId, StatusCode = checkValidReturnCode ? ResponseCode.Success.GetIntValue() : ResponseCode.Error.GetIntValue(), ResponseMessage = result.Data?.ToJsonSerialize() }) : 0;
 
             var outRespnse = new OutResponse
             {
