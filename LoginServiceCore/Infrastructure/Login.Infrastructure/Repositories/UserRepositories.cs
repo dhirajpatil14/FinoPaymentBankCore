@@ -43,6 +43,7 @@ namespace Login.Infrastructure.Repositories
 
         public async Task<IEnumerable<UserRestriction>> GetUserRestricationAsync(FisUserPasswordValidateRequest fisUserPasswordValidateRequest, int latlong)
         {
+
             var parameter = new
             {
                 Ip = fisUserPasswordValidateRequest?.SystemInfo?.Ip?.ToString(),
@@ -80,7 +81,9 @@ namespace Login.Infrastructure.Repositories
                 Request = parameter,
                 DbConnection = _sqlConnectionStrings.PBMasterConnection
             };
+
             return await _dataDbConfigurationService.GetDatasAsync<object, UserRestriction>(configSettings: config);
+
         }
 
         public async Task<int> AddUserGeoAsync(GeoUserLocation geoUserLocation)

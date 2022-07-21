@@ -46,14 +46,19 @@ namespace AspNet.Attributes
                 await _next(context);
 
             }
+
             catch (Exception error)
             {
+
+                var requestData = requestContent.ToJsonDeSerialize<InRequest>();
 
                 #region Write DB Log
                 var exceptionDetails = new Exceptions();
                 try
                 {
                     exceptionDetails = error.GetExceptionDetails();
+                    exceptionDetails.RequestData = requestData.RequestData;
+
                 }
                 catch (Exception ex)
                 {
@@ -62,8 +67,7 @@ namespace AspNet.Attributes
 
                 try
                 {
-                    var requestData = requestContent.ToJsonDeSerialize<InRequest>();
-                    await _loggerService.WriteFillLogAsync(new FillLoggerRequest { RequestID = requestData.RequestId, TokenID = requestData.TokenId, TellerID = requestData.TellerId, UserID = requestData.ReturnId(), SessionID = requestData.SessionId, MethodId = requestData.MethodId, Module = "", Message = $"Exception :  FileName = {exceptionDetails.FileName} , LineNumber = {exceptionDetails.LineNumber} , Exception = {error?.GetExceptionMessage()} ,RequestData = {requestData.RequestData}  ", PriorityId = LogPriority.Exception.GetIntValue(), ChannelID = requestData.ChannelID });
+                    await _loggerService.WriteFillLogAsync(new FillLoggerRequest { RequestID = requestData.RequestId, TokenID = requestData.TokenId, TellerID = requestData.TellerId, UserID = requestData.ReturnId(), SessionID = requestData.SessionId, MethodId = requestData.MethodId, Module = "", Message = exceptionDetails.ToJsonSerialize(), PriorityId = LogPriority.Exception.GetIntValue(), ChannelID = requestData.ChannelID });
                 }
                 catch (Exception ex)
                 {
