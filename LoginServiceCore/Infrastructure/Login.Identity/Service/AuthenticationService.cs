@@ -94,19 +94,22 @@ namespace Login.Identity.Service
             {
                 RequestId = request.RequestId,
                 ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : ResponseCode.Success.GetIntValue(),
-                ResponseMessage = isNotValid ? esbMessagesdata.CorrectedMessage : string.Empty,
+                ResponseMessage = isNotValid ? esbMessagesdata?.CorrectedMessage : string.Empty,
                 MessageType = isNotValid ? MessageType.Exclam.GetStringValue() : string.Empty,
-                ResponseData = result.Data.ToJsonSerialize()
+                ResponseData = result?.Data?.ToJsonSerialize()
             };
 
-            var messageType = result.Data.EncryptionKey is not null && checkValidReturnCode ? MessageTypeId.AuthenticateSuccess.GetIntValue() : MessageTypeId.AuthenticateUnSuccess.GetIntValue();
-            outRespnse.SessionExpiryTime = result.Data.EncryptionKey is not null ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : "0";
-            outRespnse.AuthmanFlag = result.Data.EncryptionKey is not null;
-            outRespnse.ResponseCode = result.Data.EncryptionKey is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue();
+            if (isNotValid)
+                return outRespnse;
+
+            var messageType = result?.Data?.EncryptionKey is not null && checkValidReturnCode ? MessageTypeId.AuthenticateSuccess.GetIntValue() : MessageTypeId.AuthenticateUnSuccess.GetIntValue();
+            outRespnse.SessionExpiryTime = result?.Data?.EncryptionKey is not null ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : "0";
+            outRespnse.AuthmanFlag = result?.Data?.EncryptionKey is not null;
+            outRespnse.ResponseCode = result?.Data?.EncryptionKey is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue();
 
             var esbcbsMessage = await _esbCbsMessageService.GetEsbCbsMessgeAsync(_appSettings.ESBCBSMessagesByCache, messageType, result.Data.ReturnCode);
-            outRespnse.ResponseMessage = esbcbsMessage.StandardMessageDesc;
-            outRespnse.MessageType = esbcbsMessage.MessageType;
+            outRespnse.ResponseMessage = esbcbsMessage?.StandardMessageDesc;
+            outRespnse.MessageType = esbcbsMessage?.MessageType;
 
 
             outRespnse = await CommanBlockUserAsync(result?.Data, outRespnse, checkValidReturnCode);
@@ -132,15 +135,15 @@ namespace Login.Identity.Service
             };
             outRespnse.ResponseCode = ResponseCode.Failure.GetIntValue();
             outRespnse.MessageType = MessageType.Exclam.GetStringValue();
-            outRespnse.SessionId = authenticationRequest.SessionId;
-            outRespnse.SessionExpiryTime = authenticationRequest.SessionExpiryTime;
+            outRespnse.SessionId = authenticationRequest?.SessionId;
+            outRespnse.SessionExpiryTime = authenticationRequest?.SessionExpiryTime;
 
 
             if (isUserRestricted)
-                await _loggerService.WriteFillLogAsync(new FillLoggerRequest { RequestID = authenticationRequest.RequestId, TokenID = authenticationRequest.TokenId, TellerID = authenticationRequest.TellerId, UserID = authenticationRequest.ReturnId(), SessionID = authenticationRequest.SessionId, MethodId = authenticationRequest.MethodId, Module = new TraceCalling().ToModule(), Message = $"{CommonValues.ESBREQUEST} {authenticationRequest.RequestData}", PriorityId = LogPriority.Exception.GetIntValue() });
+                await _loggerService.WriteFillLogAsync(new FillLoggerRequest { RequestID = authenticationRequest?.RequestId, TokenID = authenticationRequest?.TokenId, TellerID = authenticationRequest?.TellerId, UserID = authenticationRequest.ReturnId(), SessionID = authenticationRequest?.SessionId, MethodId = authenticationRequest?.MethodId, Module = new TraceCalling().ToModule(), Message = $"{CommonValues.ESBREQUEST} {authenticationRequest?.RequestData}", PriorityId = LogPriority.Exception.GetIntValue() });
             return outRespnse;
 
-            outRespnse.RequestId = authenticationRequest.RequestId;
+            outRespnse.RequestId = authenticationRequest?.RequestId;
 
             if (loginData?.Aadhaar?.RequestData is not null)
                 loginData.Aadhaar.RequestData = await AadharExtension.GetAadharXmlAsync(loginData.Aadhaar, _ekycAuaService);
@@ -1052,8 +1055,8 @@ namespace Login.Identity.Service
 
             if (updatedMessage is not null)
             {
-                outResponse.ResponseMessage = updatedMessage.CorrectedMessage;
-                outResponse.ResponseMessage_Hindi = updatedMessage.HindiMessage;
+                outResponse.ResponseMessage = updatedMessage?.CorrectedMessage;
+                outResponse.ResponseMessage_Hindi = updatedMessage?.HindiMessage;
             }
             else
             {
@@ -1068,8 +1071,8 @@ namespace Login.Identity.Service
             if (fisUserValidate?.ReturnCode is 300 && fisUserValidate?.BlockReasonCode is null)
             {
                 var blockUserMessage = await _esbMessageService.GetEsbMessageByIdAsync(EsbsMessages.BlockUserPassword.GetIntValue());
-                outResponse.ResponseMessage = blockUserMessage.CorrectedMessage;
-                outResponse.ResponseMessage_Hindi = blockUserMessage.HindiMessage;
+                outResponse.ResponseMessage = blockUserMessage?.CorrectedMessage;
+                outResponse.ResponseMessage_Hindi = blockUserMessage?.HindiMessage;
             }
 
             return outResponse;
