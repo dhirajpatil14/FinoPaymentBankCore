@@ -18,13 +18,22 @@ namespace LoginServiceCoreAPI
                  .ConfigureAppConfiguration((hostingContext, config) =>
                  {
                      var env = hostingContext.HostingEnvironment;
-                     var parentDirectory = Directory.GetParent(env.ContentRootPath).Parent.Parent.FullName;
-                     // find the shared folder in the parent folder
-                     var sharedFolder = Path.Combine(parentDirectory, "", "Shared");
+                     string parentDirectory = string.Empty;
+                     try
+                     {
+                         parentDirectory = Directory.GetParent(env.ContentRootPath)?.Parent?.Parent?.FullName;
+                     }
+                     catch
+                     {
+                         parentDirectory = env.ContentRootPath;
+                     }
+                     parentDirectory = parentDirectory is not null ? parentDirectory : "";
 
+                     var sharedFolder = Path.Combine(parentDirectory, "", "Shared");
                      //load the SharedSettings first, so that appsettings.json overrwrites it
                      config
-                          .AddJsonFile(Path.Combine(sharedFolder, "SharedSettings.json"), optional: true)
+                           .AddJsonFile(Path.Combine(sharedFolder, "SharedSettings.json"), optional: true)
+                          .AddJsonFile("SharedSettings.json", optional: true)
                           .AddJsonFile("appsettings.json", optional: true)
                           .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
 

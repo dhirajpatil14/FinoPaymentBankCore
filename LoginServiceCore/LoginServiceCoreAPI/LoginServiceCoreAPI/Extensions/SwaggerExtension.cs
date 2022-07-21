@@ -9,12 +9,19 @@ namespace LoginServiceCoreAPI.Extensions
 {
     public static class SwaggerExtension
     {
-        public static void UseSwaggerExtension(this IApplicationBuilder app)
+        public static void UseSwaggerExtension(this IApplicationBuilder app, bool IsDevelopmentEnvirment)
         {
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Clean Arch");
+                if (IsDevelopmentEnvirment)
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Login Service");
+                }
+                else
+                {
+                    c.SwaggerEndpoint("/LoginService/swagger/v1/swagger.json", "Login Service");
+                }
             });
         }
         public static void AddSwaggerExtension(this IServiceCollection services)
