@@ -40,7 +40,7 @@ namespace LoginService.API.Integration.Tests.Controllers
 
             var eventJson = @userRequest.ToJsonSerialize();
             HttpContent content = new StringContent(eventJson, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"{apiUrl}Authenticate", content);
+            var response = await client.PostAsync($"{apiUrl}Authenticat", content);
             response.EnsureSuccessStatusCode();
             var responseString = await response.Content.ReadAsStringAsync();
             responseString.ShouldNotBeNullOrEmpty();
