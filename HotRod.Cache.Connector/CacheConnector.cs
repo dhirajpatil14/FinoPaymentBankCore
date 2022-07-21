@@ -2,7 +2,6 @@
 using Common.Application.Model.Settings;
 using Microsoft.Extensions.Options;
 using Shared.Services.MasterCache;
-using SQL.Helper;
 using System.Threading.Tasks;
 using Utility.Extensions;
 
@@ -14,11 +13,9 @@ namespace HotRod.Cache.Connector
 
         private readonly HotRodCache _hotRodCache;
 
-
-
         private readonly IMasterCacheService _masterCacheService;
 
-        public CacheConnector(IOptions<AppSettings> appSettings, IOptions<SqlConnectionStrings> sqlConnectionStrings, HotRodCache hotRodCache, IMasterCacheService masterCacheService)
+        public CacheConnector(IOptions<AppSettings> appSettings, HotRodCache hotRodCache, IMasterCacheService masterCacheService)
         {
             _appSettings = appSettings.Value;
             _hotRodCache = hotRodCache;
