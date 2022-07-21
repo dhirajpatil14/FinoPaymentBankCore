@@ -79,7 +79,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility.Common", "Utility.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoginService.API.Integration.Tests", "LoginServiceCore\Test\LoginService.API.Integration.Tests\LoginService.API.Integration.Tests.csproj", "{901FE2AE-C508-45C4-8641-4C38062A138B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotRod.Cache.Connector", "HotRod.Cache.Connector\HotRod.Cache.Connector.csproj", "{ABE3EEE6-8AE9-4DA3-B3A2-FD51654A6EF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotRod.Cache.Connector", "HotRod.Cache.Connector\HotRod.Cache.Connector.csproj", "{ABE3EEE6-8AE9-4DA3-B3A2-FD51654A6EF1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{B8AFB77A-5E70-4AD4-8D16-A7ED7E7ED237}"
+	ProjectSection(SolutionItems) = preProject
+		Shared\SharedSettings.json = Shared\SharedSettings.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
