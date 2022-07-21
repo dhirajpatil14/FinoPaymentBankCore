@@ -57,11 +57,6 @@ namespace Login.Infrastructure.Repositories
             var geoCoordinate = new GeoCoordinate.NetStandard2.GeoCoordinate(fisUserPasswordValidateRequest.GeoLocation.Longitude, fisUserPasswordValidateRequest.GeoLocation.Longitude);
             if (geoCoordinate.IsUnknown)
             {
-
-                ////var lat = Convert.ToDouble(fisUserPasswordValidateRequest?.GeoLocation?.Lattitude.ToString().Substring(0, latlong));
-                ////var longt = Convert.ToDouble(fisUserPasswordValidateRequest?.GeoLocation?.Longitude.ToString().Substring(0, latlong));
-                //fisUserPasswordValidateRequest.GeoLocation.Lattitude = lat;
-                //fisUserPasswordValidateRequest.GeoLocation.Longitude = longt;
                 fisUserPasswordValidateRequest.GeoLocation.Lattitude = 0;
                 fisUserPasswordValidateRequest.GeoLocation.Longitude = 0;
             }
