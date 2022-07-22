@@ -55,8 +55,9 @@ namespace LoginServiceCoreAPI
             {
                 app.UseDeveloperExceptionPage();
 
-                app.UseSwaggerExtension();
+
             }
+            app.UseSwaggerExtension(env.IsDevelopment());
 
             app.UseHttpsRedirection();
 
