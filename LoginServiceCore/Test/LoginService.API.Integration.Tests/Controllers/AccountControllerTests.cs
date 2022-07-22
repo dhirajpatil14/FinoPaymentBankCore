@@ -105,7 +105,7 @@ namespace LoginService.API.Integration.Tests.Controllers
             result.ResponseData.ShouldNotBeNullOrEmpty();
             result.ResponseCode.ShouldBeEquivalentTo(0);
         }
-
+        [Fact]
         public async Task Validate_Web_User_Password_Wrong_ReturnUnsuccesssfullResult()
         {
             var client = _factory.CreateDefaultClient();
@@ -130,7 +130,7 @@ namespace LoginService.API.Integration.Tests.Controllers
             result.ResponseCode.ShouldBeEquivalentTo(0);
         }
 
-
+        [Fact]
         public async Task Validate_Mobile_User_Password_ReturnsSuccessResult()
         {
             var client = _factory.CreateDefaultClient();
@@ -154,14 +154,14 @@ namespace LoginService.API.Integration.Tests.Controllers
             result.ResponseData.ShouldNotBeNullOrEmpty();
             result.ResponseCode.ShouldBeEquivalentTo(0);
         }
-
+        [Fact]
         public async Task Validate_Mobile_User_Password_Wrong_ReturnUnsuccesssfullResult()
         {
             var client = _factory.CreateDefaultClient();
 
             var @userRequest = new AuthenticationRequest()
             {
-                RequestId = "100032353_711202216413532",
+                RequestId = "100032353_711202216413500",
                 TellerId = "100032353",
                 MethodId = 2,
                 IsEncrypt = false,
