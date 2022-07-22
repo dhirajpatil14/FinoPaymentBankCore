@@ -208,5 +208,58 @@ namespace LoginService.API.Integration.Tests.Controllers
             result.ResponseCode.ShouldBeEquivalentTo(0);
         }
         #endregion
+
+        #region Method 7
+        [Fact]
+        public async Task User_Unlock_ReturnsSuccessResult()
+        {
+            var client = _factory.CreateDefaultClient();
+
+            var @userRequest = new AuthenticationRequest()
+            {
+                RequestId = "100032353_711202216413531",
+                TellerId = "101700858",
+                MethodId = 7,
+                IsEncrypt = false,
+                RequestData = "{\"Key\":\"Schemes\",\"Version\":\"20\",\"PixType\":\"XHDPI\"}"
+            };
+
+            var eventJson = @userRequest.ToJsonSerialize();
+            HttpContent content = new StringContent(eventJson, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{apiUrl}Authenticate", content);
+            response.EnsureSuccessStatusCode();
+            var responseString = await response.Content.ReadAsStringAsync();
+            responseString.ShouldNotBeNullOrEmpty();
+            var result = responseString.ToJsonDeSerialize<OutResponse>();
+            result.ResponseData.ShouldNotBeNullOrEmpty();
+            result.ResponseCode.ShouldBeEquivalentTo(0);
+        }
+
+        [Fact]
+        public async Task User_Unlock_Return_FaiedResult()
+        {
+            var client = _factory.CreateDefaultClient();
+
+            var @userRequest = new AuthenticationRequest()
+            {
+                RequestId = "100032353_711202216413531",
+                TellerId = "101700858",
+                MethodId = 7,
+                IsEncrypt = false,
+                RequestData = "{\"Key\":\"Schemes\",\"Version\":\"20\",\"PixType\":\"XHDPI\"}"
+            };
+
+            var eventJson = @userRequest.ToJsonSerialize();
+            HttpContent content = new StringContent(eventJson, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{apiUrl}Authenticate", content);
+            response.EnsureSuccessStatusCode();
+            var responseString = await response.Content.ReadAsStringAsync();
+            responseString.ShouldNotBeNullOrEmpty();
+            var result = responseString.ToJsonDeSerialize<OutResponse>();
+            result.ResponseData.ShouldNotBeNullOrEmpty();
+            result.ResponseCode.ShouldBeEquivalentTo(1);
+            result.ResponseMessage.ShouldBeEquivalentTo("User Unlock Failed,Please Contact Call Centre");
+        }
+        #endregion
     }
 }
