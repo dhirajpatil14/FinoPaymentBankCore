@@ -114,43 +114,43 @@ namespace Login.Identity.Service
                         break;
                     #endregion
 
-                    #region This Is Used to get enryption key
+                    #region Method 12. This Is Used to get enryption key
                     case 12:
                         outResponse = await _authenticationService.GetEncryptionKeyAsync(authenticationRequest);
                         break;
                     #endregion
 
-                    #region This Is Used to reset password and validate secret question
+                    #region Method 13. This Is Used to reset password and validate secret question
                     case 13:
                         break;
                     #endregion
 
-                    #region This Is Used to change password
+                    #region Method 14. This Is Used to change password
                     case 14:
                         break;
                     #endregion
 
-                    #region This Is Used to fetch all secret questions
+                    #region Method 15. This Is Used to fetch all secret questions
                     case 15:
                         break;
                     #endregion
 
-                    #region This Is Used to Get User Details
+                    #region Method 16. This Is Used to Get User Details
                     case 16:
                         break;
                     #endregion
 
-                    #region This Is Used to fetch Management Health
+                    #region Method 17. This Is Used to fetch Management Health
                     case 17:
                         break;
                     #endregion
 
-                    #region This Is Used to update Merchant Details
+                    #region Method 18. This Is Used to update Merchant Details
                     case 18:
                         break;
                     #endregion
 
-                    #region Get User Survey
+                    #region Method 19. Get User Survey
                     case 19:
                         break;
                     #endregion
@@ -161,22 +161,22 @@ namespace Login.Identity.Service
                         break;
                     #endregion
 
-                    #region This Is Used to Get Authman Policy with OTP
+                    #region Method 21. This Is Used to Get Authman Policy with OTP
                     case 21:
                         break;
                     #endregion
 
-                    #region This Is Used to Get Aadhar details data
+                    #region Method 22. This Is Used to Get Aadhar details data
                     case 22:
                         break;
                     #endregion
 
-                    #region This Is Used to Submit Aadhar details data
+                    #region Method 23. This Is Used to Submit Aadhar details data
                     case 23:
                         break;
                     #endregion
 
-                    #region This Is Used to get blocked User Details-Teller/Branch
+                    #region Method 24. This Is Used to get blocked User Details-Teller/Branch
                     case 24:
                         break;
                     #endregion
