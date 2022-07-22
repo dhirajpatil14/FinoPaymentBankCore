@@ -127,7 +127,7 @@ namespace LoginService.API.Integration.Tests.Controllers
             responseString.ShouldNotBeNullOrEmpty();
             var result = responseString.ToJsonDeSerialize<OutResponse>();
             result.ResponseData.ShouldNotBeNullOrEmpty();
-            result.ResponseCode.ShouldBeEquivalentTo(0);
+            result.ResponseCode.ShouldNotBeSameAs(0);
         }
 
         [Fact]
