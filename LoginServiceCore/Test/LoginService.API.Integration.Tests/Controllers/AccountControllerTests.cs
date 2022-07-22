@@ -105,7 +105,7 @@ namespace LoginService.API.Integration.Tests.Controllers
             result.ResponseData.ShouldNotBeNullOrEmpty();
             result.ResponseCode.ShouldBeEquivalentTo(0);
         }
-
+        [Fact]
         public async Task Validate_Web_User_Password_Wrong_ReturnUnsuccesssfullResult()
         {
             var client = _factory.CreateDefaultClient();
@@ -130,7 +130,7 @@ namespace LoginService.API.Integration.Tests.Controllers
             result.ResponseCode.ShouldBeEquivalentTo(0);
         }
 
-
+        [Fact]
         public async Task Validate_Mobile_User_Password_ReturnsSuccessResult()
         {
             var client = _factory.CreateDefaultClient();
@@ -154,14 +154,14 @@ namespace LoginService.API.Integration.Tests.Controllers
             result.ResponseData.ShouldNotBeNullOrEmpty();
             result.ResponseCode.ShouldBeEquivalentTo(0);
         }
-
+        [Fact]
         public async Task Validate_Mobile_User_Password_Wrong_ReturnUnsuccesssfullResult()
         {
             var client = _factory.CreateDefaultClient();
 
             var @userRequest = new AuthenticationRequest()
             {
-                RequestId = "100032353_711202216413532",
+                RequestId = "100032353_711202216413500",
                 TellerId = "100032353",
                 MethodId = 2,
                 IsEncrypt = false,
@@ -261,5 +261,84 @@ namespace LoginService.API.Integration.Tests.Controllers
             result.ResponseMessage.ShouldBeEquivalentTo("User Unlock Failed,Please Contact Call Centre");
         }
         #endregion
+
+        #region Method 11
+        [Fact]
+        public async Task Validate_Secret_Question_ReturnsSuccessResult()
+        {
+            var client = _factory.CreateDefaultClient();
+
+            var @userRequest = new AuthenticationRequest()
+            {
+                RequestId = "100032353_711202216413532",
+                TellerId = "101700858",
+                MethodId = 11,
+                IsEncrypt = false,
+                RequestData = "{\"UserTypeID\":\"97\",\"ChannelID\":1,\"productTypeID\":\"\",\"IsFinancial\":\"\",\"LendingBankName\":\"\"}"
+            };
+
+            var eventJson = @userRequest.ToJsonSerialize();
+            HttpContent content = new StringContent(eventJson, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{apiUrl}Authenticate", content);
+            response.EnsureSuccessStatusCode();
+            var responseString = await response.Content.ReadAsStringAsync();
+            responseString.ShouldNotBeNullOrEmpty();
+            var result = responseString.ToJsonDeSerialize<OutResponse>();
+            result.ResponseData.ShouldNotBeNullOrEmpty();
+            result.ResponseCode.ShouldBeEquivalentTo(0);
+        }
+
+        [Fact]
+        public async Task Validate_Secret_Question_Returns_FaiedResult()
+        {
+            var client = _factory.CreateDefaultClient();
+
+            var @userRequest = new AuthenticationRequest()
+            {
+                RequestId = "100032353_711202216413533",
+                TellerId = "101700858",
+                MethodId = 11,
+                IsEncrypt = false,
+                RequestData = "{\"UserTypeID\":\"97\",\"ChannelID\":1,\"productTypeID\":\"\",\"IsFinancial\":\"\",\"LendingBankName\":\"\"}"
+            };
+
+            var eventJson = @userRequest.ToJsonSerialize();
+            HttpContent content = new StringContent(eventJson, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{apiUrl}Authenticate", content);
+            response.EnsureSuccessStatusCode();
+            var responseString = await response.Content.ReadAsStringAsync();
+            responseString.ShouldNotBeNullOrEmpty();
+            var result = responseString.ToJsonDeSerialize<OutResponse>();
+            result.ResponseData.ShouldBeNullOrEmpty();
+            result.ResponseCode.ShouldBeEquivalentTo(1);
+            result.ResponseMessage.ShouldBeEquivalentTo("Validate User Secret Question Failed,Please Contact Call Centre");
+        }
+        [Fact]
+        public async Task Validate_Secret_Question_Returns_Internal_ServerIsssue()
+        {
+            var client = _factory.CreateDefaultClient();
+
+            var @userRequest = new AuthenticationRequest()
+            {
+                RequestId = "100032353_711202216413534",
+                TellerId = "101700858",
+                MethodId = 11,
+                IsEncrypt = false,
+                RequestData = "{\"UserTypeID\":\"97\",\"ChannelID\":1,\"productTypeID\":\"\",\"IsFinancial\":\"\",\"LendingBankName\":\"\"}"
+            };
+
+            var eventJson = @userRequest.ToJsonSerialize();
+            HttpContent content = new StringContent(eventJson, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{apiUrl}Authenticate", content);
+            response.EnsureSuccessStatusCode();
+            var responseString = await response.Content.ReadAsStringAsync();
+            responseString.ShouldNotBeNullOrEmpty();
+            var result = responseString.ToJsonDeSerialize<OutResponse>();
+            result.ResponseData.ShouldBeNullOrWhiteSpace();
+            result.ResponseCode.ShouldBeEquivalentTo(99);
+            result.ResponseMessage.ShouldBeEquivalentTo("Validate User Secret Question Failed,Please Contact Call Centre");
+        }
+        #endregion
+
     }
 }
