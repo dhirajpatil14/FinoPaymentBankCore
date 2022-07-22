@@ -60,7 +60,7 @@ namespace AspNet.Attributes
                     exceptionDetails.RequestData = requestData.RequestData;
 
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                 }
@@ -82,7 +82,7 @@ namespace AspNet.Attributes
                 {
                     esbMessages = await _esbMessageService.GetCorrectMessage("contract error");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
 
@@ -127,6 +127,7 @@ namespace AspNet.Attributes
                     case ValidationException e:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         responseModel.Errors = e.Errors;
+                        responseModelview.ResponseMessage = string.Join(',', e.Errors);
                         break;
                     case KeyNotFoundException e:
                         response.StatusCode = (int)HttpStatusCode.NotFound;
