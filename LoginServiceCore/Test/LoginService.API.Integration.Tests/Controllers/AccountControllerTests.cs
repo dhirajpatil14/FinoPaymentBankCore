@@ -180,5 +180,33 @@ namespace LoginService.API.Integration.Tests.Controllers
         }
 
         #endregion
+
+        #region Method 20
+        [Fact]
+        public async Task Verify_UserId_ReturnsSuccessResult()
+        {
+            var client = _factory.CreateDefaultClient();
+
+            var @userRequest = new AuthenticationRequest()
+            {
+                RequestId = "100032353_711202216413530",
+                TellerId = "101700858",
+                MethodId = 20,
+                IsEncrypt = false,
+                //RequestData = "{\"user_id\":\"K7CFFkt/XuWxCJZLlXpFQg==\",\"password\":\"fJx6WgNHnWnYV/aRNnaBmA==\",\"client_id\":\"FINOMER\",\"systemInfo\":{\"Channel\":\"2\",\"ISP\":\"Fino\",\"browser\":\"chrome 103.0.0.0\",\"Lattitude\":38.9847719,\"Longitude\":-77.5619419,\"version\":\"103.0.0.0\",\"PostalCode\":\"\",\"MAC_DeviceID\":\"12345\",\"CellID\":\"54321\",\"DeviceModel\":\"unknown\",\"DeviceOS\":\"windows\",\"MCC\":\"Test_MCC\",\"MNC\":\"Test_MNC\",\"LanguageSupported\":\"en-US\"},\"geoLocation\":{\"Lattitude\":38.9847719,\"Longitude\":-77.5619419},\"deviceId\":null,\"xauthToken\":null,\"biometric_fp\":{},\"otp\":{},\"Aadhaar\":{},\"ECBBlockEncryption\":true,\"EncType\":\"NEW\"}"
+                RequestData = "{\"user_id\":\"K7CFFkt/XuWxCJZLlXpFQg==\",\"client_id\":\"FINOMER\",\"old_user_id\":\"\",\"ECBBlockEncryption\":\"true\"}"
+            };
+
+            var eventJson = @userRequest.ToJsonSerialize();
+            HttpContent content = new StringContent(eventJson, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{apiUrl}Authenticate", content);
+            response.EnsureSuccessStatusCode();
+            var responseString = await response.Content.ReadAsStringAsync();
+            responseString.ShouldNotBeNullOrEmpty();
+            var result = responseString.ToJsonDeSerialize<OutResponse>();
+            result.ResponseData.ShouldNotBeNullOrEmpty();
+            result.ResponseCode.ShouldBeEquivalentTo(0);
+        }
+        #endregion
     }
 }
