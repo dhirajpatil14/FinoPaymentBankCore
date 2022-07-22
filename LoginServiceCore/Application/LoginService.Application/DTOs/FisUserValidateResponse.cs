@@ -1,15 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Common.Application.Dto;
+using Newtonsoft.Json;
 
 namespace LoginService.Application.DTOs
 {
-    public class FisUserValidateResponse
+    public class FisUserValidateResponse : FisResponse
     {
-        [JsonProperty("returnCode")]
-        public int ReturnCode { get; set; } = -1;
-
-        [JsonProperty("responseMessage")]
-        public string ResponseMessage { get; set; }
-
         [JsonProperty("userId")]
         public long UserId { get; set; }
 

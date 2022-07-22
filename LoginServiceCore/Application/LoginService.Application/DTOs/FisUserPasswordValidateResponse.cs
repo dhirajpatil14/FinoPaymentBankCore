@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using Common.Application.Dto;
+using Newtonsoft.Json;
 
 namespace LoginService.Application.DTOs
 {
-    public class FisUserPasswordValidateResponse
+    public class FisUserPasswordValidateResponse : FisResponse
     {
         [JsonProperty("id_token")]
         public string IdToken { get; set; }
@@ -22,8 +23,7 @@ namespace LoginService.Application.DTOs
         [JsonProperty("access_token")]
         public string AccessToken { get; set; }
 
-        [JsonProperty("returnCode")]
-        public int ReturnCode { get; set; }
+
 
         [JsonProperty("firstLoginKilled")]
         public bool FirstLoginKilled { get; set; }
@@ -33,9 +33,6 @@ namespace LoginService.Application.DTOs
 
         [JsonProperty("balancesList")]
         public BalancesList[] BalancesList { get; set; }
-
-        [JsonProperty("responseMessage")]
-        public string ResponseMessage { get; set; }
 
         [JsonProperty("expires_in")]
         public long ExpiresIn { get; set; }
