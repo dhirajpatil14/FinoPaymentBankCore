@@ -48,49 +48,49 @@ namespace Login.Identity.Service
 
                 switch (authenticationRequest.MethodId)
                 {
-                    #region Validate User Authentication 
+                    #region Method 1. Validate User Authentication 
                     case 1:
                         outResponse = await _authenticationService?.ValidateUserAuthenticationAsync(authenticationRequest);
                         break;
                     #endregion
 
-                    #region Validate User    
+                    #region Method 2. Validate User    
                     case 2:
                         outResponse = await _authenticationService?.ValidateUserAsync(authenticationRequest);
                         break;
                     #endregion
 
-                    #region  Logout User    
+                    #region Method 3.  Logout User    
                     case 3:
                         outResponse = await _authenticationService?.LogOutUserAsync(authenticationRequest);
                         break;
                     #endregion
 
-                    #region Check Auth Context Details
+                    #region Method 4. Check Auth Context Details
                     case 4:
                         outResponse = await _authenticationService?.GetAuthContextAsync(authenticationRequest);
                         break;
                     #endregion
 
-                    #region Fetch Finger Print Service 
+                    #region Method 5. Fetch Finger Print Service 
                     case 5:
                         outResponse = await _authenticationService.GetEsbFpAsync(authenticationRequest);
                         break;
                     #endregion
 
-                    #region Validate Token
+                    #region Method 6. Validate Token
                     case 6:
                         outResponse = await _authenticationService.ValidateTokenAsync(authenticationRequest);
                         break;
                     #endregion
 
-                    #region User Unlock 
+                    #region Method 7. User Unlock 
                     case 7:
                         outResponse = await _authenticationService.UserUnlockAsync(authenticationRequest);
                         break;
                     #endregion
 
-                    #region Get Secret Question
+                    #region Method 8. Get Secret Question
                     case 8:
                         outResponse = await _authenticationService.GetSecretQuestionAsync(authenticationRequest);
                         break;

@@ -120,6 +120,9 @@ namespace Login.Identity.Service
                 outRespnse.MessageType = MessageType.Exclam.GetStringValue();
             }
 
+
+
+
             return outRespnse;
         }
 
@@ -671,16 +674,16 @@ namespace Login.Identity.Service
 
         public async Task<OutResponse> UserUnlockAsync(AuthenticationRequest authenticationRequest)
         {
-            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            var replyData = authenticationRequest.RequestData.ToJsonDeSerialize<FisUserUnlockRequest>();
 
-            var esbUrl = await GetEsbUrlAsync(EsbUrls.ESBUnlockUserDetailsUrl);
+            var esbUrl = await GetEsbUrlAsync(EsbUrls.EsbUserUnlockUrl);
 
-            var request = GetWebRequestSettings<dynamic>(esbUrl, replyData, authenticationRequest);
+            var request = GetWebRequestSettings<FisUserUnlockRequest>(esbUrl, replyData, authenticationRequest);
 
             await _loggerService.WriteCorelationLogAsync(new CorelationLoggerRequest { ServiceId = authenticationRequest.ServiceID, MethodId = authenticationRequest.MethodId, LayerId = LayerType.BLL.GetIntValue(), RequestFlag = true, ResponseFlag = false, CorelationRequest = authenticationRequest.RequestId, CorelationSession = authenticationRequest.SessionId, StatusCode = DefaultStatus.Default.GetIntValue(), ResponseMessage = "Authentication Service" });
             await _loggerService.WriteFillLogAsync(new FillLoggerRequest { RequestID = authenticationRequest.RequestId, TokenID = authenticationRequest.TokenId, TellerID = authenticationRequest.TellerId, UserID = authenticationRequest.ReturnId(), SessionID = authenticationRequest.SessionId, MethodId = authenticationRequest.MethodId, Module = new TraceCalling().ToModule(), Message = $"{CommonValues.ESBREQUEST} {authenticationRequest.RequestData}", PriorityId = LogPriority.BL1.GetIntValue() });
 
-            var result = await _webApiRequestService.PostAsync<dynamic, dynamic>(request);
+            var result = await _webApiRequestService.PostAsync<FisUserUnlockResponse, FisUserUnlockRequest>(request);
 
             var isNotValid = result.StatusCode is not (int)HttpStatusCode.OK;
 
@@ -698,9 +701,9 @@ namespace Login.Identity.Service
                 RequestId = request.RequestId,
                 SessionExpiryTime = checkValidReturnCode ? SessionExpireTime.GetSessionExpireTime(_appSettings.SessionExpired) : string.Empty,
                 ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : (!checkValidReturnCode) ? ResponseCode.Failure.GetIntValue() : ResponseCode.Success.GetIntValue(),
-                ResponseMessage = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.CorrectedMessage : (esbMessageFaield is not null && !checkValidReturnCode) ? esbMessageFaield.CorrectedMessage : string.Empty,
+                ResponseMessage = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.StandardMessageDesc : (esbMessageFaield is not null && !checkValidReturnCode) ? esbMessageFaield.CorrectedMessage : string.Empty,
                 ResponseMessage_Hindi = !checkValidReturnCode ? esbMessageFaield.HindiMessage : string.Empty,
-                MessageType = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.MessageType : !checkValidReturnCode ?? MessageType.Exclam.GetStringValue(),
+                MessageType = (esbMessageAlert is not null && checkValidReturnCode) ? esbMessageAlert.MessageType : (!checkValidReturnCode) ? MessageType.Exclam.GetStringValue() : string.Empty,
                 ResponseData = result.Data.ToJsonSerialize()
             };
 
