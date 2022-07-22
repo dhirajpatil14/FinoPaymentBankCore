@@ -96,19 +96,19 @@ namespace Login.Identity.Service
                         break;
                     #endregion
 
-                    #region Update Secret Question
+                    #region Method 9. Update Secret Question
                     case 9:
 
                         break;
                     #endregion
 
-                    #region User FP Authentication
+                    #region Method 10. User FP Authentication
                     case 10:
                         outResponse = await _authenticationService.UserFpAuthenticationAsync(authenticationRequest);
                         break;
                     #endregion
 
-                    #region Validate User Secret Question
+                    #region Method 11. Validate User Secret Question
                     case 11:
                         outResponse = await _authenticationService.ValidateSecretQuestionAsync(authenticationRequest);
                         break;
