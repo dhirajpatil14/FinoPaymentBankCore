@@ -6,7 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\AspNet.Attributes\AspNet.Attributes.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\MasterCacheService.Infrastructure\MasterCache.Service.csproj" />
   </ItemGroup>
 
 </Project>

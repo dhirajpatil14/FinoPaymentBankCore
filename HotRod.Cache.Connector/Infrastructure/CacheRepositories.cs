@@ -2,54 +2,23 @@
 using Common.Enums;
 using Data.Db.Service.Interface;
 using Data.Db.Service.Model;
+using HotRod.Cache.Connector.Application;
 using Microsoft.Extensions.Options;
 using SQL.Helper;
 using System.Threading.Tasks;
 
-namespace Shared.Services.MasterCache
+namespace HotRod.Cache.Connector.Infrastructure
 {
-    public class MasterCacheService : IMasterCacheService
+    public class CacheRepositories : ICacheRepositories
     {
         private readonly IDataDbConfigurationService _dataDbConfigurationService;
         private readonly SqlConnectionStrings _sqlConnectionStrings;
 
-        public MasterCacheService(IDataDbConfigurationService dataDbConfigurationService, IOptions<SqlConnectionStrings> sqlConnection)
+        public CacheRepositories(IDataDbConfigurationService dataDbConfigurationService, IOptions<SqlConnectionStrings> sqlConnection)
         {
             _dataDbConfigurationService = dataDbConfigurationService;
             _sqlConnectionStrings = sqlConnection.Value;
         }
-
-        public virtual async Task<MasterCaches> GetMasterByCacheNameAsync(string cacheName)
-        {
-            var config = new DataDbConfigSettings<MasterCaches>
-            {
-                TableEnums = PBMaster.MasterCache,
-                Request = new MasterCaches { MasterCacheKey = cacheName },
-                DbConnection = _sqlConnectionStrings.PBMasterConnection
-            };
-
-            return await _dataDbConfigurationService.GetDataAsync<MasterCaches, MasterCaches>(configSettings: config);
-        }
-
-        public virtual async Task<int> UpdateMasterCacheByMasterKey(string version, string masterCacheKey)
-        {
-            var parameter = new
-            {
-                Version = version,
-                MasterCacheKey = masterCacheKey
-            };
-            var sql = $"update MasterCache set Version=@Version where MasterCacheKey=@MasterCacheKey";
-            var config = new DataDbConfigSettings<object>
-            {
-
-                TableEnums = PBMaster.MasterCache,
-                PlainQuery = sql,
-                Request = parameter,
-                DbConnection = _sqlConnectionStrings.PBMasterConnection
-            };
-            return await _dataDbConfigurationService.UpdateDataAsync<object>(configSettings: config);
-        }
-
 
         public virtual async Task<FosAppVersion> GetFOSApplicationVersionAsync(string authenticator)
         {
@@ -68,6 +37,17 @@ namespace Shared.Services.MasterCache
                 DbConnection = _sqlConnectionStrings.PBMasterConnection
             };
             return await _dataDbConfigurationService.GetDataAsync<object, FosAppVersion>(configSettings: config);
+        }
+
+        public virtual async Task<MasterCaches> GetMasterByCacheNameAsync(string cacheName)
+        {
+            var config = new DataDbConfigSettings<MasterCaches>
+            {
+                TableEnums = PBMaster.MasterCache,
+                Request = new MasterCaches { MasterCacheKey = cacheName },
+                DbConnection = _sqlConnectionStrings.PBMasterConnection
+            };
+            return await _dataDbConfigurationService.GetDataAsync<MasterCaches, MasterCaches>(configSettings: config);
         }
 
         public virtual async Task<MobileVersion> GetMobileVersionAsync()
@@ -102,6 +82,29 @@ namespace Shared.Services.MasterCache
 
             return await _dataDbConfigurationService.UpdateDataAsync<object>(config);
         }
+
+        public virtual async Task<int> UpdateMasterCacheByMasterKey(string version, string masterCacheKey)
+        {
+            var parameter = new
+            {
+                Version = version,
+                MasterCacheKey = masterCacheKey
+            };
+
+            var sql = $"update MasterCache set Version=@Version where MasterCacheKey=@MasterCacheKey";
+
+            var config = new DataDbConfigSettings<object>
+            {
+
+                TableEnums = PBMaster.MasterCache,
+                PlainQuery = sql,
+                Request = parameter,
+                DbConnection = _sqlConnectionStrings.PBMasterConnection
+            };
+
+            return await _dataDbConfigurationService.UpdateDataAsync<object>(configSettings: config);
+        }
+
 
 
     }

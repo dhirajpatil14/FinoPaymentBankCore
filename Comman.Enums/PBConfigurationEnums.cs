@@ -14,7 +14,9 @@ namespace Common.Enums
         AuaRequestRd = 3,
 
         [StringValue("MSTAUA")]
-        MSTAUA = 4
+        MSTAUA = 4,
+        [StringValue("mstMessages")]
+        MasterMessages = 5,
 
     }
 }

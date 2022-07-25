@@ -1,18 +1,14 @@
 ﻿using Common.Application.Model;
 using System.Threading.Tasks;
 
-namespace Shared.Services.MasterCache
+namespace HotRod.Cache.Connector.Application
 {
-    public interface IMasterCacheService
+    public interface ICacheRepositories
     {
-        Task<MasterCaches> GetMasterByCacheNameAsync(string cacheName);
         Task<int> UpdateMasterCacheByMasterKey(string version, string masterCacheKey);
-
-        Task<FosAppVersion> GetFOSApplicationVersionAsync(string authenticator);
-
-        Task<MobileVersion> GetMobileVersionAsync();
-
         Task<int> UpdateMasterCacheAsync(string cacheName, string cacheValue, string version);
-
+        Task<MasterCaches> GetMasterByCacheNameAsync(string cacheName);
+        Task<FosAppVersion> GetFOSApplicationVersionAsync(string authenticator);
+        Task<MobileVersion> GetMobileVersionAsync();
     }
 }
