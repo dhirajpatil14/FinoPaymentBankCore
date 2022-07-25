@@ -71,7 +71,7 @@ namespace LoginServiceCoreAPI
 
             app.UseErrorHandlingMiddleware();
 
-            app.UseJwtMiddleware();
+
 
             app.UseEndpoints(endpoints =>
             {

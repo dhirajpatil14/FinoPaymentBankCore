@@ -16,7 +16,7 @@ using Utility.Extensions;
 
 namespace Login.Infrastructure.Repositories
 {
-    class UserRepositories : IUserRepositories
+    public class UserRepositories : IUserRepositories
     {
         private readonly IDataDbConfigurationService _dataDbConfigurationService;
         private readonly ICacheConnector _cacheConnector;

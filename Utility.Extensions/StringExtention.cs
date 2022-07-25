@@ -1,4 +1,8 @@
 ﻿using System;
+using System.IO;
+using System.IO.Compression;
+using System.Text;
+using Utility.Common;
 
 namespace Utility.Extensions
 {
@@ -44,6 +48,21 @@ namespace Utility.Extensions
         public static string ToBase64String(this byte[] baseByte)
         {
             return Convert.ToBase64String(baseByte);
+        }
+
+        public static byte[] Zip(this string data)
+        {
+
+            var bytes = Encoding.UTF8.GetBytes(data);
+
+            using var msi = new MemoryStream(bytes);
+            using var mso = new MemoryStream();
+            using (var gs = new GZipStream(mso, CompressionMode.Compress))
+            {
+                msi.CopyToStream(gs);
+            }
+
+            return mso.ToArray();
         }
 
     }

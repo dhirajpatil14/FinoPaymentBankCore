@@ -4,7 +4,7 @@ using Shared.Services.ESBCBSMessageService;
 using Shared.Services.ESBMessageService;
 using Shared.Services.ESBURLService;
 using Shared.Services.KYC;
-using Shared.Services.MasterCache;
+using Shared.Services.MasterMessage;
 
 namespace Shared.Services
 {
@@ -15,7 +15,7 @@ namespace Shared.Services
             services.AddSingleton<EsbUrlMemoryService>();
             services.AddSingleton<EsbMessageService>();
             services.AddSingleton<EsbCbsMessageService>();
-            services.AddTransient<IMasterCacheService, MasterCacheService>();
+            services.AddSingleton<MasterMessageService>();
             services.AddTransient<IEkycAuaService, EkycAuaService>();
         }
     }

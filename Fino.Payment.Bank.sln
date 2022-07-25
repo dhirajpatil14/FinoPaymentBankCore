@@ -96,13 +96,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{04CCDD5B-52D2-4B55-A741-F43491697C83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasterCacheServiceAPI", "MasterCacheService\MasterCacheAPI\MasterCacheServiceAPI\MasterCacheServiceAPI.csproj", "{C127E66D-600C-45D8-91EB-C78F3C2C96A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCacheServiceAPI", "MasterCacheService\MasterCacheAPI\MasterCacheServiceAPI\MasterCacheServiceAPI.csproj", "{C127E66D-600C-45D8-91EB-C78F3C2C96A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasterCacheService.Application", "MasterCacheService\Application\MasterCacheService.Application\MasterCacheService.Application.csproj", "{1BAE37B3-87C2-4D63-B3F3-3C31E581DC9F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCacheService.Application", "MasterCacheService\Application\MasterCacheService.Application\MasterCacheService.Application.csproj", "{1BAE37B3-87C2-4D63-B3F3-3C31E581DC9F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasterCacheService.Infrastructure", "MasterCacheService\Infrastructure\MasterCacheService.Infrastructure\MasterCacheService.Infrastructure.csproj", "{F3DF9D75-7F06-49C7-AD0A-2C7AC91D5F87}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCache.Service", "MasterCacheService\Infrastructure\MasterCacheService.Infrastructure\MasterCache.Service.csproj", "{F3DF9D75-7F06-49C7-AD0A-2C7AC91D5F87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasterCacheService.API.Integration.Tests", "MasterCacheService\Test\MasterCacheService.API.Integration.Tests\MasterCacheService.API.Integration.Tests.csproj", "{40A88835-5A84-4516-BBD9-8C429B242A1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCacheService.API.Integration.Tests", "MasterCacheService\Test\MasterCacheService.API.Integration.Tests\MasterCacheService.API.Integration.Tests.csproj", "{40A88835-5A84-4516-BBD9-8C429B242A1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Master.Cache.Service", "Master.Cache.Service\Master.Cache.Service.csproj", "{41276D30-0522-4BB0-AFD2-DF6943E98392}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -234,6 +236,10 @@ Global
 		{40A88835-5A84-4516-BBD9-8C429B242A1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40A88835-5A84-4516-BBD9-8C429B242A1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40A88835-5A84-4516-BBD9-8C429B242A1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41276D30-0522-4BB0-AFD2-DF6943E98392}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41276D30-0522-4BB0-AFD2-DF6943E98392}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41276D30-0522-4BB0-AFD2-DF6943E98392}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41276D30-0522-4BB0-AFD2-DF6943E98392}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -283,6 +289,7 @@ Global
 		{1BAE37B3-87C2-4D63-B3F3-3C31E581DC9F} = {C6E56D9E-A492-48C3-A3E4-6BBB80FD04EF}
 		{F3DF9D75-7F06-49C7-AD0A-2C7AC91D5F87} = {C1F59CF2-9A10-4F6A-A33B-81733E9CA72A}
 		{40A88835-5A84-4516-BBD9-8C429B242A1D} = {04CCDD5B-52D2-4B55-A741-F43491697C83}
+		{41276D30-0522-4BB0-AFD2-DF6943E98392} = {6881A608-B306-4243-AEDA-958EFCB1442C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {08D8D5A6-588D-4E19-A0A5-24B83A205F69}

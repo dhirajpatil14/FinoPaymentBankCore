@@ -5,4 +5,15 @@
 	  <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Contracts\Repositories\" />
+    <Folder Include="DTOs\" />
+    <Folder Include="Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Common.Application\Common.Application.csproj" />
+    <ProjectReference Include="..\..\..\Master.Cache.Service\Master.Cache.Service.csproj" />
+  </ItemGroup>
+
 </Project>
