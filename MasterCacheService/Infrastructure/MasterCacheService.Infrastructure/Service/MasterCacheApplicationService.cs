@@ -49,6 +49,7 @@ namespace MasterCache.Service.Service
                         outResponse = await _masterCacheService.GetMasterCacheCategoryAsync(cacheRequest);
                         break;
                     case 6611:
+                        outResponse = await _masterCacheService.GetMasterCacheCategoryMobileAsync(cacheRequest);
                         break;
                     case 1:
                         break;

@@ -25,9 +25,11 @@ namespace Common.Enums
         [StringValue("mstMobileVersion")]
         MobileVersion = 7,
 
+        [StringValue("tblMastersStatus")]
+        MasterStatus = 8,
 
-
-
+        [StringValue("tblCacheAuditTrail")]
+        CacheAuditTrail = 9
 
 
     }

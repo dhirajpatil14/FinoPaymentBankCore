@@ -105,7 +105,27 @@ namespace HotRod.Cache.Connector.Infrastructure
             return await _dataDbConfigurationService.UpdateDataAsync<object>(configSettings: config);
         }
 
+        public virtual async Task<int> InsertCacheAuditTrailLog(CacheAuditTrail cacheAuditTrail)
+        {
+            var config = new DataDbConfigSettings<CacheAuditTrail>
+            {
+                TableEnums = PBMaster.CacheAuditTrail,
+                Request = cacheAuditTrail,
+                DbConnection = _sqlConnectionStrings.PBMasterConnection
+            };
+            return await _dataDbConfigurationService.AddDataAsync<CacheAuditTrail>(config);
+        }
 
+        public async Task<int> UpdateCacheAuditTrailLog(CacheAuditTrail cacheAuditTrail)
+        {
+            var config = new DataDbConfigSettings<CacheAuditTrail>
+            {
+                PlainQuery = "update tblCacheAuditTrail set NewData = @NewData where Cachekey = @CacheKey and Id= @Id",
+                Request = cacheAuditTrail,
+                DbConnection = _sqlConnectionStrings.PBMasterConnection
+            };
 
+            return await _dataDbConfigurationService.UpdateDataAsync<CacheAuditTrail>(config);
+        }
     }
 }

@@ -11,6 +11,7 @@ namespace Utility.Extensions
             else
                 return string.Empty;
         }
+
         public static T ToJsonDeSerialize<T>(this string TObject)
         {
             return JsonConvert.DeserializeObject<T>(TObject);
