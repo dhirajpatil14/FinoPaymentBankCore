@@ -52,6 +52,34 @@ namespace MasterCache.Service.Service
                         outResponse = await _masterCacheService.GetMasterCacheCategoryMobileAsync(cacheRequest);
                         break;
                     case 1:
+                        outResponse = await _masterCacheService.GetMasterCacheAsync(cacheRequest);
+                        break;
+                    case 111:
+                        outResponse = await _masterCacheService.GetMasterCacheZipAsync(cacheRequest);
+                        break;
+                    case 222:
+                        outResponse = await _masterCacheService.ResetMasterCacheByCategoryAsync(cacheRequest);
+                        break;
+                    case 22211:
+                        outResponse = await _masterCacheService.ResetMasterCacheByCatgoryWithOutIncVersionAsync(cacheRequest);
+                        break;
+                    case 5511:
+                        outResponse = await _masterCacheService.ResetMasterCacheByCatgoryForMobileAsync(cacheRequest);
+                        break;
+                    case 7711:
+                        outResponse = await _masterCacheService.ResetMasterCacheByCategoryForMobileWithOutIncVersionAsync(cacheRequest);
+                        break;
+                    case 2:
+                        outResponse = await _masterCacheService.ResetMasterCacheAsync(cacheRequest);
+                        break;
+                    case 2211:
+                        outResponse = await _masterCacheService.ResetMasterCacheWithOutVersionAsync(cacheRequest);
+                        break;
+                    case 3:
+                        outResponse = await _masterCacheService.GetVersionForMastersAsync(cacheRequest);
+                        break;
+                    case 4:
+
                         break;
                     default:
                         break;

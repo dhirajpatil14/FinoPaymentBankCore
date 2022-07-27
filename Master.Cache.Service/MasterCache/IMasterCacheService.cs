@@ -22,7 +22,12 @@ namespace Master.Cache.Service.MasterCache
 
         Task<OutResponse> ResetMasterCacheByCategoryForMobileWithOutIncVersionAsync(CacheRequest cacheRequest);
 
-        Task<OutResponse> ResetMasterCache(CacheRequest cacheRequest);
+        Task<OutResponse> ResetMasterCacheAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> ResetMasterCacheWithOutVersionAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetVersionForMastersAsync(CacheRequest cacheRequest);
+
 
     }
 }

@@ -16,6 +16,13 @@ namespace Master.Cache.Service.MasterCache.DTo
         [JsonProperty("KeyCategory")]
         public string KeyCategory { get; set; }
 
+
+        [JsonProperty("Version")]
+        public int? Version { get; set; }
+
+        [JsonProperty("MBKeyCategory")]
+        public int? MbKeyCategory { get; set; }
+
         [JsonProperty("status")]
         public bool? Status { get; set; } = null;
     }

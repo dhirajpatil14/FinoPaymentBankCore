@@ -131,15 +131,14 @@ namespace HotRod.Cache.Connector
         /// <param name="auditTrailId"></param>
         /// <param name="ipAddress"></param>
         /// <returns></returns>
-        public async Task<int> PutCacheAuditWithOutVersion(string cacheName, string data, int auditTrailId, string ipAddress)
+        public async Task<bool> PutCacheAuditWithOutVersion(string cacheName, string data, int auditTrailId, string ipAddress, bool isMobile = false)
         {
             await PutCacheAsync(cacheName, data);
             var versionResult = await _cacheRepositories.GetMasterByCacheNameAsync(cacheName);
             var versionId = versionResult is not null ? string.IsNullOrEmpty(versionResult?.Version) ? 0 : Convert.ToInt64(versionResult?.Version) : 1;
-            var isUpdated = await _cacheRepositories.UpdateMasterCacheAsync(cacheName, data, versionId.ToString());
+            var isUpdated = await _cacheRepositories.UpdateMasterCacheAsync(cacheName, data, isMobile ? (versionId + 1).ToString() : versionId.ToString());
             var isInsertorUpdateAudit = auditTrailId is not 0 ? await _cacheRepositories.UpdateCacheAuditTrailLog(new CacheAuditTrail { CacheKey = cacheName, NewData = data, Id = auditTrailId }) : await _cacheRepositories.InsertCacheAuditTrailLog(new CacheAuditTrail { CacheKey = cacheName, IpAddress = ipAddress, NewData = data, OldData = string.Empty, UpdatedDate = DateTime.Now });
-            return isInsertorUpdateAudit;
+            return true;
         }
-
     }
 }
