@@ -28,6 +28,9 @@ namespace Master.Cache.Service.MasterCache
 
         Task<OutResponse> GetVersionForMastersAsync(CacheRequest cacheRequest);
 
+        Task<OutResponse> ResetIndividualMasterCacheAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> ResetIndividualMasterCacheWithOutIncrementVersionAsync(CacheRequest cacheRequest);
 
     }
 }

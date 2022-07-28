@@ -79,7 +79,10 @@ namespace MasterCache.Service.Service
                         outResponse = await _masterCacheService.GetVersionForMastersAsync(cacheRequest);
                         break;
                     case 4:
-
+                        outResponse = await _masterCacheService.ResetIndividualMasterCacheAsync(cacheRequest);
+                        break;
+                    case 4411:
+                        outResponse = await _masterCacheService.ResetIndividualMasterCacheWithOutIncrementVersionAsync(cacheRequest);
                         break;
                     default:
                         break;

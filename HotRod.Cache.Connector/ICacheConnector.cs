@@ -15,7 +15,7 @@ namespace HotRod.Cache.Connector
 
 
         Task<string> PutCacheAsync(string cacheName, string value);
-        Task<bool> PutCacheAuditWithOutVersion(string cacheName, string data, int auditTrailId, string ipAddress, bool isMobile = false);
+        Task<bool> PutCacheAuditWithOutVersion(string cacheName, string data, int auditTrailId, string ipAddress, bool isIncVersion = false);
 
     }
 }

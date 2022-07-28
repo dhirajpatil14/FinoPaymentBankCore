@@ -21,12 +21,12 @@ namespace Master.Cache.Service.MasterCache.Repositories
         }
 
 
-        public async Task<IEnumerable<MasterStatus>> GetMasterVersionAsync(string keyCategory = null, int? mBKeyCategory = null)
+        public async Task<IEnumerable<MasterStatus>> GetMasterVersionAsync(string keyCategory = null, int? mBKeyCategory = null, string mstTable = null)
         {
             var config = new DataDbConfigSettings<MasterStatus>
             {
                 TableEnums = PBMaster.MasterStatus,
-                Request = new MasterStatus { Status = true, KeyCategory = keyCategory, MbKeyCategory = mBKeyCategory },
+                Request = new MasterStatus { Status = true, KeyCategory = keyCategory, MbKeyCategory = mBKeyCategory, MstTableName = mstTable },
                 DbConnection = _sqlConnectionStrings.PBMasterConnection
             };
             return await _dataDbConfigurationService.GetDatasAsync<MasterStatus, MasterStatus>(configSettings: config);

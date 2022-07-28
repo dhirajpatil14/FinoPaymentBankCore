@@ -8,7 +8,7 @@ namespace Master.Cache.Service.MasterCache.Repositories
     {
         Task<dynamic> ExecuteQueryAsync(string query);
 
-        Task<IEnumerable<MasterStatus>> GetMasterVersionAsync(string keyCategory = null, int? mBKeyCategory = null);
+        Task<IEnumerable<MasterStatus>> GetMasterVersionAsync(string keyCategory = null, int? mBKeyCategory = null, string mstTable = null);
 
         Task<int> UpdateMasterStatusAsync(MasterStatus masterStatus);
     }
