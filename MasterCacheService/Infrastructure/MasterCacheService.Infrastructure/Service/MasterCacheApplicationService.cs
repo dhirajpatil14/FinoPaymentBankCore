@@ -84,6 +84,9 @@ namespace MasterCache.Service.Service
                     case 4411:
                         outResponse = await _masterCacheService.ResetIndividualMasterCacheWithOutIncrementVersionAsync(cacheRequest);
                         break;
+                    case 5:
+                        outResponse = await _masterCacheService.GetProfileFeatureControlsAsync(cacheRequest);
+                        break;
                     default:
                         break;
                 }

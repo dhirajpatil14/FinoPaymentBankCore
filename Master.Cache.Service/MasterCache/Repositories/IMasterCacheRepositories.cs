@@ -11,5 +11,11 @@ namespace Master.Cache.Service.MasterCache.Repositories
         Task<IEnumerable<MasterStatus>> GetMasterVersionAsync(string keyCategory = null, int? mBKeyCategory = null, string mstTable = null);
 
         Task<int> UpdateMasterStatusAsync(MasterStatus masterStatus);
+
+        Task<IEnumerable<MasterProductFeature>> GetMasterProfileFeatureDetailsAsync(MasterProductFeature masterProductFeature);
+
+        Task<IEnumerable<MasterProfileControl>> GetMasterProfileControlAsync(MasterProfileControl masterProfileControl);
+
+
     }
 }

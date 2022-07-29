@@ -2,16 +2,17 @@
 using Common.Enums;
 using HotRod.Cache;
 using HotRod.Cache.Connector;
+using Master.Cache.Service.MasterCache.DTo;
 using Master.Cache.Service.MasterCache.Model;
 using Master.Cache.Service.MasterCache.Repositories;
 using Master.Cache.Service.MasterCache.Settings;
 using Microsoft.Extensions.Options;
 using Shared.Services.MasterMessage;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Utility.Extensions;
-
 namespace Master.Cache.Service.MasterCache
 {
     public class MasterCacheService : IMasterCacheService
@@ -108,6 +109,32 @@ namespace Master.Cache.Service.MasterCache
             return await ResetIndividualMasterCacheComman(cacheRequest, false, true);
         }
 
+        public async Task<OutResponse> GetProfileFeatureControlsAsync(CacheRequest cacheRequest)
+        {
+            var data = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            bool isValid = (data.Ekyc is "" && data.ProductType is "") || (data.ProductType is not "");
+
+            var productFeatureDetailsData = await _cacheConnector.GetCache($"MobileTabCntrl" + data.ProductType is not "" ? data.ProductType : string.Empty, true);
+            var productFeatureDetails = productFeatureDetailsData.ToJsonDeSerialize<dynamic>();
+
+            //Add GetProductFeatureSpecificDetails
+            productFeatureDetails = productFeatureDetails is null && isValid ? await ProfileControlsDataAsync(data.ProductType, data.ChannelID, data.ekyc) : null;
+            var isUpdated = productFeatureDetails is null && isValid && await _cacheConnector.PutCacheMasterAsync($"MobileTabCntrl" + data.ProductType is not "" ? data.ProductType : string.Empty, productFeatureDetails.ToJsonSerialize());
+
+
+            var alertMessage = productFeatureDetails is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TabControlsReturnSuccessFul.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TabControlsReturnFailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = productFeatureDetails is not null ? productFeatureDetails.ToJsonSerialize() : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = productFeatureDetails is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
+        }
 
 
         #region Internal Method
@@ -353,6 +380,14 @@ namespace Master.Cache.Service.MasterCache
                 MessageType = alertMessage.MessageType
             };
             return outRespnse;
+        }
+
+
+        internal async Task<IEnumerable<MasterProductFeature>> ProfileControlsDataAsync(string productId, string channelId, bool? eKyc)
+        {
+            var masterProfiles = await _masterCacheRepositories.GetMasterProfileFeatureDetailsAsync(new MasterProductFeature { ProductCode = productId is "" ? null : Convert.ToInt32(productId), ChannelID = channelId, Ekyc = eKyc });
+            masterProfiles?.ToList().ForEach(async xx => xx.ProfileControlDetails = string.Join("|", (await _masterCacheRepositories.GetMasterProfileControlAsync(new MasterProfileControl { ProductCode = productId is null ? xx.ProductCode : Convert.ToInt32(productId), Ekyc = xx.Ekyc, ChannelID = channelId })).Select(yy => $"{yy.TabControlID}~{yy.ControlID}~{yy.ControlDesc}~{yy.Displayable}~{yy.Editable}~{yy.Mandatory}~{yy.KYCMandatory}~{yy.FieldType}~{yy.DataType}~{yy.FieldLength}~{yy.FieldMinLength}~{yy.FieldMaxLength}~{yy.FieldMinValue}~{yy.FieldMaxValue}~{yy.RequiredMaster}~{yy.RFU1}~{yy.RFU2}~{yy.KYCFlag}~{yy.EditableAddOn}~{yy.DisplayableADDOn}")));
+            return masterProfiles;
         }
 
         #endregion

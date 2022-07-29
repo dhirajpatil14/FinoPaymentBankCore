@@ -140,5 +140,18 @@ namespace HotRod.Cache.Connector
             var isInsertorUpdateAudit = auditTrailId is not 0 ? await _cacheRepositories.UpdateCacheAuditTrailLog(new CacheAuditTrail { CacheKey = cacheName, NewData = data, Id = auditTrailId }) : await _cacheRepositories.InsertCacheAuditTrailLog(new CacheAuditTrail { CacheKey = cacheName, IpAddress = ipAddress, NewData = data, OldData = string.Empty, UpdatedDate = DateTime.Now });
             return true;
         }
+
+        public async Task<bool> PutCacheMasterAsync(string cacheName, string data)
+        {
+
+            await PutCacheAsync(cacheName, data);
+
+            var cache = await _cacheRepositories.GetMasterByCacheNameAsync(cacheName);
+            var versionId = cache is not null ? Convert.ToInt32(cache?.Version) : 1;
+            await _cacheRepositories.UpdateMasterCacheAsync(cacheName, data, versionId.ToString());
+            return true;
+        }
+
+
     }
 }

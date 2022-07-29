@@ -32,5 +32,7 @@ namespace Master.Cache.Service.MasterCache
 
         Task<OutResponse> ResetIndividualMasterCacheWithOutIncrementVersionAsync(CacheRequest cacheRequest);
 
+        Task<OutResponse> GetProfileFeatureControlsAsync(CacheRequest cacheRequest);
+
     }
 }
