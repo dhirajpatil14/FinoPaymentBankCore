@@ -369,7 +369,8 @@ namespace Login.Identity.Service
                     #endregion
 
                     #region Get Certificate Expiry Date
-                    var expiryDate = await _userRepositories.GetAuaExpiryDataAsync(1, 11);
+                    var expiryDate = (await _ekycAuaService.GetMasterAuaAsync(new MasterAua { Status = true, Id = 11 })).AuaExpiryDate;
+
                     #endregion
 
                     #region Get FOS MOBILE VERSION

@@ -102,6 +102,9 @@ namespace Master.Cache.Service.MasterCache.DTo
         [JsonProperty("status")]
         public bool Status { get; set; }
 
+        [JsonProperty("appChannelid")]
+        public int? AppChannelid { get; set; } = null;
+
         [JsonProperty("ProfileControlDetails")]
         public string ProfileControlDetails { get; set; }
 

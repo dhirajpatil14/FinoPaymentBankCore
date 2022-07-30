@@ -87,6 +87,21 @@ namespace MasterCache.Service.Service
                     case 5:
                         outResponse = await _masterCacheService.GetProfileFeatureControlsAsync(cacheRequest);
                         break;
+                    case 55:
+                        outResponse = await _masterCacheService.GetProfileFeatureControlsAppChannelAsync(cacheRequest);
+                        break;
+                    case 6:
+                        outResponse = await _masterCacheService.GetSequencesAsync(cacheRequest);
+                        break;
+                    case 66:
+                        outResponse = await _masterCacheService.GetSequencesAppChannelAsync(cacheRequest);
+                        break;
+                    case 7:
+                        outResponse = await _masterCacheService.GetPublicKeyAsync(cacheRequest);
+                        break;
+                    case 8:
+                        outResponse = await _masterCacheService.GetMenuByChannelAsync(cacheRequest);
+                        break;
                     default:
                         break;
                 }

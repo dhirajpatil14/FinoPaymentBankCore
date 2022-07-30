@@ -418,24 +418,7 @@ namespace Login.Infrastructure.Repositories
             return fosdata is null ? await GetFosVersionCacheAsync(authenticator, cacheName) : fosdata.ToJsonDeSerialize<FosAppVersion>();
         }
 
-        public async Task<string> GetAuaExpiryDataAsync(int status, int id)
-        {
-            var parameter = new
-            {
-                Status = status,
-                ID = id
-            };
 
-            var query = "SELECT AUA_ExpiryDate FROM MSTAUA with (NOLOCK) where Status = @Status and ID = @ID";
-
-            var config = new DataDbConfigSettings<object>
-            {
-                PlainQuery = query,
-                Request = parameter,
-                DbConnection = _sqlConnectionStrings.PBConfigurationConnection
-            };
-            return await _dataDbConfigurationService.GetDataAsync<object, string>(configSettings: config);
-        }
 
         public async Task<MobileVersion> GetMobileVersionDataAsync(string cacheName)
         {

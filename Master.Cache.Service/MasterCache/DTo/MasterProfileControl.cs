@@ -97,5 +97,9 @@ namespace Master.Cache.Service.MasterCache.DTo
         //Add Jsonignore
         [JsonProperty("ProductCode")]
         public int? ProductCode { get; set; }
+
+        [JsonProperty("appChannelid")]
+        public int? AppChannelid { get; set; } = null;
+
     }
 }

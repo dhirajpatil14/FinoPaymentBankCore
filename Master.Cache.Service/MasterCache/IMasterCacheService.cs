@@ -34,5 +34,15 @@ namespace Master.Cache.Service.MasterCache
 
         Task<OutResponse> GetProfileFeatureControlsAsync(CacheRequest cacheRequest);
 
+        Task<OutResponse> GetProfileFeatureControlsAppChannelAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetSequencesAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetSequencesAppChannelAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetPublicKeyAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetMenuByChannelAsync(CacheRequest cacheRequest);
+
     }
 }

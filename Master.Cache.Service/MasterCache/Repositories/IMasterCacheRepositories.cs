@@ -8,14 +8,20 @@ namespace Master.Cache.Service.MasterCache.Repositories
     {
         Task<dynamic> ExecuteQueryAsync(string query);
 
-        Task<IEnumerable<MasterStatus>> GetMasterVersionAsync(string keyCategory = null, int? mBKeyCategory = null, string mstTable = null);
+        Task<IEnumerable<MasterStatus>> GetMasterVersionAsync(MasterStatus masterStatus);
 
         Task<int> UpdateMasterStatusAsync(MasterStatus masterStatus);
+
+        Task<int> InsertMasterStatusAsync(MasterStatus masterStatus);
+
 
         Task<IEnumerable<MasterProductFeature>> GetMasterProfileFeatureDetailsAsync(MasterProductFeature masterProductFeature);
 
         Task<IEnumerable<MasterProfileControl>> GetMasterProfileControlAsync(MasterProfileControl masterProfileControl);
 
+        Task<IEnumerable<SequenceMapping>> GetSequencesAsync();
+
+        Task<IEnumerable<RoleMenu>> GetRoleBasedMenuAsync(int userType, int channelId);
 
     }
 }
