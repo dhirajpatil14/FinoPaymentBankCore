@@ -1,5 +1,7 @@
 ﻿using Data.Db.Service;
 using Loggers.Logs;
+using MasterCache.Service.Service;
+using MasterCacheService.Application.Contracts.ServiceContarct;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Services;
 
@@ -15,7 +17,7 @@ namespace MasterCache.Service
 
             service.AddMemoryService();
 
-            service.AddMasterCacheService();
+            service.AddTransient<IMasterCacheApplicationService, MasterCacheApplicationService>();
         }
     }
 }

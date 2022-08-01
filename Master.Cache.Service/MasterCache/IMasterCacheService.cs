@@ -44,5 +44,7 @@ namespace Master.Cache.Service.MasterCache
 
         Task<OutResponse> GetMenuByChannelAsync(CacheRequest cacheRequest);
 
+        Task<OutResponse> GetProfileTypeTransByChannelAsync(CacheRequest cacheRequest);
+
     }
 }

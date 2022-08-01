@@ -16,11 +16,11 @@ namespace MasterCacheServiceAPI.Extensions
             {
                 if (IsDevelopmentEnvirment)
                 {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Login Service");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Cache Service");
                 }
                 else
                 {
-                    c.SwaggerEndpoint("/LoginService/swagger/v1/swagger.json", "Login Service");
+                    c.SwaggerEndpoint("/LoginService/swagger/v1/swagger.json", "Cache Service");
                 }
             });
         }
@@ -31,7 +31,7 @@ namespace MasterCacheServiceAPI.Extensions
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
-                    Title = "UPI Architecture - WebApi",
+                    Title = "Cache Service - WebApi",
                     Description = "This Api will be responsible for overall data distribution and authorization.",
                     Contact = new OpenApiContact
                     {

@@ -6,6 +6,11 @@ namespace MasterCacheService.Application.Contracts.ServiceContarct
 {
     public interface IMasterCacheApplicationService
     {
+        /// <summary>
+        /// Master Cache Service
+        /// </summary>
+        /// <param name="cacheRequest"></param>
+        /// <returns></returns>
         Task<OutResponse> MasterServiceCacheAsync(CacheRequest cacheRequest);
 
     }

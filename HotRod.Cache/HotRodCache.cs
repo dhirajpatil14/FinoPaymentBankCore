@@ -1,4 +1,5 @@
-﻿using HotRod.Cache.Settings;
+﻿using HotRod.Cache.MasterCacheDictionary;
+using HotRod.Cache.Settings;
 using Infinispan.Hotrod.Core;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
@@ -9,10 +10,13 @@ namespace HotRod.Cache
     {
         private Cache<string, string> Cache;
 
+        private readonly MasterCachesDictionary _masterCachesDictionary;
+
         public readonly CacheSettings _cacheSettings;
-        public HotRodCache(IOptions<CacheSettings> cacheSettings)
+        public HotRodCache(IOptions<CacheSettings> cacheSettings, MasterCachesDictionary masterCachesDictionary)
         {
             _cacheSettings = cacheSettings.Value;
+            _masterCachesDictionary = masterCachesDictionary;
             ConnectAsync();
         }
 
@@ -49,8 +53,16 @@ namespace HotRod.Cache
         /// <returns></returns>
         public async Task<string> GetCacheAsync(string key)
         {
-
-            return await Cache.Get(key);
+            string cacheData = await _masterCachesDictionary.GetMasterCacheAsync(key);
+            if (cacheData is null)
+            {
+                cacheData = await Cache.Get(key);
+                if (!string.IsNullOrEmpty(cacheData))
+                {
+                    await _masterCachesDictionary.SetMasterCacheAsync(key, cacheData);
+                }
+            }
+            return cacheData;
         }
         #endregion
 
@@ -63,10 +75,16 @@ namespace HotRod.Cache
         /// <returns>return key of value</returns>
         public async Task<string> PutCacheAsync(string key, string value)
         {
+            string cacheData = await _masterCachesDictionary.GetMasterCacheAsync(key);
+
+            if (string.IsNullOrEmpty(cacheData))
+            {
+                await _masterCachesDictionary.SetMasterCacheAsync(key, cacheData);
+            }
+
             return await Cache.Put(key, value);
         }
         #endregion
-
 
         #region Get Version
         /// <summary>
@@ -81,7 +99,6 @@ namespace HotRod.Cache
         }
         #endregion
 
-
         #region Remove  Cache Value
         /// <summary>
         /// Set Cache Value
@@ -94,10 +111,6 @@ namespace HotRod.Cache
             return remove;
         }
         #endregion
-
-
-
-
 
     }
 }

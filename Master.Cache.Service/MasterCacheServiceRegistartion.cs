@@ -6,9 +6,9 @@ namespace Master.Cache.Service
 {
     public static class MasterCacheServiceRegistartion
     {
-        public static void AddMasterCacheService(this IServiceCollection services)
+        public static void AddMasterSharedCacheService(this IServiceCollection services)
         {
-            services.AddSingleton<MasterCacheDictionary>();
+
             services.AddTransient<IMasterCacheRepositories, MasterCacheRepositories>();
             services.AddTransient<IMasterCacheService, MasterCacheService>();
         }
