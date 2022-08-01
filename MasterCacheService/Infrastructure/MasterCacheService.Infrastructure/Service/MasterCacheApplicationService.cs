@@ -102,6 +102,9 @@ namespace MasterCache.Service.Service
                     case 8:
                         outResponse = await _masterCacheService.GetMenuByChannelAsync(cacheRequest);
                         break;
+                    case 9:
+                        outResponse = await _masterCacheService.GetProfileTypeTransByChannelAsync(cacheRequest);
+                        break;
                     default:
                         break;
                 }

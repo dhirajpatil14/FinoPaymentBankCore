@@ -14,6 +14,7 @@ namespace HotRod.Cache.Connector
         private readonly HotRodCache _hotRodCache;
         private readonly ICacheRepositories _cacheRepositories;
 
+
         public CacheConnector(IOptions<AppSettings> appSettings, HotRodCache hotRodCache, ICacheRepositories cacheRepositories)
         {
             _appSettings = appSettings.Value;

@@ -1,5 +1,6 @@
 using HotRod.Cache;
 using Master.Cache.Service;
+using MasterCache.Service;
 using MasterCacheServiceAPI.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -39,9 +40,9 @@ namespace MasterCacheServiceAPI
 
             services.AddAuthentication();
 
+            services.AddMasterSharedCacheService();
+
             services.AddMasterCacheService();
-
-
 
         }
 

@@ -2,13 +2,13 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Master.Cache.Service.MasterCache
+namespace HotRod.Cache.MasterCacheDictionary
 {
-    public class MasterCacheDictionary
+    public class MasterCachesDictionary
     {
         private readonly Dictionary<string, IEnumerable<dynamic>> _cacheMaster;
 
-        public MasterCacheDictionary()
+        public MasterCachesDictionary()
         {
             _cacheMaster = new Dictionary<string, IEnumerable<dynamic>>();
         }
@@ -59,6 +59,5 @@ namespace Master.Cache.Service.MasterCache
                 _cacheMaster.Remove(KEY);
             }
         }
-
     }
 }

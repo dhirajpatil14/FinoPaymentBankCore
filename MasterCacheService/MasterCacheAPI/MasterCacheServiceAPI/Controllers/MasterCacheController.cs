@@ -1,4 +1,5 @@
-﻿using Common.Application.Model;
+﻿using Master.Cache.Service.MasterCache.Model;
+using MasterCacheService.Application.Contracts.ServiceContarct;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -9,15 +10,16 @@ namespace MasterCacheServiceAPI.Controllers
     [ApiController]
     public class MasterCacheController : ControllerBase
     {
-        public MasterCacheController()
+        private readonly IMasterCacheApplicationService _masterCacheApplicationService;
+        public MasterCacheController(IMasterCacheApplicationService masterCacheApplicationService)
         {
-
+            _masterCacheApplicationService = masterCacheApplicationService;
         }
 
         [HttpPost("mastercache")]
-        public async Task<IActionResult> AuthenticationAsync(InRequest inRequest)
+        public async Task<IActionResult> AuthenticationAsync(CacheRequest inRequest)
         {
-            return Ok();
+            return Ok(await _masterCacheApplicationService.MasterServiceCacheAsync(inRequest));
         }
     }
 }
