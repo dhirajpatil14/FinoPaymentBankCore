@@ -1,4 +1,5 @@
 ﻿using Common.Application.Interface;
+using Common.Application.Model;
 using Common.Application.Model.EKYC;
 using Common.Enums;
 using Data.Db.Service.Interface;
@@ -30,6 +31,17 @@ namespace Shared.Services.KYC
             };
 
             return await _dataDbConfigurationService.GetDataAsync<EkycAuaAadharRd, EkycAuaAadharRd>(configSettings: config);
+        }
+
+        public async Task<MasterAua> GetMasterAuaAsync(MasterAua masterAua)
+        {
+            var config = new DataDbConfigSettings<MasterAua>
+            {
+                TableEnums = PBConfiguration.MSTAUA,
+                Request = masterAua,
+                DbConnection = _sqlConnectionStrings.PBConfigurationConnection
+            };
+            return await _dataDbConfigurationService.GetDataAsync<MasterAua, MasterAua>(configSettings: config);
         }
     }
 }

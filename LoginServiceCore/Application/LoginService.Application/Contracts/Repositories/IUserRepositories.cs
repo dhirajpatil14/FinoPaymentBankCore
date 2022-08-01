@@ -44,7 +44,6 @@ namespace LoginService.Application.Contracts.Repositories
 
         Task<FosAppVersion> GetFosVersionAsync(string authenticator, string cacheName);
 
-        Task<string> GetAuaExpiryDataAsync(int status, int id);
 
         Task<MobileVersion> GetMobileVersionDataAsync(string cacheName);
 

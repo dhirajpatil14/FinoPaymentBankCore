@@ -22,7 +22,27 @@ namespace Master.Cache.Service.MasterCache
 
         Task<OutResponse> ResetMasterCacheByCategoryForMobileWithOutIncVersionAsync(CacheRequest cacheRequest);
 
-        Task<OutResponse> ResetMasterCache(CacheRequest cacheRequest);
+        Task<OutResponse> ResetMasterCacheAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> ResetMasterCacheWithOutVersionAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetVersionForMastersAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> ResetIndividualMasterCacheAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> ResetIndividualMasterCacheWithOutIncrementVersionAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetProfileFeatureControlsAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetProfileFeatureControlsAppChannelAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetSequencesAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetSequencesAppChannelAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetPublicKeyAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetMenuByChannelAsync(CacheRequest cacheRequest);
 
     }
 }

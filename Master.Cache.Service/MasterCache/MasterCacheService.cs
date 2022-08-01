@@ -1,115 +1,523 @@
-﻿using Common.Application.Model;
-using Common.Application.Model.Settings;
+﻿using Common.Application.Interface;
+using Common.Application.Model;
 using Common.Enums;
-using Data.Db.Service.Interface;
 using HotRod.Cache;
 using HotRod.Cache.Connector;
+using Master.Cache.Service.MasterCache.DTo;
 using Master.Cache.Service.MasterCache.Model;
+using Master.Cache.Service.MasterCache.Repositories;
+using Master.Cache.Service.MasterCache.Settings;
 using Microsoft.Extensions.Options;
-using Shared.Services.ESBMessageService;
-
 using Shared.Services.MasterMessage;
-using SQL.Helper;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Utility.Extensions;
-
 namespace Master.Cache.Service.MasterCache
 {
     public class MasterCacheService : IMasterCacheService
     {
-        private readonly IDataDbConfigurationService _dataDbConfigurationService;
-        private readonly SqlConnectionStrings _sqlConnectionStrings;
-        private readonly HotRodCache _hotRodCache;
         private readonly ICacheConnector _cacheConnector;
-        private readonly EsbMessageService _esbMessageService;
+        private readonly IMasterCacheRepositories _masterCacheRepositories;
+        private readonly IEkycAuaService _ekycAuaService;
         private readonly MasterMessageService _masterMessageService;
         private readonly AppSettings _appSettings;
+        private readonly MasterCacheDictionary _masterCacheDictionary;
 
-        public MasterCacheService(IDataDbConfigurationService dataDbConfigurationService, ICacheConnector cacheConnector, IOptions<SqlConnectionStrings> sqlConnection, IOptions<AppSettings> appSettings, EsbMessageService esbMessageService, MasterMessageService masterMessageService, HotRodCache hotRodCache)
+        public MasterCacheService(ICacheConnector cacheConnector, IOptions<AppSettings> appSettings, IMasterCacheRepositories masterCacheRepositories, IEkycAuaService ekycAuaService, MasterMessageService masterMessageService, HotRodCache hotRodCache, MasterCacheDictionary masterCacheDictionary)
         {
-            _dataDbConfigurationService = dataDbConfigurationService;
-            _sqlConnectionStrings = sqlConnection.Value;
-            _hotRodCache = hotRodCache;
             _cacheConnector = cacheConnector;
-            _esbMessageService = esbMessageService;
             _masterMessageService = masterMessageService;
+            _ekycAuaService = ekycAuaService;
+            _masterCacheDictionary = masterCacheDictionary;
+            _masterCacheRepositories = masterCacheRepositories;
             _appSettings = appSettings.Value;
         }
 
         public async Task<OutResponse> GetMasterCacheCategoryAsync(CacheRequest cacheRequest)
         {
-            var cacheResponse = new CacheResponse();
-            var cacheData = await _cacheConnector.GetCache(cacheRequest.RequestData, true);
-            cacheResponse.CacheMaster = cacheData.ToJsonDeSerialize<dynamic>();
+            return await GetMasterCacheCommanCategoryAsync(cacheRequest.RequestData, cacheRequest.RequestId, MasterCahcheEnums.MASTERCACHECATEGORY);
+        }
+
+        public async Task<OutResponse> GetMasterCacheCategoryMobileAsync(CacheRequest cacheRequest)
+        {
+            return await GetMasterCacheCommanCategoryAsync(cacheRequest.RequestData, cacheRequest.RequestId, MasterCahcheEnums.MASTERCACHEMOBILECATEGORY);
+        }
+
+        public async Task<OutResponse> GetMasterCacheAsync(CacheRequest cacheRequest)
+        {
+            return await GetMasterCacheCommanCategoryAsync(cacheRequest.RequestData, cacheRequest.RequestId, MasterCahcheEnums.MASTERCACHE);
+        }
+
+        public async Task<OutResponse> GetMasterCacheZipAsync(CacheRequest cacheRequest)
+        {
+            return await GetMasterCacheCommanCategoryAsync(cacheRequest.RequestData, cacheRequest.RequestId, MasterCahcheEnums.MASTERCACHEZIP);
+        }
+
+        public async Task<OutResponse> ResetMasterCacheByCategoryAsync(CacheRequest cacheRequest)
+        {
+            return await ResetMasterCacheCommanByCategoryAsync(cacheRequest, "MastersVersion", false, false, false, true);
+        }
+
+        public async Task<OutResponse> ResetMasterCacheByCatgoryWithOutIncVersionAsync(CacheRequest cacheRequest)
+        {
+            return await ResetMasterCacheCommanByCategoryAsync(cacheRequest, "MastersVersion", false, false, false, true);
+        }
+
+        public async Task<OutResponse> ResetMasterCacheByCatgoryForMobileAsync(CacheRequest cacheRequest)
+        {
+            return await ResetMasterCacheCommanByCategoryAsync(cacheRequest, "MastersVersion", true, false, true, true, true);
+        }
+
+        public async Task<OutResponse> ResetMasterCacheByCategoryForMobileWithOutIncVersionAsync(CacheRequest cacheRequest)
+        {
+            return await ResetMasterCacheCommanByCategoryAsync(cacheRequest, "MastersVersion", true, false, false, true, true);
+        }
+
+        public async Task<OutResponse> ResetMasterCacheAsync(CacheRequest cacheRequest)
+        {
+            return await ResetMasterCacheCommanByCategoryAsync(cacheRequest, "MobileMastersVersion", true, true, true, true, true);
+        }
+
+        public async Task<OutResponse> ResetMasterCacheWithOutVersionAsync(CacheRequest cacheRequest)
+        {
+
+            return await ResetMasterCacheCommanByCategoryAsync(cacheRequest, "MobileMastersVersion", true, true, false, true, true);
+        }
+
+        public async Task<OutResponse> GetVersionForMastersAsync(CacheRequest cacheRequest)
+        {
+
+            var masterStatus = await _masterCacheRepositories.GetMasterVersionAsync(new MasterStatus { Status = true });
+            var masterData = masterStatus.ToJsonSerialize();
+            var alertMessage = masterData is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterVersionReturnSuccessFul.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterVersionReturnFailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = masterData is not null ? masterData : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = masterData is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> ResetIndividualMasterCacheAsync(CacheRequest cacheRequest)
+        {
+            return await ResetIndividualMasterCacheComman(cacheRequest, true, true);
+        }
+
+        public async Task<OutResponse> ResetIndividualMasterCacheWithOutIncrementVersionAsync(CacheRequest cacheRequest)
+        {
+            return await ResetIndividualMasterCacheComman(cacheRequest, false, true);
+        }
+
+        public async Task<OutResponse> GetProfileFeatureControlsAsync(CacheRequest cacheRequest)
+        {
+            var data = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            bool isValid = (data.Ekyc is "" && data.ProductType is "") || (data.ProductType is not "");
+
+            var productFeatureDetailsData = await _cacheConnector.GetCache($"MobileTabCntrl" + data.ProductType is not "" ? data.ProductType : string.Empty, true);
+            var productFeatureDetails = productFeatureDetailsData.ToJsonDeSerialize<dynamic>();
+
+            productFeatureDetails = productFeatureDetails is null && isValid ? await ProfileControlsDataAsync(data.ProductType, data.ChannelID, data.ekyc) : null;
+            _ = productFeatureDetails is null && isValid && await _cacheConnector.PutCacheMasterAsync($"MobileTabCntrl" + data.ProductType is not "" ? data.ProductType : string.Empty, productFeatureDetails.ToJsonSerialize());
+
+
+            var alertMessage = productFeatureDetails is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TabControlsReturnSuccessFul.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TabControlsReturnFailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = productFeatureDetails is not null ? productFeatureDetails.ToJsonSerialize() : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = productFeatureDetails is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> GetProfileFeatureControlsAppChannelAsync(CacheRequest cacheRequest)
+        {
+            var data = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            bool isValid = (data.Ekyc is "" && data.ProductType is "") || (data.ProductType is not "");
+            var productFeatureDetailsData = await _cacheConnector.GetCache($"MobileTabCntrl" + data.ProductType is not "" ? data.ProductType + data.AppChannelID : data.AppChannelID, true);
+            var productFeatureDetails = productFeatureDetailsData.ToJsonDeSerialize<dynamic>();
+            productFeatureDetails = productFeatureDetails is null && isValid ? await ProfileControlsDataAsync(data.ProductType, data.ChannelID, data.ekyc, Convert.ToString(data.AppChannelID)) : null;
+            _ = productFeatureDetails is null && isValid && await _cacheConnector.PutCacheMasterAsync($"MobileTabCntrl" + data.ProductType is not "" ? data.ProductType + data.AppChannelID : data.AppChannelID, productFeatureDetails.ToJsonSerialize());
+
+            var alertMessage = productFeatureDetails is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TabControlsReturnSuccessFul.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TabControlsReturnFailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = productFeatureDetails is not null ? productFeatureDetails.ToJsonSerialize() : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = productFeatureDetails is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> GetSequencesAsync(CacheRequest cacheRequest)
+        {
+            return await GetSequenceAsync(cacheRequest);
+        }
+
+        public async Task<OutResponse> GetSequencesAppChannelAsync(CacheRequest cacheRequest)
+        {
+            return await GetSequenceAsync(cacheRequest, true);
+        }
+
+        public async Task<OutResponse> GetPublicKeyAsync(CacheRequest cacheRequest)
+        {
+            var masterAuaData = await _ekycAuaService.GetMasterAuaAsync(new MasterAua { Status = true, Id = 11 });
+
+            var alertMessage = masterAuaData is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.PublicKeySendSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.PublicKeySendFailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = masterAuaData is not null ? masterAuaData.ToJsonSerialize() : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = masterAuaData is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
+        }
+
+        public async Task<OutResponse> GetMenuByChannelAsync(CacheRequest cacheRequest)
+        {
+            var menuRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            var menuCacheData = await _cacheConnector.GetCache($"ProfileTypeDataMenu{menuRequestData.UserTypeID}{menuRequestData.ChannelID}", true);
+            IEnumerable<RoleMenu> roleMenus = null;
+            if (menuCacheData is null)
+            {
+                roleMenus = await _masterCacheRepositories.GetRoleBasedMenuAsync(menuRequestData.UserTypeID, menuRequestData.ChannelID);
+                await _cacheConnector.PutCacheMasterAsync($"ProfileTypeDataMenu{menuRequestData.UserTypeID}{menuRequestData.ChannelID}", roleMenus.ToJsonSerialize());
+            }
+            roleMenus = roleMenus is null ? menuCacheData.ToJsonDeSerialize<IEnumerable<RoleMenu>>() : roleMenus;
+            roleMenus = menuRequestData.FormID is not null ? roleMenus.Where(xx => xx.FormId == Convert.ToInt32(menuRequestData.FormID)) : roleMenus;
+
+            var alertMessage = roleMenus is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MenuListByChannelSentSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MenuListByChannelFailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = roleMenus is not null ? roleMenus.ToJsonSerialize() : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = roleMenus is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
+        }
+
+
+        #region Internal Method
+        internal async Task<OutResponse> GetMasterCacheCommanCategoryAsync(string requestData, string requestId, MasterCahcheEnums masterCahcheEnums)
+        {
+            var data = await _masterCacheDictionary.GetMasterCacheAsync(masterCahcheEnums.GetStringValue());
+
+            string keyCategory = string.Empty;
+
+            var cacheResponse = new CacheResponse
+            {
+                CacheMaster = data is null ? await _cacheConnector.GetCache(requestData, true) : data
+            };
+
+            switch (masterCahcheEnums)
+            {
+                case MasterCahcheEnums.MASTERCACHEMOBILECATEGORY:
+                    keyCategory = requestData.Substring(requestData.Length - 1, 1);
+                    break;
+                default:
+                    break;
+            }
 
             if (cacheResponse.CacheMaster is null)
             {
-                //below commented funcation required impliment
-                //ResetMasterCacheByCategoryDataNullWithOutIncVer()
+                switch (masterCahcheEnums)
+                {
+                    case MasterCahcheEnums.MASTERCACHECATEGORY:
+                        //below commented funcation required impliment
+                        //ResetMasterCacheByCategoryDataNullForMobileWithOutIncVer(objRequest);
+                        break;
+                    case MasterCahcheEnums.MASTERCACHEMOBILECATEGORY:
+                        //below commented funcation required impliment
+                        //ResetMasterCacheByCategoryDataNullWithOutIncVer()
+                        break;
+                    case MasterCahcheEnums.MASTERCACHE or MasterCahcheEnums.MASTERCACHEZIP:
+                        //below commented funcation required impliment
+                        //ResetIndividualMasterCacheWithOutIncVer(objRequest);
+                        break;
+                    default:
+                        break;
+                }
             }
 
-            cacheResponse.CacheMaster = await _cacheConnector.GetCache(cacheRequest.RequestData, true);
+            cacheResponse.CacheMaster = await _cacheConnector.GetCache(requestData, true);
 
-            int.TryParse(await _cacheConnector.GetCacheVersion(cacheRequest.RequestData), out int version);
+            int.TryParse(await _cacheConnector.GetCacheVersion(requestData), out int version);
+
+            var isMasterCacheData = requestData is "MastersCacheData" or "MastersCacheData1" or "MastersCacheData2" or "MastersCacheData3" or "MastersCacheData4" or "MastersCacheMobileData1" or "MastersCacheMobileData2" or "MastersCacheMobileData3" or "MastersCacheMobileData4" or "MastersCacheMobileData5";
+
             cacheResponse.VersionId = version;
-            cacheResponse.MastersVersion = cacheRequest.RequestData is "MastersCacheData1" or "MastersCacheData2" or "MastersCacheData3" or "MastersCacheData4" ? await _cacheConnector.GetCache("MastersVersion", true) : $"{cacheRequest.RequestData}#{cacheResponse.VersionId}";
+
+            cacheResponse.MastersVersion = isMasterCacheData ? await _cacheConnector.GetCache($"MastersVersion{keyCategory}", true) : $"{requestData}#{cacheResponse.VersionId}";
+
+            if (isMasterCacheData && string.IsNullOrEmpty(cacheResponse.MastersVersion))
+            {
+                switch (masterCahcheEnums)
+                {
+                    case MasterCahcheEnums.MASTERCACHE:
+                        cacheResponse.MastersVersion = await GetMasterVersionAsync("MastersVersion");
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            _ = data is null && cacheResponse.CacheMaster is not null ? await _masterCacheDictionary.SetMasterCacheAsync(masterCahcheEnums.GetStringValue(), cacheResponse.CacheMaster) : 0;
 
             var alertMessage = cacheResponse.CacheMaster is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterDataFound.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterDataCouldNotFound.GetIntValue());
-
 
             var outRespnse = new OutResponse
             {
                 ResponseData = cacheResponse.CacheMaster is not null ? BitConverter.ToString(cacheResponse.ToJsonSerialize()?.Zip()).Replace("-", string.Empty) : null,
-                RequestId = cacheRequest.RequestId,
+                RequestId = requestId,
                 ResponseCode = cacheResponse.CacheMaster is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
                 ResponseMessage = alertMessage.Message,
                 MessageType = alertMessage.MessageType
             };
 
             return outRespnse;
-
         }
 
-        public Task<OutResponse> GetMasterCacheCategoryMobileAsync(CacheRequest cacheRequest)
+        internal async Task<OutResponse> ResetMasterCacheCommanByCategoryAsync(CacheRequest cacheRequest, string key, bool isMobile = false, bool isResetMbkMobile = false, bool isoneincrementCache = false, bool istwoincrementCache = false, bool isUpdateValue = false)
         {
-            throw new System.NotImplementedException();
+            var data = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            string sql = string.Empty;
+            bool isResult = false;
+            var versionValue = string.Empty;
+            var Version = 0;
+            var versionData = await _masterCacheRepositories.GetMasterVersionAsync(new MasterStatus { KeyCategory = data.Keycategory });
+
+            int auditId;
+            foreach (var vData in versionData)
+            {
+                sql = $"{sql}{vData.SqlQuery};";
+
+                string versionLocalData = JsonExtensions.ToJsonSerialize(await _masterCacheRepositories.ExecuteQueryAsync(vData.SqlQuery));
+                var resultLocalData = await _cacheConnector.GetCache(vData.MstTableName, true);
+
+                auditId = resultLocalData is not null ? await _cacheConnector.RemoveCacheAuditAsync(new CacheAuditTrail { CacheKey = vData.MstTableName, IpAddress = data.Ip_Address }) : 0;
+                await _cacheConnector.PutCacheAuditWithOutVersion(vData.MstTableName, versionLocalData, auditId, data.Ip_Address, isoneincrementCache);
+                int.TryParse(await _cacheConnector.GetCacheVersion(vData.MstTableName), out Version);
+                versionValue = $"{versionValue}{vData.MstTableName}#{Version}~";
+                await _masterCacheRepositories.UpdateMasterStatusAsync(new DTo.MasterStatus { Version = Version, MstTableName = vData.MstTableName });
+            }
+            if (versionData is not null)
+            {
+                _ = await _masterCacheRepositories.ExecuteQueryAsync(sql.Remove(sql.Length - 1));
+                var resultCacheData = JsonExtensions.ToJsonSerialize(await _cacheConnector.GetCache(data.CacheKey, true));
+                auditId = resultCacheData is not null ? await _cacheConnector.RemoveCacheAuditAsync(new CacheAuditTrail { CacheKey = data.CacheKey, IpAddress = data.Ip_Address }) : 0;
+
+                isResult = await _cacheConnector.PutCacheAuditWithOutVersion(data.CacheKey, isUpdateValue ? versionValue : resultCacheData, auditId, data.Ip_Address, istwoincrementCache);
+
+                int.TryParse(await _cacheConnector.GetCacheVersion(data.CacheKey), out Version);
+                await _masterCacheRepositories.UpdateMasterStatusAsync(new DTo.MasterStatus { Version = Version, MstTableName = isResetMbkMobile ? "MastersCacheData" : data.CacheKey });
+            }
+
+            var isUpdate = isResult && isMobile && !isResetMbkMobile ? await GetMasterVersionAsync(key, isMobile) : string.Empty;
+            isUpdate = isResult && isMobile && isResetMbkMobile ? await GetMasterVersionMbKeyCategoryAsync(key, isMobile) : string.Empty;
+
+            var alertMessage = isResult ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterCacheResetSuccessful.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterCacheResetfailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = isResult ? $"Master Cahce VersionId {Version}" : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = isResult ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
         }
 
-        public Task<OutResponse> GetMasterCacheAsync(CacheRequest cacheRequest)
+        internal async Task<string> GetMasterVersionAsync(string key, bool isMobile = false, string keyCategory = null, int? mBKeyCategory = null)
         {
-            throw new System.NotImplementedException();
+            string version = string.Empty;
+
+            var data = await _masterCacheRepositories.GetMasterVersionAsync(new MasterStatus { KeyCategory = keyCategory, MbKeyCategory = mBKeyCategory });
+
+            foreach (var cacheName in data.Select(xx => xx.CacheName))
+            {
+
+                var versionId = isMobile ? await _cacheConnector.GetCacheVersion(cacheName) : await _cacheConnector.GetCache(cacheName, true);
+                version = $"{version}{cacheName}#{versionId}~";
+            }
+
+            version = version.Remove(version.Length - 1);
+
+            if (version is not null)
+            {
+                //MastersVersion
+                await _cacheConnector.RemoveAsync(key);
+                await _cacheConnector.PutCacheAsync(key, version);
+            }
+
+            return version;
         }
 
-        public Task<OutResponse> GetMasterCacheZipAsync(CacheRequest cacheRequest)
+        internal async Task<string> GetMasterVersionMbKeyCategoryAsync(string key, bool ismobile = false)
         {
-            throw new System.NotImplementedException();
+            string version = string.Empty;
+            if (_appSettings?.MobileKeyCategoryCount > 0)
+            {
+                for (var i = 1; i <= _appSettings?.MobileKeyCategoryCount; i++)
+                {
+                    version = $"{version}{await GetMasterVersionAsync($"{key}{i}", ismobile, null, i)}";
+                }
+            }
+
+            return version;
         }
 
-        public Task<OutResponse> ResetMasterCacheByCategoryAsync(CacheRequest cacheRequest)
+        internal async Task<string> UpdateMasterVersionGroupKeyCategoryAsync(CacheRequest cacheRequest)
         {
-            throw new System.NotImplementedException();
+            var data = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            string cacheKey = data is not null ? data.CacheKey : cacheRequest.RequestData;
+            var versionData = (await _masterCacheRepositories.GetMasterVersionAsync(new MasterStatus { MstTableName = cacheKey })).FirstOrDefault();
+            return versionData?.MbKeyCategory is not 0 ? await GetMasterVersionAsync($"MobileMastersVersion{versionData?.MbKeyCategory}", true, null, versionData?.MbKeyCategory) : string.Empty;
         }
 
-        public Task<OutResponse> ResetMasterCacheByCatgoryWithOutIncVersionAsync(CacheRequest cacheRequest)
+        internal async Task<OutResponse> ResetIndividualMasterCacheComman(CacheRequest cacheRequest, bool isoneincrementCache = false, bool istwoincrementCache = false)
         {
-            throw new System.NotImplementedException();
+            var data = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            string sql = string.Empty;
+            bool isResult = false;
+            var versionValue = string.Empty;
+            var Version = 0;
+            var versionData = (await _masterCacheRepositories.GetMasterVersionAsync(new MasterStatus { MstTableName = data.CacheKey })).FirstOrDefault();
+
+            var versionAllData = (bool)versionData?.Status ? await _masterCacheRepositories.GetMasterVersionAsync(new MasterStatus { }) : null;
+            int auditId;
+            bool isUpdate = false;
+            foreach (var vData in versionAllData)
+            {
+                sql = $"{sql}{vData.SqlQuery};";
+
+                Version = Convert.ToInt32(await _cacheConnector.GetCacheVersion(vData.MstTableName));
+
+                if (Version != 0 || (data.CacheKey && cacheRequest.RequestData is not "MastersCacheData"))
+                {
+                    isUpdate = data.CacheKey && cacheRequest.RequestData is not "MastersCacheData" ?? true;
+                    string versionLocalData = JsonExtensions.ToJsonSerialize(await _masterCacheRepositories.ExecuteQueryAsync(vData.SqlQuery));
+                    var resultLocalData = await _cacheConnector.GetCache(vData.MstTableName, true);
+                    auditId = resultLocalData is not null ? await _cacheConnector.RemoveCacheAuditAsync(new CacheAuditTrail { CacheKey = vData.MstTableName, IpAddress = data.Ip_Address }) : 0;
+                    await _cacheConnector.PutCacheAuditWithOutVersion(vData.MstTableName, versionLocalData, auditId, data.Ip_Address, isoneincrementCache);
+
+                    await GetMasterVersionAsync("MastersVersion", true);
+                    await UpdateMasterVersionGroupKeyCategoryAsync(cacheRequest);
+                }
+            }
+            if (isUpdate)
+            {
+                _ = await _masterCacheRepositories.ExecuteQueryAsync(sql.Remove(sql.Length - 1));
+                var resultCacheData = JsonExtensions.ToJsonSerialize(await _cacheConnector.GetCache("MastersCacheData", true));
+                auditId = resultCacheData is not null ? await _cacheConnector.RemoveCacheAuditAsync(new CacheAuditTrail { CacheKey = data.CacheKey, IpAddress = data.Ip_Address }) : 0;
+                isResult = await _cacheConnector.PutCacheAuditWithOutVersion("MastersCacheData", resultCacheData, auditId, data.Ip_Address, istwoincrementCache);
+                int.TryParse(await _cacheConnector.GetCacheVersion("MastersCacheData"), out Version);
+                await _masterCacheRepositories.UpdateMasterStatusAsync(new DTo.MasterStatus { Version = Version, MstTableName = "MastersCacheData" });
+
+            }
+            if (!(bool)versionData?.Status && (data.CacheKey && cacheRequest.RequestData is not "MastersCacheData"))
+            {
+                string versionLocalData = JsonExtensions.ToJsonSerialize(await _masterCacheRepositories.ExecuteQueryAsync(versionData.SqlQuery));
+                var resultCacheData = await _cacheConnector.GetCache("MastersCacheData", true);
+                auditId = resultCacheData is not null ? await _cacheConnector.RemoveCacheAuditAsync(new CacheAuditTrail { CacheKey = versionData.MstTableName, IpAddress = data.Ip_Address }) : 0;
+                isResult = await _cacheConnector.PutCacheAuditWithOutVersion(versionData.MstTableName, versionLocalData, auditId, data.Ip_Address, istwoincrementCache);
+                int.TryParse(await _cacheConnector.GetCacheVersion(versionData.MstTableName), out Version);
+                await _masterCacheRepositories.UpdateMasterStatusAsync(new DTo.MasterStatus { Version = Version, MstTableName = versionData.MstTableName });
+            }
+            if (isUpdate || (!(bool)versionData?.Status && (data.CacheKey && cacheRequest.RequestData is not "MastersCacheData")))
+            {
+                await GetMasterVersionAsync("MastersVersion", true);
+                await UpdateMasterVersionGroupKeyCategoryAsync(cacheRequest);
+            }
+
+            var alertMessage = isResult ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterCacheResetSuccessful.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterCacheResetfailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = isResult ? $"{cacheRequest.RequestData} Cache updated " : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = isResult ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
         }
 
-        public Task<OutResponse> ResetMasterCacheByCatgoryForMobileAsync(CacheRequest cacheRequest)
+        internal async Task<IEnumerable<MasterProductFeature>> ProfileControlsDataAsync(string productId, string channelId, bool? eKyc, string appChannelId = null)
         {
-            throw new System.NotImplementedException();
+            var masterProfiles = await _masterCacheRepositories.GetMasterProfileFeatureDetailsAsync(new MasterProductFeature { ProductCode = productId is "" ? null : Convert.ToInt32(productId), ChannelID = channelId, Ekyc = eKyc, AppChannelid = appChannelId is not null ? Convert.ToInt32(appChannelId) : null });
+            masterProfiles?.ToList().ForEach(async xx => xx.ProfileControlDetails = string.Join("|", (await _masterCacheRepositories.GetMasterProfileControlAsync(new MasterProfileControl { ProductCode = productId is null ? xx.ProductCode : Convert.ToInt32(productId), Ekyc = xx.Ekyc, ChannelID = channelId, AppChannelid = appChannelId is not null ? Convert.ToInt32(appChannelId) : null })).Select(yy => $"{yy.TabControlID}~{yy.ControlID}~{yy.ControlDesc}~{yy.Displayable}~{yy.Editable}~{yy.Mandatory}~{yy.KYCMandatory}~{yy.FieldType}~{yy.DataType}~{yy.FieldLength}~{yy.FieldMinLength}~{yy.FieldMaxLength}~{yy.FieldMinValue}~{yy.FieldMaxValue}~{yy.RequiredMaster}~{yy.RFU1}~{yy.RFU2}~{yy.KYCFlag}~{yy.EditableAddOn}~{yy.DisplayableADDOn}")));
+            return masterProfiles;
         }
 
-        public Task<OutResponse> ResetMasterCacheByCategoryForMobileWithOutIncVersionAsync(CacheRequest cacheRequest)
+        internal async Task<OutResponse> GetSequenceAsync(CacheRequest cacheRequest, bool isAppChannel = false)
         {
-            throw new System.NotImplementedException();
-        }
+            var data = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            var sequencesCache = await _cacheConnector.GetCache(isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList", true);
+            IEnumerable<SequenceMapping> sequencesData = null;
 
-        public Task<OutResponse> ResetMasterCache(CacheRequest cacheRequest)
-        {
-            throw new System.NotImplementedException();
+            sequencesData = sequencesCache is null ? await _masterCacheRepositories.GetSequencesAsync() : sequencesCache.ToJsonDeSerialize<IEnumerable<SequenceMapping>>();
+
+            var dataSequence = sequencesData.ToJsonSerialize();
+            await _cacheConnector.PutCacheMasterAsync(isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList", dataSequence);
+            if (data.ProductType is not "")
+            {
+                sequencesData = sequencesData.Where(xx =>
+                {
+                    dynamic dynamic = xx.NewProductType == Convert.ToInt32(data.productType);
+                    return dynamic;
+                });
+
+            }
+            var sequenceVersion = await _cacheConnector.GetCacheVersion(isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList");
+            var sequenceMobile = new SequencesMobile
+            {
+                Version = Convert.ToInt32(sequenceVersion),
+                SequenceMappings = sequencesData
+            };
+
+            var profileControl = sequenceMobile.ToJsonSerialize();
+
+            if (sequencesCache is null)
+            {
+                var masterStatus = await _masterCacheRepositories.GetMasterVersionAsync(new MasterStatus { CacheName = isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList" });
+                _ = masterStatus.Any() ? await _masterCacheRepositories.UpdateMasterStatusAsync(new MasterStatus { Version = Convert.ToInt32(sequenceVersion), CacheName = isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList" }) : await _masterCacheRepositories.InsertMasterStatusAsync(new MasterStatus { MstTableId = 42, CacheName = isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList", Version = Convert.ToInt32(sequenceVersion), MstUpdateFlag = 0, CreatedDate = DateTime.Now, CreatedBy = 0 });
+            }
+
+            var alertMessage = profileControl is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.SequenceListReturnSuccessful.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.SequenceListReturnfailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = profileControl is not null ? profileControl : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = profileControl is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
         }
+        #endregion
 
     }
 }

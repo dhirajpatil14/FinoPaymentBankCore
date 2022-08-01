@@ -10,5 +10,9 @@ namespace HotRod.Cache.Connector.Application
         Task<MasterCaches> GetMasterByCacheNameAsync(string cacheName);
         Task<FosAppVersion> GetFOSApplicationVersionAsync(string authenticator);
         Task<MobileVersion> GetMobileVersionAsync();
+        Task<int> InsertCacheAuditTrailLog(CacheAuditTrail cacheAuditTrail);
+
+        Task<int> UpdateCacheAuditTrailLog(CacheAuditTrail cacheAuditTrail);
+
     }
 }
