@@ -194,12 +194,26 @@ namespace Master.Cache.Service.MasterCache
         {
             var menuRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
             var menuCacheData = await _cacheConnector.GetCache($"ProfileTypeDataMenu{menuRequestData.UserTypeID}{menuRequestData.ChannelID}", true);
-
+            IEnumerable<RoleMenu> roleMenus = null;
             if (menuCacheData is null)
             {
-
+                roleMenus = await _masterCacheRepositories.GetRoleBasedMenuAsync(menuRequestData.UserTypeID, menuRequestData.ChannelID);
+                await _cacheConnector.PutCacheMasterAsync($"ProfileTypeDataMenu{menuRequestData.UserTypeID}{menuRequestData.ChannelID}", roleMenus.ToJsonSerialize());
             }
+            roleMenus = roleMenus is null ? menuCacheData.ToJsonDeSerialize<IEnumerable<RoleMenu>>() : roleMenus;
+            roleMenus = menuRequestData.FormID is not null ? roleMenus.Where(xx => xx.FormId == Convert.ToInt32(menuRequestData.FormID)) : roleMenus;
 
+            var alertMessage = roleMenus is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MenuListByChannelSentSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MenuListByChannelFailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = roleMenus is not null ? roleMenus.ToJsonSerialize() : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = roleMenus is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
         }
 
 

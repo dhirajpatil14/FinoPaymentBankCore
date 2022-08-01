@@ -150,29 +150,38 @@ namespace Master.Cache.Service.MasterCache.Repositories
 
         public async Task<IEnumerable<RoleMenu>> GetRoleBasedMenuAsync(int userType, int channelId)
         {
+            string query = string.Empty;
 
             var parameter = new
             {
-                userType = userType,
-                channelID = channelId
+                userType,
+                channelId
             };
 
-            var query = "select mstMenu.MenuID,mstMenu.MenuDescription,mstMenu.MenuParent,mstMenu.MenuUrl,mstMenu.MenuPosition,mstMenu.OnClickFunction,mstMenu.Menu_cssClass,mstMenu.Menu_cssIconClass,mstMenu.FormID, mstMenu.MenuIdKey " +
-                "  from mstMenu with (nolock)  INNER JOIN mstRoleMenu with (nolock) ON mstMenu.MenuID=mstRoleMenu.MenuID INNER JOIN mstuserType ON  mstRoleMenu.UserType =  mstuserType.UserTypeId" +
-                " INNER JOIN mstChannel with (nolock) ON mstChannel.ChannelID = mstMenu.ChannelID " +
-                " where mstRoleMenu.status = 1 and  mstRoleMenu.UserType  = @userType and mstChannel.ChannelID = @channelID order by mstMenu.MenuPosition";
-
+            if (channelId == 2)
+            {
+                query = "select mstMenu.MenuID,mstMenu.MenuDescription,mstMenu.MenuParent,mstMenu.MenuUrl,mstMenu.MenuPosition,mstMenu.OnClickFunction,mstMenu.Menu_cssClass,mstMenu.Menu_cssIconClass,mstMenu.FormID, mstMenu.MenuIdKey " +
+                    "  from mstMenu with (nolock)  INNER JOIN mstRoleMenu with (nolock) ON mstMenu.MenuID=mstRoleMenu.MenuID INNER JOIN mstuserType ON  mstRoleMenu.UserType =  mstuserType.UserTypeId" +
+                    " INNER JOIN mstChannel with (nolock) ON mstChannel.ChannelID = mstMenu.ChannelID " +
+                    " where mstRoleMenu.status = 1 and  mstRoleMenu.UserType  = @userType and mstChannel.ChannelID = @channelId order by mstMenu.MenuPosition";
+            }
+            else
+            {
+                query = " select distinct mstMenu.MenuID,mstMenu.MenuDescription,mstMenu.MenuUrl,mstMenu.Menu_cssClass,mstMenu.Menu_cssIconClass " +
+                    " from mstMenu with (nolock) INNER JOIN mstRoleMenu with (nolock) ON mstMenu.MenuID=mstRoleMenu.MenuID  " +
+                    " INNER JOIN mstuserType with (nolock) ON  mstRoleMenu.UserType =  mstuserType.UserTypeId " +
+                    "  INNER JOIN mstChannel with (nolock) ON mstChannel.ChannelID = mstMenu.ChannelID " +
+                    " INNER JOIN mstmenuPosition with (nolock) ON mstmenuPosition.menuPositionID = MobileMenuPosition " +
+                    " where mstRoleMenu.status = 1" +
+                    "  and  mstRoleMenu.UserType  = @userType and mstMenu.ChannelID = @channelId  ";
+            }
             var config = new DataDbConfigSettings<object>
             {
                 PlainQuery = query,
                 Request = parameter,
                 DbConnection = _sqlConnectionStrings.PBMasterConnection
             };
-
-            var data = await _dataDbConfigurationService.GetDatasAsync<object, RoleMenu>(config);
-
-
-
+            return await _dataDbConfigurationService.GetDatasAsync<object, RoleMenu>(config);
         }
 
     }
