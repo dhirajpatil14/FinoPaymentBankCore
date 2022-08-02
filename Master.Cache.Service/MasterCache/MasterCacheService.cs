@@ -309,52 +309,22 @@ namespace Master.Cache.Service.MasterCache
         {
             var masterRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
             var masterCacheData = await _cacheConnector.GetCache($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", true);
-            ProfileType profileType = masterCacheData is not null ? masterCacheData.ToJsonDeSerialize<ProfileType>():null;
-            if (profileType is null || profileType.ChannelID is null|| profileType.ProfileTransaction is null || profileType.UserTypeID is null || profileType.UserTypeName is null)
-            {
-                profileType = _masterCacheRepositories.ProfileTypeDictionaryAsync(masterRequestData.UserTypeID, masterRequestData.ChannelID);
-                
-                // ned to check --
-                if (profileType?.ChannelID is  null || profileType?.ProfileTransaction is null || profileType.UserTypeID is null || profileType.UserTypeName is null)
-                {
-                    profileType = null;
-                }
-                else
-                {
-                    await _cacheConnector.PutCacheMasterAsync($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", profileType.ToJsonSerialize());
-                }
-            }
-            if (profileType is not null)
-            {
-                IEnumerable<ProfileTransaction> profileTransaction = null;
+            var profileType = masterCacheData is not null ? masterCacheData.ToJsonDeSerialize<ProfileType>() : null;
 
-                if (masterRequestData.productTypeID is not null)
-                {
-                    if (masterRequestData.transactionTypeID is not null)
-                    {
-                        profileTransaction = profileType.ProfileTransaction.Where(item => (item.TransactionTypeID == masterRequestData.TransactionTypeID) && (item.ProductTypeID == masterRequestData.productTypeID)).ToList();
-                    }
-                    else
-                    {
-                        profileTransaction = profileType.ProfileTransaction.Where(item => item.ProductTypeID == masterRequestData.productTypeID).ToList();
-                    }
-                }
-                else if (masterRequestData.productTypeID is  null)
-                {
-                    if (masterRequestData.transactionTypeID is not null)
-                    {
-                        profileTransaction = profileType.ProfileTransaction.Where(item => item?.TransactionTypeID == masterRequestData?.TransactionTypeID).ToList();
-                    }
-                }
-                else profileTransaction = profileType.ProfileTransaction?.ToList();
+            var profileUpdatedTypes = profileType is null ? await _masterCacheRepositories.ProfileTypeDictionaryAsync(masterRequestData?.UserTypeID, masterRequestData?.ChannelID) : null;
 
-                profileType.ProfileTransaction = profileTransaction;
+            _ = profileUpdatedTypes is not null && await _cacheConnector.PutCacheMasterAsync($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", profileUpdatedTypes.ToJsonSerialize());
 
-            }
-            var alertMessage = profileType is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MenuListByChannelSentSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MenuListByChannelFailed.GetIntValue());
+            profileType = profileUpdatedTypes is not null ? profileUpdatedTypes : profileType;
+
+            var responseData = profileType is not null && masterRequestData.productTypeID is null or "" ? profileType.ToJsonSerialize() : masterRequestData.TransactionTypeID is not null or "" ? (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID && xx.TransactionTypeID == masterRequestData.TransactionTypeID)).ToJsonSerialize() : (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID)).ToJsonSerialize();
+
+
+            var alertMessage = profileType is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelFailed.GetIntValue());
+
             var outRespnse = new OutResponse
             {
-                ResponseData = profileType is not null ? profileType.ToJsonSerialize() : null,
+                ResponseData = responseData is not null or "" ? responseData : null,
                 RequestId = cacheRequest.RequestId,
                 ResponseCode = profileType is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
                 ResponseMessage = alertMessage.Message,
