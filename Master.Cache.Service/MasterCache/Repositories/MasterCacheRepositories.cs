@@ -5,6 +5,7 @@ using Master.Cache.Service.MasterCache.DTo;
 using Microsoft.Extensions.Options;
 using SQL.Helper;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Master.Cache.Service.MasterCache.Repositories
@@ -184,5 +185,38 @@ namespace Master.Cache.Service.MasterCache.Repositories
             return await _dataDbConfigurationService.GetDatasAsync<object, RoleMenu>(config);
         }
 
+        public async Task<ProfileType> ProfileTypeDictionaryAsync(string userType, string channelId)
+        {
+            var parameter = new
+            {
+                userType,
+                channelId
+            };
+
+            var query = " select mpt.ProfileTypeID,mpt.UserTypeID,mpt.TransactionTypeID,mpt.AuthTypeID,mpt.ChannelID,mpt.PerTransactionLimit," +
+                                " mpt.MinTransLimit,mpt.MaxTransLimit,mpt.UserGrossLimit,mstTransactionType.TransactionTypeName,mstTransactionType.TransactionType," +
+                                " mstTransactionAuthType.AuthTypeName,mstUserType.UserTypeName,isnull(mpt.Denomination,0) Denomination, " +
+                                " mpt.ProductTypeID,mpt.status,mstTransactionType.IsFinancial,mpt.IsSplit,mpt.NoofRetry,mpt.FallBackAuth,mstTransactionType.DMSId, " +
+                                " mstTransactionType.PageUrl,mpt.RFU,mpt.NoofFallBack,isnull(mpt.CashContributionStatus,0) CashContributionStatus," +
+                                " isnull(mpt.IsOnlyWalkin,1) IsOnlyWalkin,mstTransactionType.TransactionTypeKey from mstProfileType mpt WITH (NOLOCK) " +
+                                " INNER JOIN mstTransactionType WITH (NOLOCK) ON mpt.TransactionTypeID= mstTransactionType.TransactionTypeID " +
+                                " INNER JOIN mstTransactionAuthType WITH (NOLOCK) ON mpt.AuthTypeID = mstTransactionAuthType.AuthTypeId " +
+                                " INNER JOIN mstUserType WITH (NOLOCK) ON mpt.UserTypeID=mstUserType.UserTypeId " +
+                                " where mpt.UserTypeID=@userType and ChannelID= @channelId and status ='true'";
+
+            var config = new DataDbConfigSettings<object>
+            {
+                PlainQuery = query,
+                Request = parameter,
+                DbConnection = _sqlConnectionStrings.PBMasterConnection
+            };
+
+            var profileTranscations = await _dataDbConfigurationService.GetDatasAsync<dynamic, ProfileTransaction>(configSettings: config);
+
+            var profileTranscation = profileTranscations?.FirstOrDefault();
+
+           return new ProfileType { ChannelID = profileTranscation?.ChannelID ,UserTypeID = profileTranscation?.UserTypeID,UserTypeName = profileTranscation?.UserTypeName,ProfileTransaction = profileTranscations };
+
+        }
     }
 }

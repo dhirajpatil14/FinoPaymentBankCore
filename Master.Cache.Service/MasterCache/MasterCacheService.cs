@@ -305,11 +305,62 @@ namespace Master.Cache.Service.MasterCache
         /// </summary>
         /// <param name="cacheRequest"></param>
         /// <returns></returns>
-        public Task<OutResponse> GetProfileTypeTransByChannelAsync(CacheRequest cacheRequest)
+        public async Task<OutResponse> GetProfileTypeTransByChannelAsync(CacheRequest cacheRequest)
         {
-            var requestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            var masterRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            var masterCacheData = await _cacheConnector.GetCache($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", true);
+            ProfileType profileType = masterCacheData is not null ? masterCacheData.ToJsonDeSerialize<ProfileType>():null;
+            if (profileType is null || profileType.ChannelID is null|| profileType.ProfileTransaction is null || profileType.UserTypeID is null || profileType.UserTypeName is null)
+            {
+                profileType = _masterCacheRepositories.ProfileTypeDictionaryAsync(masterRequestData.UserTypeID, masterRequestData.ChannelID);
+                
+                // ned to check --
+                if (profileType?.ChannelID is  null || profileType?.ProfileTransaction is null || profileType.UserTypeID is null || profileType.UserTypeName is null)
+                {
+                    profileType = null;
+                }
+                else
+                {
+                    await _cacheConnector.PutCacheMasterAsync($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", profileType.ToJsonSerialize());
+                }
+            }
+            if (profileType is not null)
+            {
+                IEnumerable<ProfileTransaction> profileTransaction = null;
 
-            throw new NotImplementedException();
+                if (masterRequestData.productTypeID is not null)
+                {
+                    if (masterRequestData.transactionTypeID is not null)
+                    {
+                        profileTransaction = profileType.ProfileTransaction.Where(item => (item.TransactionTypeID == masterRequestData.TransactionTypeID) && (item.ProductTypeID == masterRequestData.productTypeID)).ToList();
+                    }
+                    else
+                    {
+                        profileTransaction = profileType.ProfileTransaction.Where(item => item.ProductTypeID == masterRequestData.productTypeID).ToList();
+                    }
+                }
+                else if (masterRequestData.productTypeID is  null)
+                {
+                    if (masterRequestData.transactionTypeID is not null)
+                    {
+                        profileTransaction = profileType.ProfileTransaction.Where(item => item?.TransactionTypeID == masterRequestData?.TransactionTypeID).ToList();
+                    }
+                }
+                else profileTransaction = profileType.ProfileTransaction?.ToList();
+
+                profileType.ProfileTransaction = profileTransaction;
+
+            }
+            var alertMessage = profileType is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MenuListByChannelSentSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MenuListByChannelFailed.GetIntValue());
+            var outRespnse = new OutResponse
+            {
+                ResponseData = profileType is not null ? profileType.ToJsonSerialize() : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = profileType is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
         }
 
         #region Internal Method
