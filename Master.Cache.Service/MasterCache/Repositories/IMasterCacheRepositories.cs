@@ -22,6 +22,7 @@ namespace Master.Cache.Service.MasterCache.Repositories
         Task<IEnumerable<SequenceMapping>> GetSequencesAsync();
 
         Task<IEnumerable<RoleMenu>> GetRoleBasedMenuAsync(int userType, int channelId);
+        Task<ProfileType> ProfileTypeDictionaryAsync(string userType, string channelId);
 
     }
 }
