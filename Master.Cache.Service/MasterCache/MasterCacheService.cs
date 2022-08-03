@@ -314,31 +314,18 @@ namespace Master.Cache.Service.MasterCache
         /// <returns></returns>
         public async Task<OutResponse> GetProfileTypeTransByChannelAsync(CacheRequest cacheRequest)
         {
-            var masterRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
-            var masterCacheData = await _cacheConnector.GetCache($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", true);
-            var profileType = masterCacheData is not null ? masterCacheData.ToJsonDeSerialize<ProfileType>() : null;
-
-            var profileUpdatedTypes = profileType is null ? await _masterCacheRepositories.ProfileTypeDictionaryAsync(masterRequestData?.UserTypeID, masterRequestData?.ChannelID) : null;
-
-            _ = profileUpdatedTypes is not null && await _cacheConnector.PutCacheMasterAsync($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", profileUpdatedTypes.ToJsonSerialize());
-
-            profileType = profileUpdatedTypes is not null ? profileUpdatedTypes : profileType;
-
-            var responseData = profileType is not null && masterRequestData.productTypeID is null or "" ? profileType.ToJsonSerialize() : masterRequestData.TransactionTypeID is not null or "" ? (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID && xx.TransactionTypeID == masterRequestData.TransactionTypeID)).ToJsonSerialize() : (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID)).ToJsonSerialize();
-
-
-            var alertMessage = profileType is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelFailed.GetIntValue());
-
-            var outRespnse = new OutResponse
-            {
-                ResponseData = responseData is not null or "" ? responseData : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = profileType is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-            return outRespnse;
+            return await ProfileTypeTransByChannelAsync(cacheRequest);
         }
+        /// <summary>
+        /// This method returns the Profile for transaction base on user Type and channel ID
+        /// </summary>
+        /// <param name="cacheRequest"></param>
+        /// <returns></returns>
+        public async Task<OutResponse> GetProfileTypeTransByChannelLendingAsync(CacheRequest cacheRequest)
+        {
+            return await ProfileTypeTransByChannelAsync(cacheRequest, true);
+        }
+
 
         #region Internal Method
         internal async Task<OutResponse> GetMasterCacheCommanCategoryAsync(string requestData, string requestId, MasterCahcheEnums masterCahcheEnums)
@@ -659,6 +646,33 @@ namespace Master.Cache.Service.MasterCache
                 ResponseData = profileControl is not null ? profileControl : null,
                 RequestId = cacheRequest.RequestId,
                 ResponseCode = profileControl is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
+        }
+
+        internal async Task<OutResponse> ProfileTypeTransByChannelAsync(CacheRequest cacheRequest, bool isLeadingBank = false)
+        {
+            var masterRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            var masterCacheData = await _cacheConnector.GetCache($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", true);
+            var profileType = masterCacheData is not null ? masterCacheData.ToJsonDeSerialize<ProfileType>() : null;
+
+            var profileUpdatedTypes = profileType is null ? await _masterCacheRepositories.ProfileTypeDictionaryAsync(masterRequestData?.UserTypeID, masterRequestData?.ChannelID, isLeadingBank ? masterRequestData.LendingBankName : null) : null;
+
+            _ = profileUpdatedTypes is not null && await _cacheConnector.PutCacheMasterAsync($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", profileUpdatedTypes.ToJsonSerialize());
+
+            profileType = profileUpdatedTypes is not null ? profileUpdatedTypes : profileType;
+
+            var responseData = profileType is not null && masterRequestData.productTypeID is null or "" ? profileType.ToJsonSerialize() : masterRequestData.TransactionTypeID is not null or "" ? (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID && xx.TransactionTypeID == masterRequestData.TransactionTypeID)).ToJsonSerialize() : (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID)).ToJsonSerialize();
+
+            var alertMessage = profileType is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelFailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = responseData is not null or "" ? responseData : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = profileType is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
                 ResponseMessage = alertMessage.Message,
                 MessageType = alertMessage.MessageType
             };

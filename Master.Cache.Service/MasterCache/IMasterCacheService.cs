@@ -46,5 +46,9 @@ namespace Master.Cache.Service.MasterCache
 
         Task<OutResponse> GetProfileTypeTransByChannelAsync(CacheRequest cacheRequest);
 
+        Task<OutResponse> GetProfileTypeTransByChannelLendingAsync(CacheRequest cacheRequest);
+
+
+
     }
 }
