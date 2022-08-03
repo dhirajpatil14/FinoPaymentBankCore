@@ -26,7 +26,8 @@ namespace Master.Cache.Service.MasterCache.Repositories
         Task<(IEnumerable<RoleMenu> rolesMenu, IEnumerable<MobileRoleMenu> mobileRoleMenus)> GetRoleBasedMenuMultipalAsync(int userType, int channelId);
 
 
-        Task<ProfileType> ProfileTypeDictionaryAsync(string userType, string channelId, string lendingBankName = null);
+        Task<(ProfileType profileType, IEnumerable<ProfileTransaction> profileTransactions)> ProfileTypeDictionaryAsync(string userType, string channelId, string lendingBankName = null, string distinctField = null, string[] orderByField = null);
+        
 
     }
 }
