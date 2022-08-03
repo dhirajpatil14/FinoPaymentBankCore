@@ -10,7 +10,10 @@ using Microsoft.Extensions.Options;
 using Shared.Services.MasterMessage;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Utility.Extensions;
 namespace Master.Cache.Service.MasterCache
@@ -314,32 +317,36 @@ namespace Master.Cache.Service.MasterCache
         /// <returns></returns>
         public async Task<OutResponse> GetProfileTypeTransByChannelAsync(CacheRequest cacheRequest)
         {
-            var masterRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
-            var masterCacheData = await _cacheConnector.GetCache($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", true);
-            var profileType = masterCacheData is not null ? masterCacheData.ToJsonDeSerialize<ProfileType>() : null;
+            //var masterRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            //var masterCacheData = await _cacheConnector.GetCache($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", true);
+            //var profileType = masterCacheData is not null ? masterCacheData.ToJsonDeSerialize<ProfileType>() : null;
 
-            var profileUpdatedTypes = profileType is null ? await _masterCacheRepositories.ProfileTypeDictionaryAsync(masterRequestData?.UserTypeID, masterRequestData?.ChannelID) : null;
+            //var profileUpdatedTypes = profileType is null ? await _masterCacheRepositories.ProfileTypeDictionaryAsync(masterRequestData?.UserTypeID, masterRequestData?.ChannelID) : null;
 
-            _ = profileUpdatedTypes is not null && await _cacheConnector.PutCacheMasterAsync($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", profileUpdatedTypes.ToJsonSerialize());
+            //_ = profileUpdatedTypes is not null && await _cacheConnector.PutCacheMasterAsync($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", profileUpdatedTypes.ToJsonSerialize());
 
-            profileType = profileUpdatedTypes is not null ? profileUpdatedTypes : profileType;
+            //profileType = profileUpdatedTypes is not null ? profileUpdatedTypes : profileType;
 
-            var responseData = profileType is not null && masterRequestData.productTypeID is null or "" ? profileType.ToJsonSerialize() : masterRequestData.TransactionTypeID is not null or "" ? (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID && xx.TransactionTypeID == masterRequestData.TransactionTypeID)).ToJsonSerialize() : (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID)).ToJsonSerialize();
+            //var responseData = profileType is not null && masterRequestData.productTypeID is null or "" ? profileType.ToJsonSerialize() : masterRequestData.TransactionTypeID is not null or "" ? (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID && xx.TransactionTypeID == masterRequestData.TransactionTypeID)).ToJsonSerialize() : (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID)).ToJsonSerialize();
 
 
-            var alertMessage = profileType is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelFailed.GetIntValue());
+            //var alertMessage = profileType is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelFailed.GetIntValue());
 
-            var outRespnse = new OutResponse
-            {
-                ResponseData = responseData is not null or "" ? responseData : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = profileType is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-            return outRespnse;
+            //var outRespnse = new OutResponse
+            //{
+            //    ResponseData = responseData is not null or "" ? responseData : null,
+            //    RequestId = cacheRequest.RequestId,
+            //    ResponseCode = profileType is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+            //    ResponseMessage = alertMessage.Message,
+            //    MessageType = alertMessage.MessageType
+            //};
+            //return outRespnse;
+            return await GetCommonProfileTypeTransByChannelAsync(cacheRequest, false);
         }
-
+        public async Task<OutResponse> GetProfileTypeTransByChannelZipAsync(CacheRequest cacheRequest)
+        {
+           return await GetCommonProfileTypeTransByChannelAsync(cacheRequest,true);
+        }
         #region Internal Method
         internal async Task<OutResponse> GetMasterCacheCommanCategoryAsync(string requestData, string requestId, MasterCahcheEnums masterCahcheEnums)
         {
@@ -664,7 +671,63 @@ namespace Master.Cache.Service.MasterCache
             };
             return outRespnse;
         }
+        internal async Task<OutResponse> GetCommonProfileTypeTransByChannelAsync(CacheRequest cacheRequest,bool zip)
+        {
+            var masterRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            var masterCacheData = await _cacheConnector.GetCache($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", true);
+            var profileType = masterCacheData is not null ? masterCacheData.ToJsonDeSerialize<ProfileType>() : null;
 
+            var profileUpdatedTypes = profileType is null ? await _masterCacheRepositories.ProfileTypeDictionaryAsync(masterRequestData?.UserTypeID, masterRequestData?.ChannelID) : null;
+
+            _ = profileUpdatedTypes is not null && await _cacheConnector.PutCacheMasterAsync($"ProfileTypeMasterData{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", profileUpdatedTypes.ToJsonSerialize());
+
+            profileType = profileUpdatedTypes is not null ? profileUpdatedTypes : profileType;
+
+            var responseData = profileType is not null && masterRequestData.productTypeID is null or "" ? profileType.ToJsonSerialize() : masterRequestData.TransactionTypeID is not null or "" ? (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID && xx.TransactionTypeID == masterRequestData.TransactionTypeID)).ToJsonSerialize() : (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID)).ToJsonSerialize();
+
+
+            var alertMessage = profileType is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelFailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                // zip condition pendition
+                ResponseData = responseData is not null or ""  && zip? BitConverter.ToString(Zip(responseData)).Replace("-", string.Empty) :responseData is not null or "" ? responseData : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = profileType is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
+        }
+      
+        internal static byte[] Zip(string str)
+        {
+            var bytes = Encoding.UTF8.GetBytes(str);
+
+            using (var msi = new MemoryStream(bytes))
+            using (var mso = new MemoryStream())
+            {
+                using (var gs = new GZipStream(mso, CompressionMode.Compress))
+                {
+                    //msi.CopyTo(gs);
+                    CopyTo(msi, gs);
+                }
+
+                return mso.ToArray();
+            }
+
+        }
+        internal static void CopyTo(Stream src, Stream dest)
+        {
+            byte[] bytes = new byte[4096];
+
+            int cnt;
+
+            while ((cnt = src.Read(bytes, 0, bytes.Length)) != 0)
+            {
+                dest.Write(bytes, 0, cnt);
+            }
+        }
         #endregion
 
     }
