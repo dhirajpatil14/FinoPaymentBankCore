@@ -10,6 +10,11 @@ namespace Master.Cache.Service.MasterCache.DTo
         [JsonPropertyName("MenuDescription")]
         public string MenuDescription { get; set; }
 
+        [JsonPropertyName("menuPositionDesc")]
+        public string MenuPositionDesc { get; set; }
+
+
+
         [JsonPropertyName("MenuParent")]
         public string MenuParent { get; set; }
 
