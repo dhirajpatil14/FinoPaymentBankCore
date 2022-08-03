@@ -233,7 +233,7 @@ namespace Master.Cache.Service.MasterCache.Repositories
 
         }
 
-        public async Task<(ProfileType profileType, IEnumerable<ProfileTransaction> profileTransactions)> ProfileTypeDictionaryAsync(string userType, string channelId, string lendingBankName = null,string distinctField=null,string[] orderByField=null)
+        public async Task<(ProfileType profileType, IEnumerable<ProfileTransaction> profileTransactions)> ProfileTypeDictionaryAsync(string userType, string channelId, string lendingBankName = null, string distinctField = null, string[] orderByField = null)
         {
             var parameter = new
             {
@@ -242,7 +242,7 @@ namespace Master.Cache.Service.MasterCache.Repositories
                 lendingBankName
             };
 
-            var query = " select "+ distinctField is not null ? $"distinct {distinctField}," : string.Empty + " mpt.ProfileTypeID,mpt.UserTypeID,mpt.TransactionTypeID,mpt.AuthTypeID,mpt.ChannelID,mpt.PerTransactionLimit," +
+            var query = " select " + distinctField is not null ? $"distinct {distinctField}," : string.Empty + " mpt.ProfileTypeID,mpt.UserTypeID,mpt.TransactionTypeID,mpt.AuthTypeID,mpt.ChannelID,mpt.PerTransactionLimit," +
                                 " mpt.MinTransLimit,mpt.MaxTransLimit,mpt.UserGrossLimit,mstTransactionType.TransactionTypeName,mstTransactionType.TransactionType," +
                                 " mstTransactionAuthType.AuthTypeName,mstUserType.UserTypeName,isnull(mpt.Denomination,0) Denomination, " +
                                 " mpt.ProductTypeID,mpt.status,mstTransactionType.IsFinancial,mpt.IsSplit,mpt.NoofRetry,mpt.FallBackAuth,mstTransactionType.DMSId, " +
@@ -252,8 +252,8 @@ namespace Master.Cache.Service.MasterCache.Repositories
                                 " INNER JOIN mstTransactionAuthType WITH (NOLOCK) ON mpt.AuthTypeID = mstTransactionAuthType.AuthTypeId " +
                                 " INNER JOIN mstUserType WITH (NOLOCK) ON mpt.UserTypeID=mstUserType.UserTypeId " +
                                 " where mpt.UserTypeID=@userType and ChannelID= @channelId and status ='true'" +
-                                 lendingBankName is "" ? " and LendingBankId=0 " : lendingBankName is not "" and null ? "  mpt.ProductTypeID = @lendingBankName" : ""  
-                                 + orderByField is not null ? $"order by "+string.Join(",",orderByField) : "";
+                                 lendingBankName is "" ? " and LendingBankId=0 " : lendingBankName is not "" and null ? " and  mpt.ProductTypeID = @lendingBankName" : ""
+                                 + orderByField is not null ? $" order by " + string.Join(",", orderByField) : "";
 
 
             var config = new DataDbConfigSettings<object>
@@ -272,6 +272,6 @@ namespace Master.Cache.Service.MasterCache.Repositories
             return (profileTypeData, profileTranscations);
         }
 
-      
+
     }
 }
