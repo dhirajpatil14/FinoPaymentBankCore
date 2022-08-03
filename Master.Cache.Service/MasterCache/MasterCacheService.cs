@@ -288,11 +288,18 @@ namespace Master.Cache.Service.MasterCache
             roleMenus = roleMenus is null ? menuCacheData.ToJsonDeSerialize<IEnumerable<RoleMenu>>() : roleMenus;
             roleMenus = menuRequestData.FormID is not null ? roleMenus.Where(xx => xx.FormId == Convert.ToInt32(menuRequestData.FormID)) : roleMenus;
 
+
+            var finalData = menuRequestData.ChannelID is not 2 ? roleMenus.GroupBy(p => p.MenuPositionDesc, (key, g) => new MobileRoleMenu
+            {
+                MenuPositionDesc = key,
+                MobileMenu = g.ToList()
+            }) : null;
+
             var alertMessage = roleMenus is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MenuListByChannelSentSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MenuListByChannelFailed.GetIntValue());
 
             var outRespnse = new OutResponse
             {
-                ResponseData = roleMenus is not null ? roleMenus.ToJsonSerialize() : null,
+                ResponseData = roleMenus is not null ? menuRequestData.ChannelID is 2 ? roleMenus.ToJsonSerialize() : finalData.ToJsonSerialize() : null,
                 RequestId = cacheRequest.RequestId,
                 ResponseCode = roleMenus is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
                 ResponseMessage = alertMessage.Message,

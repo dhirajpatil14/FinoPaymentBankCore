@@ -151,14 +151,13 @@ namespace Master.Cache.Service.MasterCache.Repositories
 
         public async Task<IEnumerable<RoleMenu>> GetRoleBasedMenuAsync(int userType, int channelId)
         {
-            string query = string.Empty;
-
             var parameter = new
             {
                 userType,
                 channelId
             };
 
+            string query;
             if (channelId == 2)
             {
                 query = "select mstMenu.MenuID,mstMenu.MenuDescription,mstMenu.MenuParent,mstMenu.MenuUrl,mstMenu.MenuPosition,mstMenu.OnClickFunction,mstMenu.Menu_cssClass,mstMenu.Menu_cssIconClass,mstMenu.FormID, mstMenu.MenuIdKey " +
@@ -183,6 +182,55 @@ namespace Master.Cache.Service.MasterCache.Repositories
                 DbConnection = _sqlConnectionStrings.PBMasterConnection
             };
             return await _dataDbConfigurationService.GetDatasAsync<object, RoleMenu>(config);
+        }
+
+        public async Task<(IEnumerable<RoleMenu> rolesMenu, IEnumerable<MobileRoleMenu> mobileRoleMenus)> GetRoleBasedMenuMultipalAsync(int userType, int channelId)
+        {
+            string query = string.Empty;
+
+            var parameter = new
+            {
+                userType,
+                channelId
+            };
+
+            if (channelId == 2)
+            {
+                query = "select mstMenu.MenuID,mstMenu.MenuDescription,mstMenu.MenuParent,mstMenu.MenuUrl,mstMenu.MenuPosition,mstMenu.OnClickFunction,mstMenu.Menu_cssClass,mstMenu.Menu_cssIconClass,mstMenu.FormID, mstMenu.MenuIdKey " +
+                    "  from mstMenu with (nolock)  INNER JOIN mstRoleMenu with (nolock) ON mstMenu.MenuID=mstRoleMenu.MenuID INNER JOIN mstuserType ON  mstRoleMenu.UserType =  mstuserType.UserTypeId" +
+                    " INNER JOIN mstChannel with (nolock) ON mstChannel.ChannelID = mstMenu.ChannelID " +
+                    " where mstRoleMenu.status = 1 and  mstRoleMenu.UserType  = @userType and mstChannel.ChannelID = @channelId order by mstMenu.MenuPosition";
+            }
+            else
+            {
+                query = " select distinct mstMenu.MenuID,mstmenuPosition.menuPositionDesc,mstMenu.MenuDescription,mstMenu.MenuUrl,mstMenu.Menu_cssClass,mstMenu.Menu_cssIconClass " +
+                    " from mstMenu with (nolock) INNER JOIN mstRoleMenu with (nolock) ON mstMenu.MenuID=mstRoleMenu.MenuID  " +
+                    " INNER JOIN mstuserType with (nolock) ON  mstRoleMenu.UserType =  mstuserType.UserTypeId " +
+                    "  INNER JOIN mstChannel with (nolock) ON mstChannel.ChannelID = mstMenu.ChannelID " +
+                    " INNER JOIN mstmenuPosition with (nolock) ON mstmenuPosition.menuPositionID = MobileMenuPosition " +
+                    " where mstRoleMenu.status = 1" +
+                    "  and  mstRoleMenu.UserType  = @userType and mstMenu.ChannelID = @channelId  ";
+            }
+
+            var config = new DataDbConfigSettings<object>
+            {
+                PlainQuery = query,
+                Request = parameter,
+                DbConnection = _sqlConnectionStrings.PBMasterConnection
+            };
+
+
+
+            var data = await _dataDbConfigurationService.GetDatasAsync<object, RoleMenu>(config);
+            IEnumerable<MobileRoleMenu> dataByGroup = channelId is not 2 ? data.GroupBy(p => p.MenuPositionDesc, (key, g) => new MobileRoleMenu
+            {
+                MenuPositionDesc = key,
+                MobileMenu = g.ToList()
+
+            }) : null;
+
+            return (channelId is 2 ? data : null, dataByGroup);
+
         }
 
         public async Task<ProfileType> ProfileTypeDictionaryAsync(string userType, string channelId)
@@ -215,7 +263,7 @@ namespace Master.Cache.Service.MasterCache.Repositories
 
             var profileTranscation = profileTranscations?.FirstOrDefault();
 
-           return new ProfileType { ChannelID = profileTranscation?.ChannelID ,UserTypeID = profileTranscation?.UserTypeID,UserTypeName = profileTranscation?.UserTypeName,ProfileTransaction = profileTranscations };
+            return new ProfileType { ChannelID = profileTranscation?.ChannelID, UserTypeID = profileTranscation?.UserTypeID, UserTypeName = profileTranscation?.UserTypeName, ProfileTransaction = profileTranscations };
 
         }
     }
