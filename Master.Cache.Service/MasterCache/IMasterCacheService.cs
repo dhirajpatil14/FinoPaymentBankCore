@@ -48,8 +48,6 @@ namespace Master.Cache.Service.MasterCache
         Task<OutResponse> GetProfileTypeTransByChannelZipAsync(CacheRequest cacheRequest);
 
         Task<OutResponse> GetProfileTypeTransByChannelLendingAsync(CacheRequest cacheRequest);
-
-
-
+        Task<OutResponse> GetProductTransByChannelAsync(CacheRequest cacheRequest);
     }
 }

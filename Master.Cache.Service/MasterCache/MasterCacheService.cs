@@ -337,6 +337,30 @@ namespace Master.Cache.Service.MasterCache
         {
             return await ProfileTypeTransByChannelAsync(cacheRequest, false, true);
         }
+        /// <summary>
+        /// product base transaction Types By user Type and channel ID saved in cache
+        /// </summary>
+        /// <param name="cacheRequest"></param>
+        /// <returns></returns>
+        public async Task<OutResponse> GetProductTransByChannelAsync(CacheRequest cacheRequest)
+        {
+            var masterRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            var productTransMapCacheData = await _cacheConnector.GetCache($"ProductTransMap{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", true);
+            var productTransMap = productTransMapCacheData is not null ? productTransMapCacheData.ToJsonDeSerialize<dynamic>() : null;
+            var updatedProductTransMap = productTransMap is null ? await _masterCacheRepositories.GetProductTransMapAsync(masterRequestData?.UserTypeID, masterRequestData?.ChannelID) : null;
+            _ = updatedProductTransMap is not null && await _cacheConnector.PutCacheMasterAsync($"ProductTransMap{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", updatedProductTransMap.ToJsonSerialize());
+            var alertMessage = updatedProductTransMap is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProductTransByChannelSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProductTransByChannelFailed.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = updatedProductTransMap is not null or "" ? updatedProductTransMap : null,
+                RequestId = cacheRequest.RequestId,
+                ResponseCode = updatedProductTransMap is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+            return outRespnse;
+        }
 
         #region Internal Method
         internal async Task<OutResponse> GetMasterCacheCommanCategoryAsync(string requestData, string requestId, MasterCahcheEnums masterCahcheEnums)
@@ -690,6 +714,8 @@ namespace Master.Cache.Service.MasterCache
             };
             return outRespnse;
         }
+
+       
         #endregion
 
     }

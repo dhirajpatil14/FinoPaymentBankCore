@@ -27,6 +27,7 @@ namespace Master.Cache.Service.MasterCache.Repositories
 
 
         Task<ProfileType> ProfileTypeDictionaryAsync(string userType, string channelId, string lendingBankName = null);
+        Task<dynamic> GetProductTransMapAsync(string userType, string channelId);
 
     }
 }

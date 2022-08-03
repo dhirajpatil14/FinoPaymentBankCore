@@ -269,5 +269,32 @@ namespace Master.Cache.Service.MasterCache.Repositories
             return new ProfileType { ChannelID = profileTranscation?.ChannelID, UserTypeID = profileTranscation?.UserTypeID, UserTypeName = profileTranscation?.UserTypeName, ProfileTransaction = profileTranscations };
 
         }
+
+        public async Task<dynamic> GetProductTransMapAsync(string userType, string channelId)
+        {
+            var parameter = new
+            {
+                userType,
+                channelId
+            };
+
+            var query = " select distinct mpt.UserTypeID,mpt.TransactionTypeID,mstTransactionType.TransactionTypeName,mstTransactionType.TransactionType," +
+                              " mstUserType.UserTypeName,isnull(mpt.Denomination,0) Denomination,mpt.ProductTypeID,mpt.status,mstTransactionType.IsFinancial" +
+                              " from mstProfileType mpt WITH (NOLOCK) " +
+                              " INNER JOIN mstTransactionType WITH (NOLOCK) ON mpt.TransactionTypeID= mstTransactionType.TransactionTypeID" +
+                              " INNER JOIN mstTransactionAuthType WITH (NOLOCK) ON mpt.AuthTypeID = mstTransactionAuthType.AuthTypeId" +
+                              " INNER JOIN mstUserType WITH (NOLOCK) ON mpt.UserTypeID=mstUserType.UserTypeId" +
+                              " where status ='true' and mpt.UserTypeID=@userType and ChannelID=@channelId" +
+                              " order by mpt.ProducttypeID";
+
+            var config = new DataDbConfigSettings<dynamic>
+            {
+                PlainQuery = query,
+                Request = parameter,
+                DbConnection = _sqlConnectionStrings.PBMasterConnection
+            };
+            return await _dataDbConfigurationService.GetDatasAsync<dynamic, dynamic>(configSettings: config);
+
+        }
     }
 }
