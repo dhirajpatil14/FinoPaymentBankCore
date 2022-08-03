@@ -233,12 +233,13 @@ namespace Master.Cache.Service.MasterCache.Repositories
 
         }
 
-        public async Task<ProfileType> ProfileTypeDictionaryAsync(string userType, string channelId)
+        public async Task<ProfileType> ProfileTypeDictionaryAsync(string userType, string channelId, string lendingBankName = null)
         {
             var parameter = new
             {
                 userType,
-                channelId
+                channelId,
+                lendingBankName
             };
 
             var query = " select mpt.ProfileTypeID,mpt.UserTypeID,mpt.TransactionTypeID,mpt.AuthTypeID,mpt.ChannelID,mpt.PerTransactionLimit," +
@@ -250,7 +251,9 @@ namespace Master.Cache.Service.MasterCache.Repositories
                                 " INNER JOIN mstTransactionType WITH (NOLOCK) ON mpt.TransactionTypeID= mstTransactionType.TransactionTypeID " +
                                 " INNER JOIN mstTransactionAuthType WITH (NOLOCK) ON mpt.AuthTypeID = mstTransactionAuthType.AuthTypeId " +
                                 " INNER JOIN mstUserType WITH (NOLOCK) ON mpt.UserTypeID=mstUserType.UserTypeId " +
-                                " where mpt.UserTypeID=@userType and ChannelID= @channelId and status ='true'";
+                                " where mpt.UserTypeID=@userType and ChannelID= @channelId and status ='true'" +
+                                 lendingBankName is "" ? " and LendingBankId=0 " : lendingBankName is not "" and null ? "  mpt.ProductTypeID = @lendingBankName" : "";
+
 
             var config = new DataDbConfigSettings<object>
             {
