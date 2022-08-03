@@ -114,6 +114,9 @@ namespace MasterCache.Service.Service
                     case 10:
                         outResponse = await _masterCacheService.GetProductTransByChannelAsync(cacheRequest);
                         break;
+                    case 11:
+                        outResponse = await _masterCacheService.GetProductWiseTransactionsAsync(cacheRequest);
+                        break;
                     default:
                         break;
                 }

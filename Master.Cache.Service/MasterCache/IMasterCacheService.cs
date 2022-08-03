@@ -49,5 +49,7 @@ namespace Master.Cache.Service.MasterCache
 
         Task<OutResponse> GetProfileTypeTransByChannelLendingAsync(CacheRequest cacheRequest);
         Task<OutResponse> GetProductTransByChannelAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> GetProductWiseTransactionsAsync(CacheRequest cacheRequest);
     }
 }

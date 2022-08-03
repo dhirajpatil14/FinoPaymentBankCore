@@ -367,6 +367,14 @@ namespace Master.Cache.Service.MasterCache
             return outRespnse;
         }
 
+        public async Task<OutResponse> GetProductWiseTransactionsAsync(CacheRequest cacheRequest)
+        {
+            var transcationRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            var productTranscationData = (await _cacheConnector.GetCache($"ProductTransMap{transcationRequestData.UserTypeID}{transcationRequestData.ChannelID}" + transcationRequestData.LendingBankName is not null or "" ? transcationRequestData.LendingBankName : "", true)).ToJsonDeSerialize();
+
+        }
+
         #region Internal Method
         internal async Task<OutResponse> GetMasterCacheCommanCategoryAsync(string requestData, string requestId, MasterCahcheEnums masterCahcheEnums)
         {
