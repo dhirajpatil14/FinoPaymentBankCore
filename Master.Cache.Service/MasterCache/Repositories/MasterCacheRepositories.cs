@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using SQL.Helper;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Master.Cache.Service.MasterCache.Repositories
@@ -71,7 +72,6 @@ namespace Master.Cache.Service.MasterCache.Repositories
 
             return await _dataDbConfigurationService.AddDataAsync<MasterStatus>(config);
         }
-
 
         public async Task<IEnumerable<MasterProductFeature>> GetMasterProfileFeatureDetailsAsync(MasterProductFeature masterProductFeature)
         {
@@ -273,5 +273,46 @@ namespace Master.Cache.Service.MasterCache.Repositories
         }
 
 
+        public async Task<IEnumerable<ProductTranscation>> GetProductTranscationData(string leadingBankType, string userTypeId, string isFinancial)
+        {
+            var parameter = new
+            {
+                leadingBankType,
+                userTypeId,
+                isFinancial
+            };
+
+            StringBuilder builder = new();
+            builder.Append("DROP TABLE #ProductList ");
+            builder.Append("DECLARE @lendingbankType int =0 select @lendingbankType=Id from mstLendingBanks Where BankType= @leadingBankType ");
+            builder.Append("select P.type,isnull(P.LendingBankId,0) LendingBankId INTO #ProductList  from mstProductType P ");
+            builder.Append(" where p.LendingFlag=0 union (  select M.ProductTypeId,L.Id from mstLendingBanks L ");
+            builder.Append(" inner join mstLendingBankProductMapping M WITH (NOLOCK) on L.id = M.LendingBankId ");
+            builder.Append(" where L.Id = @lendingbankType )  order by LendingBankId select distinct mpt.UserTypeID, mpt.TransactionTypeID As Tid,");
+            builder.Append(" mstTransactionType.TransactionDesc As Nm, mstTransactionType.TransactionType As Ty,mstUserType.UserTypeName, ");
+            builder.Append(" isnull(mpt.Denomination,0) Denomination, mpt.ProductTypeID As ProductTypeId,mpt.status,mstTransactionType.IsFinancial As Fi ");
+            builder.Append(" from mstProfileType mpt with (nolock) INNER JOIN mstTransactionType with (nolock) ");
+            builder.Append(" ON mpt.TransactionTypeID= mstTransactionType.TransactionTypeID ");
+            builder.Append(" INNER JOIN mstTransactionAuthType with (nolock) ON mpt.AuthTypeID = mstTransactionAuthType.AuthTypeId ");
+            builder.Append(" INNER JOIN mstUserType with (nolock) ON mpt.UserTypeID=mstUserType.UserTypeId ");
+            builder.Append(" INNER JOIN  #ProductList with (nolock) on mpt.ProductTypeID = #ProductList.[type] ");
+            builder.Append(" where status ='true' and mpt.UserTypeID= @userTypeId and mpt.ChannelID=@channelId ");
+            builder.Append(isFinancial is not "" ? " and isFinancial=@isFinancial" : string.Empty);
+
+            var config = new DataDbConfigSettings<object>
+            {
+                PlainQuery = builder.ToString(),
+                Request = parameter,
+                DbConnection = _sqlConnectionStrings.PBMasterConnection
+            };
+
+            var data = await _dataDbConfigurationService.GetDatasAsync<object, Transcation>(config);
+
+            return data.GroupBy(p => p.ProductTypeId, (key, g) => new ProductTranscation
+            {
+                Pty = key,
+                Transcations = g.ToList()
+            });
+        }
     }
 }

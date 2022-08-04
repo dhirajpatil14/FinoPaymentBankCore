@@ -27,7 +27,9 @@ namespace Master.Cache.Service.MasterCache.Repositories
 
 
         Task<(ProfileType profileType, IEnumerable<ProfileTransaction> profileTransactions)> ProfileTypeDictionaryAsync(string userType, string channelId, string lendingBankName = null, string distinctField = null, string[] orderByField = null);
-        
+
+        Task<IEnumerable<ProductTranscation>> GetProductTranscationData(string leadingBankType, string userTypeId, string isFinancial);
+
 
     }
 }
