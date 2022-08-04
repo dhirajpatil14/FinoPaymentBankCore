@@ -367,6 +367,11 @@ namespace Master.Cache.Service.MasterCache
             return outRespnse;
         }
 
+        /// <summary>
+        /// This method returns the product base transaction Types By user Type and channel ID.
+        /// </summary>
+        /// <param name="cacheRequest"></param>
+        /// <returns></returns>
         public async Task<OutResponse> GetProductWiseTransactionsAsync(CacheRequest cacheRequest)
         {
             var transcationRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
