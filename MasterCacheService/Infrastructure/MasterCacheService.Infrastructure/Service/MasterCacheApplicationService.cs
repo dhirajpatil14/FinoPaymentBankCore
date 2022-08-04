@@ -117,6 +117,9 @@ namespace MasterCache.Service.Service
                     case 11:
                         outResponse = await _masterCacheService.GetProductWiseTransactionsAsync(cacheRequest);
                         break;
+                    case 12:
+                        outResponse = await _masterCacheService.ResetMenuMasterByUserChannelAsync(cacheRequest);
+                        break;
                     default:
                         break;
                 }

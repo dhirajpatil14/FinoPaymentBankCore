@@ -144,17 +144,10 @@ namespace Master.Cache.Service.MasterCache
 
             var masterStatus = await _masterCacheRepositories.GetMasterVersionAsync(new MasterStatus { Status = true });
             var masterData = masterStatus.ToJsonSerialize();
-            var alertMessage = masterData is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterVersionReturnSuccessFul.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterVersionReturnFailed.GetIntValue());
 
-            var outRespnse = new OutResponse
-            {
-                ResponseData = masterData is not null ? masterData : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = masterData is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-            return outRespnse;
+            var isValid = masterData is not null;
+
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? masterData : null, isValid ? MessageTypeId.MasterVersionReturnSuccessFul : MessageTypeId.MasterVersionReturnFailed, isValid ? ResponseCode.Success : ResponseCode.Failure);
         }
         /// <summary>
         /// update Individual Master Cache Response by request key Name with All Master
@@ -192,17 +185,10 @@ namespace Master.Cache.Service.MasterCache
             _ = productFeatureDetails is null && isValid && await _cacheConnector.PutCacheMasterAsync($"MobileTabCntrl" + data.ProductType is not "" ? data.ProductType : string.Empty, productFeatureDetails.ToJsonSerialize());
 
 
-            var alertMessage = productFeatureDetails is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TabControlsReturnSuccessFul.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TabControlsReturnFailed.GetIntValue());
+            var isValidValue = productFeatureDetails is not null;
 
-            var outRespnse = new OutResponse
-            {
-                ResponseData = productFeatureDetails is not null ? productFeatureDetails.ToJsonSerialize() : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = productFeatureDetails is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-            return outRespnse;
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValidValue ? productFeatureDetails.ToJsonSerialize() : null, isValidValue ? MessageTypeId.TabControlsReturnSuccessFul : MessageTypeId.TabControlsReturnFailed, isValidValue ? ResponseCode.Success : ResponseCode.Failure);
+
         }
         /// <summary>
         /// Product Profile controls 
@@ -218,18 +204,9 @@ namespace Master.Cache.Service.MasterCache
             productFeatureDetails = productFeatureDetails is null && isValid ? await ProfileControlsDataAsync(data.ProductType, data.ChannelID, data.ekyc, Convert.ToString(data.AppChannelID)) : null;
             _ = productFeatureDetails is null && isValid && await _cacheConnector.PutCacheMasterAsync($"MobileTabCntrl" + data.ProductType is not "" ? data.ProductType + data.AppChannelID : data.AppChannelID, productFeatureDetails.ToJsonSerialize());
 
-            var alertMessage = productFeatureDetails is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TabControlsReturnSuccessFul.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.TabControlsReturnFailed.GetIntValue());
+            var isValidValue = productFeatureDetails is not null;
 
-            var outRespnse = new OutResponse
-            {
-                ResponseData = productFeatureDetails is not null ? productFeatureDetails.ToJsonSerialize() : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = productFeatureDetails is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-
-            return outRespnse;
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValidValue ? productFeatureDetails.ToJsonSerialize() : null, isValidValue ? MessageTypeId.TabControlsReturnSuccessFul : MessageTypeId.TabControlsReturnFailed, isValidValue ? ResponseCode.Success : ResponseCode.Failure);
         }
         /// <summary>
         /// Sequence with producttype, channelid, ekyc/Normal ekyc
@@ -257,18 +234,8 @@ namespace Master.Cache.Service.MasterCache
         public async Task<OutResponse> GetPublicKeyAsync(CacheRequest cacheRequest)
         {
             var masterAuaData = await _ekycAuaService.GetMasterAuaAsync(new MasterAua { Status = true, Id = 11 });
-
-            var alertMessage = masterAuaData is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.PublicKeySendSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.PublicKeySendFailed.GetIntValue());
-
-            var outRespnse = new OutResponse
-            {
-                ResponseData = masterAuaData is not null ? masterAuaData.ToJsonSerialize() : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = masterAuaData is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-            return outRespnse;
+            var isValid = masterAuaData is not null;
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? masterAuaData.ToJsonSerialize() : null, isValid ? MessageTypeId.PublicKeySendSuccess : MessageTypeId.PublicKeySendFailed, isValid ? ResponseCode.Success : ResponseCode.Failure);
         }
         /// <summary>
         /// MenuList by Channel
@@ -295,17 +262,8 @@ namespace Master.Cache.Service.MasterCache
                 MobileMenu = g.ToList()
             }) : null;
 
-            var alertMessage = roleMenus is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MenuListByChannelSentSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MenuListByChannelFailed.GetIntValue());
-
-            var outRespnse = new OutResponse
-            {
-                ResponseData = roleMenus is not null ? menuRequestData.ChannelID is 2 ? roleMenus.ToJsonSerialize() : finalData.ToJsonSerialize() : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = roleMenus is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-            return outRespnse;
+            var isValid = roleMenus is not null;
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? menuRequestData?.ChannelID is 2 ? roleMenus.ToJsonSerialize() : finalData.ToJsonSerialize() : null, isValid ? MessageTypeId.MenuListByChannelSentSuccess : MessageTypeId.MenuListByChannelFailed, isValid ? ResponseCode.Success : ResponseCode.Failure);
         }
 
         /// <summary>
@@ -354,17 +312,11 @@ namespace Master.Cache.Service.MasterCache
 
             _ = updatedProductTransMap is not null && await _cacheConnector.PutCacheMasterAsync($"ProductTransMap{masterRequestData.UserTypeID}{masterRequestData.ChannelID}", updatedProductTransMap.ToJsonSerialize());
 
-            var alertMessage = updatedProductTransMap is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProductTransByChannelSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProductTransByChannelFailed.GetIntValue());
 
-            var outRespnse = new OutResponse
-            {
-                ResponseData = updatedProductTransMap is not null or "" ? updatedProductTransMap.ToJsonSerialize() : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = updatedProductTransMap is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-            return outRespnse;
+            var isValid = updatedProductTransMap is not null or "";
+
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? updatedProductTransMap.ToJsonSerialize() : null, isValid ? MessageTypeId.ProductTransByChannelSuccess : MessageTypeId.ProductTransByChannelFailed, isValid ? ResponseCode.Success : ResponseCode.Failure);
+
         }
 
         /// <summary>
@@ -382,20 +334,46 @@ namespace Master.Cache.Service.MasterCache
 
             _ = productTranscationCache is null && finalProductTranscationData is not null ? await _cacheConnector.PutCacheMasterAsync($"ProductTransMap{transcationRequestData.UserTypeID}{transcationRequestData.ChannelID}" + transcationRequestData.LendingBankName is not null or "" ? transcationRequestData.LendingBankName : "", finalProductTranscationData.ToJsonSerialize()) : null;
 
-            var alertMessage = finalProductTranscationData is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProductWiseTransactionListSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProductWiseTransactionListFailed.GetIntValue());
+            var isValid = finalProductTranscationData is not null;
 
-            var outRespnse = new OutResponse
-            {
-                ResponseData = finalProductTranscationData is not null ? finalProductTranscationData.ToJsonSerialize() : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = finalProductTranscationData is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-            return outRespnse;
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? finalProductTranscationData.ToJsonSerialize() : null, isValid ? MessageTypeId.ProductWiseTransactionListSuccess : MessageTypeId.ProductWiseTransactionListFailed, isValid ? ResponseCode.Success : ResponseCode.Failure);
+        }
+
+        /// <summary>
+        /// Reset Menu Master Details by User ID and channel
+        /// </summary>
+        /// <param name="cacheRequest"></param>
+        /// <returns></returns>
+        public async Task<OutResponse> ResetMenuMasterByUserChannelAsync(CacheRequest cacheRequest)
+        {
+            var menumasterRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+
+            var auditTrialId = await _cacheConnector.RemoveCacheAuditAsync(new CacheAuditTrail { CacheKey = $"ProfileTypeDataMenu{menumasterRequestData.UserTypeID}{menumasterRequestData.ChannelID}", IpAddress = menumasterRequestData.Ip_Address });
+            var roleData = await _masterCacheRepositories.GetRoleBasedMenuAsync(menumasterRequestData.UserTypeID, menumasterRequestData.ChannelID);
+            await _cacheConnector.PutCacheAuditWithOutVersion($"ProfileTypeDataMenu{menumasterRequestData.UserTypeID}{menumasterRequestData.ChannelID}", roleData.ToJsonSerialize(), auditTrialId, menumasterRequestData.Ip_Address, true);
+            var versionId = await _cacheConnector.GetCacheVersion($"ProfileTypeDataMenu{menumasterRequestData.UserTypeID}{menumasterRequestData.ChannelID}");
+
+            var isValid = versionId.ToInt32() > 0;
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? string.Format("Menu Cache versionID {0}", versionId) : null, isValid ? MessageTypeId.ResetMenuCacheSuccessful : MessageTypeId.ResetMenuCacheFailed, isValid ? ResponseCode.Success : ResponseCode.Failure);
         }
 
         #region Internal Method
+        internal async Task<OutResponse> ToApplyResponseAsync(string requestId, string responseData, MessageTypeId messageTypeId, ResponseCode responseCode)
+        {
+            var alertMessage = await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, messageTypeId.GetIntValue());
+
+            var outRespnse = new OutResponse
+            {
+                ResponseData = responseData,
+                RequestId = requestId,
+                ResponseCode = responseCode.GetIntValue(),
+                ResponseMessage = alertMessage.Message,
+                MessageType = alertMessage.MessageType
+            };
+
+            return outRespnse;
+        }
+
         internal async Task<OutResponse> GetMasterCacheCommanCategoryAsync(string requestData, string requestId, MasterCahcheEnums masterCahcheEnums)
         {
 
@@ -458,19 +436,9 @@ namespace Master.Cache.Service.MasterCache
                 }
             }
 
+            var isValid = cacheResponse.CacheMaster is not null;
 
-            var alertMessage = cacheResponse.CacheMaster is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterDataFound.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterDataCouldNotFound.GetIntValue());
-
-            var outRespnse = new OutResponse
-            {
-                ResponseData = cacheResponse.CacheMaster is not null ? BitConverter.ToString(cacheResponse.ToJsonSerialize()?.Zip()).Replace("-", string.Empty) : null,
-                RequestId = requestId,
-                ResponseCode = cacheResponse.CacheMaster is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-
-            return outRespnse;
+            return await ToApplyResponseAsync(requestId, isValid ? BitConverter.ToString(cacheResponse.ToJsonSerialize()?.Zip()).Replace("-", string.Empty) : null, isValid ? MessageTypeId.MasterDataFound : MessageTypeId.MasterDataCouldNotFound, isValid ? ResponseCode.Success : ResponseCode.Failure);
         }
 
         internal async Task<OutResponse> ResetMasterCacheCommanByCategoryAsync(CacheRequest cacheRequest, string key, bool isMobile = false, bool isResetMbkMobile = false, bool isoneincrementCache = false, bool istwoincrementCache = false, bool isUpdateValue = false)
@@ -484,8 +452,6 @@ namespace Master.Cache.Service.MasterCache
             var versionData = await _masterCacheRepositories.GetMasterVersionAsync(new MasterStatus { KeyCategory = data.Keycategory });
 
             int auditId = 0;
-
-
 
             foreach (var vData in versionData)
             {
@@ -528,17 +494,7 @@ namespace Master.Cache.Service.MasterCache
 
             _ = isResult && isMobile && isResetMbkMobile ? await GetMasterVersionMbKeyCategoryAsync(key, isMobile) : string.Empty;
 
-            var alertMessage = isResult ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterCacheResetSuccessful.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterCacheResetfailed.GetIntValue());
-
-            var outRespnse = new OutResponse
-            {
-                ResponseData = isResult ? $"Master Cahce VersionId {Version}" : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = isResult ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-            return outRespnse;
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isResult ? $"Master Cahce VersionId {Version}" : null, isResult ? MessageTypeId.MasterCacheResetSuccessful : MessageTypeId.MasterCacheResetfailed, isResult ? ResponseCode.Success : ResponseCode.Failure);
         }
 
         internal async Task<string> GetMasterVersionAsync(string key, bool isMobile = false, string keyCategory = null, int? mBKeyCategory = null)
@@ -653,17 +609,7 @@ namespace Master.Cache.Service.MasterCache
                 await UpdateMasterVersionGroupKeyCategoryAsync(cacheRequest);
             }
 
-            var alertMessage = isResult ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterCacheResetSuccessful.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.MasterCacheResetfailed.GetIntValue());
-
-            var outRespnse = new OutResponse
-            {
-                ResponseData = isResult ? $"{cacheRequest.RequestData} Cache updated " : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = isResult ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-            return outRespnse;
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isResult ? $"{cacheRequest.RequestData} Cache updated " : null, isResult ? MessageTypeId.MasterCacheResetSuccessful : MessageTypeId.MasterCacheResetfailed, isResult ? ResponseCode.Success : ResponseCode.Failure);
         }
 
         internal async Task<IEnumerable<MasterProductFeature>> ProfileControlsDataAsync(string productId, string channelId, bool? eKyc, string appChannelId = null)
@@ -707,17 +653,9 @@ namespace Master.Cache.Service.MasterCache
                 _ = masterStatus.Any() ? await _masterCacheRepositories.UpdateMasterStatusAsync(new MasterStatus { Version = Convert.ToInt32(sequenceVersion), CacheName = isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList" }) : await _masterCacheRepositories.InsertMasterStatusAsync(new MasterStatus { MstTableId = 42, CacheName = isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList", Version = Convert.ToInt32(sequenceVersion), MstUpdateFlag = 0, CreatedDate = DateTime.Now, CreatedBy = 0 });
             }
 
-            var alertMessage = profileControl is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.SequenceListReturnSuccessful.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.SequenceListReturnfailed.GetIntValue());
+            var isValid = profileControl is not null;
 
-            var outRespnse = new OutResponse
-            {
-                ResponseData = profileControl is not null ? profileControl : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = profileControl is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-            return outRespnse;
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? profileControl : null, isValid ? MessageTypeId.SequenceListReturnSuccessful : MessageTypeId.SequenceListReturnfailed, isValid ? ResponseCode.Success : ResponseCode.Failure);
         }
 
         internal async Task<OutResponse> ProfileTypeTransByChannelAsync(CacheRequest cacheRequest, bool isLeadingBank = false, bool isZip = false)
@@ -734,18 +672,9 @@ namespace Master.Cache.Service.MasterCache
 
             var responseData = profileType is not null && masterRequestData.productTypeID is null or "" ? profileType.ToJsonSerialize() : masterRequestData.TransactionTypeID is not null or "" ? (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID && xx.TransactionTypeID == masterRequestData.TransactionTypeID)).ToJsonSerialize() : (profileType.ProfileTransaction.Where(xx => xx.ProductTypeID == masterRequestData.productTypeID)).ToJsonSerialize();
 
+            var isValid = responseData is not null or "";
 
-            var alertMessage = profileType is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProfileTypeTransByChannelFailed.GetIntValue());
-
-            var outRespnse = new OutResponse
-            {
-                ResponseData = responseData is not null or "" ? isZip ? BitConverter.ToString(responseData.Zip()).Replace("-", string.Empty) : responseData : null,
-                RequestId = cacheRequest.RequestId,
-                ResponseCode = profileType is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
-                ResponseMessage = alertMessage.Message,
-                MessageType = alertMessage.MessageType
-            };
-            return outRespnse;
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? isZip ? BitConverter.ToString(responseData.Zip()).Replace("-", string.Empty) : responseData : null, isValid ? MessageTypeId.ProfileTypeTransByChannelSuccess : MessageTypeId.ProfileTypeTransByChannelFailed, isValid ? ResponseCode.Success : ResponseCode.Failure);
         }
 
 
