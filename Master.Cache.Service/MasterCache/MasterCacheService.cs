@@ -253,7 +253,7 @@ namespace Master.Cache.Service.MasterCache
                 await _cacheConnector.PutCacheMasterAsync($"ProfileTypeDataMenu{menuRequestData.UserTypeID}{menuRequestData.ChannelID}", roleMenus.ToJsonSerialize());
             }
             roleMenus = roleMenus is null ? menuCacheData.ToJsonDeSerialize<IEnumerable<RoleMenu>>() : roleMenus;
-            roleMenus = menuRequestData.FormID is not null ? roleMenus.Where(xx => xx.FormId == Convert.ToInt32(menuRequestData.FormID)) : roleMenus;
+            roleMenus = menuRequestData.FormID is not null ? roleMenus.Where(xx => xx.FormId == menuRequestData.FormID.ToInt32()) : roleMenus;
 
 
             var finalData = menuRequestData.ChannelID is not 2 ? roleMenus.GroupBy(p => p.MenuPositionDesc, (key, g) => new MobileRoleMenu
@@ -561,7 +561,7 @@ namespace Master.Cache.Service.MasterCache
                 sql = $"{sql}{vData.SqlQuery};";
 
 
-                Version = Convert.ToInt32(await _cacheConnector.GetCacheVersion(vData.MstTableName));
+                Version = (await _cacheConnector.GetCacheVersion(vData.MstTableName)).ToInt32();
 
                 if (Version != 0 || (data.CacheKey && cacheRequest.RequestData is not "MastersCacheData"))
                 {
@@ -614,8 +614,8 @@ namespace Master.Cache.Service.MasterCache
 
         internal async Task<IEnumerable<MasterProductFeature>> ProfileControlsDataAsync(string productId, string channelId, bool? eKyc, string appChannelId = null)
         {
-            var masterProfiles = await _masterCacheRepositories.GetMasterProfileFeatureDetailsAsync(new MasterProductFeature { ProductCode = productId is "" ? null : Convert.ToInt32(productId), ChannelID = channelId, Ekyc = eKyc, AppChannelid = appChannelId is not null ? Convert.ToInt32(appChannelId) : null });
-            masterProfiles?.ToList().ForEach(async xx => xx.ProfileControlDetails = string.Join("|", (await _masterCacheRepositories.GetMasterProfileControlAsync(new MasterProfileControl { ProductCode = productId is null ? xx.ProductCode : Convert.ToInt32(productId), Ekyc = xx.Ekyc, ChannelID = channelId, AppChannelid = appChannelId is not null ? Convert.ToInt32(appChannelId) : null })).Select(yy => $"{yy.TabControlID}~{yy.ControlID}~{yy.ControlDesc}~{yy.Displayable}~{yy.Editable}~{yy.Mandatory}~{yy.KYCMandatory}~{yy.FieldType}~{yy.DataType}~{yy.FieldLength}~{yy.FieldMinLength}~{yy.FieldMaxLength}~{yy.FieldMinValue}~{yy.FieldMaxValue}~{yy.RequiredMaster}~{yy.RFU1}~{yy.RFU2}~{yy.KYCFlag}~{yy.EditableAddOn}~{yy.DisplayableADDOn}")));
+            var masterProfiles = await _masterCacheRepositories.GetMasterProfileFeatureDetailsAsync(new MasterProductFeature { ProductCode = productId is "" ? null : productId.ToInt32(), ChannelID = channelId, Ekyc = eKyc, AppChannelid = appChannelId is not null ? appChannelId.ToInt32() : null });
+            masterProfiles?.ToList().ForEach(async xx => xx.ProfileControlDetails = string.Join("|", (await _masterCacheRepositories.GetMasterProfileControlAsync(new MasterProfileControl { ProductCode = productId is null ? xx.ProductCode : productId.ToInt32(), Ekyc = xx.Ekyc, ChannelID = channelId, AppChannelid = appChannelId is not null ? appChannelId.ToInt32() : null })).Select(yy => $"{yy.TabControlID}~{yy.ControlID}~{yy.ControlDesc}~{yy.Displayable}~{yy.Editable}~{yy.Mandatory}~{yy.KYCMandatory}~{yy.FieldType}~{yy.DataType}~{yy.FieldLength}~{yy.FieldMinLength}~{yy.FieldMaxLength}~{yy.FieldMinValue}~{yy.FieldMaxValue}~{yy.RequiredMaster}~{yy.RFU1}~{yy.RFU2}~{yy.KYCFlag}~{yy.EditableAddOn}~{yy.DisplayableADDOn}")));
             return masterProfiles;
         }
 
@@ -633,7 +633,7 @@ namespace Master.Cache.Service.MasterCache
             {
                 sequencesData = sequencesData.Where(xx =>
                 {
-                    dynamic dynamic = xx.NewProductType == Convert.ToInt32(data.productType);
+                    dynamic dynamic = xx.NewProductType == data.productType.ToInt32();
                     return dynamic;
                 });
 
@@ -641,7 +641,7 @@ namespace Master.Cache.Service.MasterCache
             var sequenceVersion = await _cacheConnector.GetCacheVersion(isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList");
             var sequenceMobile = new SequencesMobile
             {
-                Version = Convert.ToInt32(sequenceVersion),
+                Version = sequenceVersion.ToInt32(),
                 SequenceMappings = sequencesData
             };
 
@@ -650,7 +650,7 @@ namespace Master.Cache.Service.MasterCache
             if (sequencesCache is null)
             {
                 var masterStatus = await _masterCacheRepositories.GetMasterVersionAsync(new MasterStatus { CacheName = isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList" });
-                _ = masterStatus.Any() ? await _masterCacheRepositories.UpdateMasterStatusAsync(new MasterStatus { Version = Convert.ToInt32(sequenceVersion), CacheName = isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList" }) : await _masterCacheRepositories.InsertMasterStatusAsync(new MasterStatus { MstTableId = 42, CacheName = isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList", Version = Convert.ToInt32(sequenceVersion), MstUpdateFlag = 0, CreatedDate = DateTime.Now, CreatedBy = 0 });
+                _ = masterStatus.Any() ? await _masterCacheRepositories.UpdateMasterStatusAsync(new MasterStatus { Version = sequenceVersion.ToInt32(), CacheName = isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList" }) : await _masterCacheRepositories.InsertMasterStatusAsync(new MasterStatus { MstTableId = 42, CacheName = isAppChannel ? $"MobSequenceMasterList" + data.AppChannelID : $"MobSequenceMasterList", Version = sequenceVersion.ToInt32(), MstUpdateFlag = 0, CreatedDate = DateTime.Now, CreatedBy = 0 });
             }
 
             var isValid = profileControl is not null;
