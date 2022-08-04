@@ -65,5 +65,10 @@ namespace Utility.Extensions
             return mso.ToArray();
         }
 
+        public static int ToInt32(this string value)
+        {
+            return !string.IsNullOrEmpty(value) ? Convert.ToInt32(value) : 0;
+        }
+
     }
 }
