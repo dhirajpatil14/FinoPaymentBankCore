@@ -373,17 +373,17 @@ namespace Master.Cache.Service.MasterCache
 
             var productTranscationCache = (await _cacheConnector.GetCache($"ProductTransMap{transcationRequestData.UserTypeID}{transcationRequestData.ChannelID}" + transcationRequestData.LendingBankName is not null or "" ? transcationRequestData.LendingBankName : "", true)).ToJsonDeSerialize<ProductTranscation>();
 
-            var finalProductTranscationCache = productTranscationCache is null ? (await _masterCacheRepositories.GetProductTranscationData(transcationRequestData.LendingBankName, transcationRequestData.UserTypeID, transcationRequestData.IsFinancial)) : productTranscationCache;
+            var finalProductTranscationData = productTranscationCache is null ? (await _masterCacheRepositories.GetProductTranscationData(transcationRequestData.LendingBankName, transcationRequestData.UserTypeID, transcationRequestData.IsFinancial)) : productTranscationCache;
 
-            _ = productTranscationCache is null && finalProductTranscationCache is not null ? await _cacheConnector.PutCacheMasterAsync($"ProductTransMap{transcationRequestData.UserTypeID}{transcationRequestData.ChannelID}" + transcationRequestData.LendingBankName is not null or "" ? transcationRequestData.LendingBankName : "", finalProductTranscationCache.ToJsonSerialize()) : null;
+            _ = productTranscationCache is null && finalProductTranscationData is not null ? await _cacheConnector.PutCacheMasterAsync($"ProductTransMap{transcationRequestData.UserTypeID}{transcationRequestData.ChannelID}" + transcationRequestData.LendingBankName is not null or "" ? transcationRequestData.LendingBankName : "", finalProductTranscationData.ToJsonSerialize()) : null;
 
-            var alertMessage = finalProductTranscationCache is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProductWiseTransactionListSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProductWiseTransactionListFailed.GetIntValue());
+            var alertMessage = finalProductTranscationData is not null ? await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProductWiseTransactionListSuccess.GetIntValue()) : await _masterMessageService.GetMasterMessgeAsync(_appSettings.ESBCBSMessagesByCache, MessageTypeId.ProductWiseTransactionListFailed.GetIntValue());
 
             var outRespnse = new OutResponse
             {
-                ResponseData = finalProductTranscationCache is not null ? finalProductTranscationCache.ToJsonSerialize() : null,
+                ResponseData = finalProductTranscationData is not null ? finalProductTranscationData.ToJsonSerialize() : null,
                 RequestId = cacheRequest.RequestId,
-                ResponseCode = finalProductTranscationCache is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
+                ResponseCode = finalProductTranscationData is not null ? ResponseCode.Success.GetIntValue() : ResponseCode.Failure.GetIntValue(),
                 ResponseMessage = alertMessage.Message,
                 MessageType = alertMessage.MessageType
             };
