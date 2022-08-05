@@ -6,6 +6,7 @@ using Master.Cache.Service.MasterCache.DTo;
 using Master.Cache.Service.MasterCache.Model;
 using Master.Cache.Service.MasterCache.Repositories;
 using Master.Cache.Service.MasterCache.Settings;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Shared.Services.MasterMessage;
 using System;
@@ -22,6 +23,7 @@ namespace Master.Cache.Service.MasterCache
         private readonly IEkycAuaService _ekycAuaService;
         private readonly MasterMessageService _masterMessageService;
         private readonly AppSettings _appSettings;
+        private readonly IConfiguration _configuration;
 
 
         /// <summary>
@@ -34,13 +36,14 @@ namespace Master.Cache.Service.MasterCache
         /// <param name="masterMessageService">Master Message Servie</param>
         /// <param name="hotRodCache">Server side HotRod Cache</param>
         /// <param name="masterCacheDictionary">Master Cache Dictionary</param>
-        public MasterCacheService(ICacheConnector cacheConnector, IOptions<AppSettings> appSettings, IMasterCacheRepositories masterCacheRepositories, IEkycAuaService ekycAuaService, MasterMessageService masterMessageService)
+        public MasterCacheService(ICacheConnector cacheConnector, IOptions<AppSettings> appSettings, IMasterCacheRepositories masterCacheRepositories, IEkycAuaService ekycAuaService, MasterMessageService masterMessageService, IConfiguration configuration)
         {
             _cacheConnector = cacheConnector;
             _masterMessageService = masterMessageService;
             _ekycAuaService = ekycAuaService;
             _masterCacheRepositories = masterCacheRepositories;
             _appSettings = appSettings.Value;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -373,7 +376,27 @@ namespace Master.Cache.Service.MasterCache
             return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? "Keyword object cleared success from cache." : "Keyword object cleared Failed from cache.", isValid ? MessageTypeId.MasterDataFound : MessageTypeId.MasterDataCouldNotFound, isValid ? ResponseCode.Success : ResponseCode.Failure);
 
         }
+        public async Task<OutResponse> GetDecryptConnectionStringAsync(CacheRequest cacheRequest)
+        {
+            var cacheServerName = _configuration.GetSection("CacheSettings:CacheServerName").ToString();
+            var cacheConnectionString= string.Empty;
+            var keyval = string.Empty;
+            cacheServerName = cacheRequest.TellerId is not null or "" ? cacheRequest?.TellerId : cacheServerName;
 
+            var isRequestData = cacheRequest.RequestData is not null;
+            if (isRequestData)
+            {
+                // verify use of cacheServerName
+                cacheConnectionString = await _cacheConnector.GetCache(cacheRequest.RequestData, true);
+
+                keyval = await _masterCacheRepositories.GetKeyValConnectionAsync(string.Empty, true);
+            }
+           
+            // toDecrpt correction need to creat extension method 
+            var responseData = isRequestData ? cacheConnectionString is not null ? cacheConnectionString.ToDecrypt(keyval) : (await _masterCacheRepositories.GetKeyValConnectionAsync(cacheRequest.RequestData, false)).ToDecrypt(keyval) : null;
+            var isValid = responseData is not null;
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? responseData : null, isValid ? MessageTypeId.MasterDataFound : MessageTypeId.MasterDataCouldNotFound, isValid ? ResponseCode.Success : ResponseCode.Failure);
+        }
 
         #region Internal Method
         internal async Task<OutResponse> ToApplyResponseAsync(string requestId, string responseData, MessageTypeId messageTypeId, ResponseCode responseCode)

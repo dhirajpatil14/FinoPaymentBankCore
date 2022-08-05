@@ -57,6 +57,6 @@ namespace Master.Cache.Service.MasterCache
         Task<OutResponse> ResetProfileMasterByUserChannelAsync(CacheRequest cacheRequest);
 
         Task<OutResponse> ClearCacheDataByKeyAsync(CacheRequest cacheRequest);
-
+        Task<OutResponse> GetDecryptConnectionStringAsync(CacheRequest cacheRequest);
     }
 }
