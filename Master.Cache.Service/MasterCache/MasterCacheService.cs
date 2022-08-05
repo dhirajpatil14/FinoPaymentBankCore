@@ -23,7 +23,6 @@ namespace Master.Cache.Service.MasterCache
         private readonly IEkycAuaService _ekycAuaService;
         private readonly MasterMessageService _masterMessageService;
         private readonly AppSettings _appSettings;
-        private readonly IConfiguration _configuration;
 
 
         /// <summary>
@@ -36,14 +35,13 @@ namespace Master.Cache.Service.MasterCache
         /// <param name="masterMessageService">Master Message Servie</param>
         /// <param name="hotRodCache">Server side HotRod Cache</param>
         /// <param name="masterCacheDictionary">Master Cache Dictionary</param>
-        public MasterCacheService(ICacheConnector cacheConnector, IOptions<AppSettings> appSettings, IMasterCacheRepositories masterCacheRepositories, IEkycAuaService ekycAuaService, MasterMessageService masterMessageService, IConfiguration configuration)
+        public MasterCacheService(ICacheConnector cacheConnector, IOptions<AppSettings> appSettings, IMasterCacheRepositories masterCacheRepositories, IEkycAuaService ekycAuaService, MasterMessageService masterMessageService)
         {
             _cacheConnector = cacheConnector;
             _masterMessageService = masterMessageService;
             _ekycAuaService = ekycAuaService;
             _masterCacheRepositories = masterCacheRepositories;
             _appSettings = appSettings.Value;
-            _configuration = configuration;
         }
 
         /// <summary>
