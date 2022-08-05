@@ -53,5 +53,10 @@ namespace Master.Cache.Service.MasterCache
         Task<OutResponse> GetProductWiseTransactionsAsync(CacheRequest cacheRequest);
 
         Task<OutResponse> ResetMenuMasterByUserChannelAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> ResetProfileMasterByUserChannelAsync(CacheRequest cacheRequest);
+
+        Task<OutResponse> ClearCacheDataByKeyAsync(CacheRequest cacheRequest);
+
     }
 }

@@ -120,6 +120,9 @@ namespace MasterCache.Service.Service
                     case 12:
                         outResponse = await _masterCacheService.ResetMenuMasterByUserChannelAsync(cacheRequest);
                         break;
+                    case 13:
+                        outResponse = await _masterCacheService.ResetProfileMasterByUserChannelAsync(cacheRequest);
+                        break;
                     default:
                         break;
                 }
