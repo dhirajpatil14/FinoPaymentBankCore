@@ -378,24 +378,18 @@ namespace Master.Cache.Service.MasterCache
         }
         public async Task<OutResponse> GetDecryptConnectionStringAsync(CacheRequest cacheRequest)
         {
-            var cacheServerName = _configuration.GetSection("CacheSettings:CacheServerName").ToString();
-            var cacheConnectionString= string.Empty;
-            var keyval = string.Empty;
-            cacheServerName = cacheRequest.TellerId is not null or "" ? cacheRequest?.TellerId : cacheServerName;
-
             var isRequestData = cacheRequest.RequestData is not null;
-            if (isRequestData)
-            {
-                // verify use of cacheServerName
-                cacheConnectionString = await _cacheConnector.GetCache(cacheRequest.RequestData, true);
-
-                keyval = await _masterCacheRepositories.GetKeyValConnectionAsync(string.Empty, true);
-            }
-           
+            var cacheConnectionString = isRequestData ? await _cacheConnector.GetCache(cacheRequest.RequestData, true) : null;
             // toDecrpt correction need to creat extension method 
-            var responseData = isRequestData ? cacheConnectionString is not null ? cacheConnectionString.ToDecrypt(keyval) : (await _masterCacheRepositories.GetKeyValConnectionAsync(cacheRequest.RequestData, false)).ToDecrypt(keyval) : null;
+            var responseData = isRequestData ? cacheConnectionString is not null ? cacheConnectionString : await _masterCacheRepositories.GetKeyValConnectionAsync(cacheRequest.RequestData, false) : null;
+
+            _ = cacheConnectionString is null && await _cacheConnector.PutCacheMasterAsync(cacheRequest.RequestData, cacheConnectionString);
+
             var isValid = responseData is not null;
-            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? responseData : null, isValid ? MessageTypeId.MasterDataFound : MessageTypeId.MasterDataCouldNotFound, isValid ? ResponseCode.Success : ResponseCode.Failure);
+
+            var keyval = isValid ? await _masterCacheRepositories.GetKeyValConnectionAsync(string.Empty, true) : null;
+
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? responseData.ToDecrypt(keyval) : null, isValid ? MessageTypeId.MasterDataFound : MessageTypeId.MasterDataCouldNotFound, isValid ? ResponseCode.Success : ResponseCode.Failure);
         }
 
         #region Internal Method
