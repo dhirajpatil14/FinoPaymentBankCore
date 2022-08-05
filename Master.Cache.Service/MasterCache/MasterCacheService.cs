@@ -346,16 +346,29 @@ namespace Master.Cache.Service.MasterCache
         /// <returns></returns>
         public async Task<OutResponse> ResetMenuMasterByUserChannelAsync(CacheRequest cacheRequest)
         {
-            var menumasterRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
-
-            var auditTrialId = await _cacheConnector.RemoveCacheAuditAsync(new CacheAuditTrail { CacheKey = $"ProfileTypeDataMenu{menumasterRequestData.UserTypeID}{menumasterRequestData.ChannelID}", IpAddress = menumasterRequestData.Ip_Address });
-            var roleData = await _masterCacheRepositories.GetRoleBasedMenuAsync(menumasterRequestData.UserTypeID, menumasterRequestData.ChannelID);
-            await _cacheConnector.PutCacheAuditWithOutVersion($"ProfileTypeDataMenu{menumasterRequestData.UserTypeID}{menumasterRequestData.ChannelID}", roleData.ToJsonSerialize(), auditTrialId, menumasterRequestData.Ip_Address, true);
-            var versionId = await _cacheConnector.GetCacheVersion($"ProfileTypeDataMenu{menumasterRequestData.UserTypeID}{menumasterRequestData.ChannelID}");
-
-            var isValid = versionId.ToInt32() > 0;
-            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? string.Format("Menu Cache versionID {0}", versionId) : null, isValid ? MessageTypeId.ResetMenuCacheSuccessful : MessageTypeId.ResetMenuCacheFailed, isValid ? ResponseCode.Success : ResponseCode.Failure);
+            return await ResetCommanMasterAsync(cacheRequest, true, "ProfileTypeDataMenu", "Menu Cache versionID {0}", MessageTypeId.ResetMenuCacheSuccessful, MessageTypeId.ResetMenuCacheFailed);
         }
+
+        /// <summary>
+        /// Reset profile Master Details by User ID and channel
+        /// </summary>
+        /// <param name="cacheRequest"></param>
+        /// <returns></returns>
+        public async Task<OutResponse> ResetProfileMasterByUserChannelAsync(CacheRequest cacheRequest)
+        {
+            return await ResetCommanMasterAsync(cacheRequest, false, "ProfileTypeMasterData", "Profile Cache versionID {0}", MessageTypeId.ResetProfileSuccessful, MessageTypeId.ResetProfileFailed);
+        }
+
+        public async Task<OutResponse> ClearCacheDataByKeyAsync(CacheRequest cacheRequest)
+        {
+            var clearCacheRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            var auditTrialId = cacheRequest.RequestData is not "" ? await _cacheConnector.RemoveCacheAuditAsync(new CacheAuditTrail { CacheKey = $"{clearCacheRequestData.CacheKey}", IpAddress = clearCacheRequestData.Ip_Address }) : 0;
+            var isValid = auditTrialId > 0;
+
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? "Keyword object cleared success from cache." : "Keyword object cleared Failed from cache.", isValid ? MessageTypeId.MasterDataFound : MessageTypeId.MasterDataCouldNotFound, isValid ? ResponseCode.Success : ResponseCode.Failure);
+
+        }
+
 
         #region Internal Method
         internal async Task<OutResponse> ToApplyResponseAsync(string requestId, string responseData, MessageTypeId messageTypeId, ResponseCode responseCode)
@@ -677,7 +690,25 @@ namespace Master.Cache.Service.MasterCache
             return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? isZip ? BitConverter.ToString(responseData.Zip()).Replace("-", string.Empty) : responseData : null, isValid ? MessageTypeId.ProfileTypeTransByChannelSuccess : MessageTypeId.ProfileTypeTransByChannelFailed, isValid ? ResponseCode.Success : ResponseCode.Failure);
         }
 
+        internal async Task<OutResponse> ResetCommanMasterAsync(CacheRequest cacheRequest, bool isRolebased, string key, string dataFormat, MessageTypeId messageSuccessTypeId, MessageTypeId messageFailedTypeId)
+        {
+            var resetProfileRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();
+            var auditTrialId = await _cacheConnector.RemoveCacheAuditAsync(new CacheAuditTrail { CacheKey = $"{key}{resetProfileRequestData.UserTypeID}{resetProfileRequestData.ChannelID}", IpAddress = resetProfileRequestData.Ip_Address });
+            if (!isRolebased)
+            {
+                var profileType = (await _masterCacheRepositories.ProfileTypeDictionaryAsync(resetProfileRequestData?.UserTypeID, resetProfileRequestData?.ChannelID)).profileType;
+                await _cacheConnector.PutCacheAuditWithOutVersion($"{key}{resetProfileRequestData.UserTypeID}{resetProfileRequestData.ChannelID}", profileType.ToJsonSerialize(), auditTrialId, resetProfileRequestData.Ip_Address, true);
+            }
+            else
+            {
+                var roleData = await _masterCacheRepositories.GetRoleBasedMenuAsync(resetProfileRequestData?.UserTypeID, resetProfileRequestData?.ChannelID);
+                await _cacheConnector.PutCacheAuditWithOutVersion($"{key}{resetProfileRequestData?.UserTypeID}{resetProfileRequestData?.ChannelID}", roleData.ToJsonSerialize(), auditTrialId, resetProfileRequestData?.Ip_Address, true);
+            }
 
+            var versionId = await _cacheConnector.GetCacheVersion($"{key}{resetProfileRequestData.UserTypeID}{resetProfileRequestData.ChannelID}");
+            var isValid = versionId.ToInt32() > 0;
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? string.Format(dataFormat, versionId) : null, isValid ? messageSuccessTypeId : messageFailedTypeId, isValid ? ResponseCode.Success : ResponseCode.Failure);
+        }
         #endregion
 
     }
