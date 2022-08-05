@@ -359,6 +359,11 @@ namespace Master.Cache.Service.MasterCache
             return await ResetCommanMasterAsync(cacheRequest, false, "ProfileTypeMasterData", "Profile Cache versionID {0}", MessageTypeId.ResetProfileSuccessful, MessageTypeId.ResetProfileFailed);
         }
 
+        /// <summary>
+        /// return Master Cache Response by key Name 
+        /// </summary>
+        /// <param name="cacheRequest"></param>
+        /// <returns></returns>
         public async Task<OutResponse> ClearCacheDataByKeyAsync(CacheRequest cacheRequest)
         {
             var clearCacheRequestData = cacheRequest.RequestData.ToJsonDeSerialize<dynamic>();

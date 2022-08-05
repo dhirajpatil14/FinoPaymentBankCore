@@ -123,6 +123,9 @@ namespace MasterCache.Service.Service
                     case 13:
                         outResponse = await _masterCacheService.ResetProfileMasterByUserChannelAsync(cacheRequest);
                         break;
+                    case 15:
+                        outResponse = await _masterCacheService.ClearCacheDataByKeyAsync(cacheRequest);
+                        break;
                     default:
                         break;
                 }
