@@ -323,14 +323,8 @@ namespace Master.Cache.Service.MasterCache.Repositories
             };
 
             string query;
-            if (keyVal)
-            {
-                query = "select KeyVal from dbo.mstKeyConfiguration with (nolock) ";
-            }
-            else
-            {
-                query = " select ConnectionString from dbo.tblConnectionStrings with (nolock) Where ConnectionStringName=@connectionName ";
-            }
+            query = keyVal ?"select KeyVal from dbo.mstKeyConfiguration with (nolock) " : " select ConnectionString from dbo.tblConnectionStrings with (nolock) Where ConnectionStringName=@connectionName "; ;
+            
             var config = new DataDbConfigSettings<object>
             {
                 PlainQuery = query,
