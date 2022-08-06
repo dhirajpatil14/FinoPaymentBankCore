@@ -126,6 +126,9 @@ namespace MasterCache.Service.Service
                     case 15:
                         outResponse = await _masterCacheService.ClearCacheDataByKeyAsync(cacheRequest);
                         break;
+                    case 16:
+                        outResponse = await _masterCacheService.GetDecryptConnectionStringAsync(cacheRequest);
+                        break;
                     default:
                         break;
                 }

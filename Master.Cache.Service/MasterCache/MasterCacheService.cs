@@ -6,6 +6,7 @@ using Master.Cache.Service.MasterCache.DTo;
 using Master.Cache.Service.MasterCache.Model;
 using Master.Cache.Service.MasterCache.Repositories;
 using Master.Cache.Service.MasterCache.Settings;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Shared.Services.MasterMessage;
 using System;
@@ -373,7 +374,21 @@ namespace Master.Cache.Service.MasterCache
             return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? "Keyword object cleared success from cache." : "Keyword object cleared Failed from cache.", isValid ? MessageTypeId.MasterDataFound : MessageTypeId.MasterDataCouldNotFound, isValid ? ResponseCode.Success : ResponseCode.Failure);
 
         }
+        public async Task<OutResponse> GetDecryptConnectionStringAsync(CacheRequest cacheRequest)
+        {
+            var isRequestData = cacheRequest.RequestData is not null;
+            var cacheConnectionString = isRequestData ? await _cacheConnector.GetCache(cacheRequest.RequestData, true) : null;
+            // toDecrpt correction need to creat extension method 
+            var responseData = isRequestData ? cacheConnectionString is not null ? cacheConnectionString : await _masterCacheRepositories.GetKeyValConnectionAsync(cacheRequest.RequestData, false) : null;
 
+            _ = cacheConnectionString is null && await _cacheConnector.PutCacheMasterAsync(cacheRequest.RequestData, cacheConnectionString);
+
+            var isValid = responseData is not null;
+
+            var keyval = isValid ? await _masterCacheRepositories.GetKeyValConnectionAsync(string.Empty, true) : null;
+
+            return await ToApplyResponseAsync(cacheRequest.RequestId, isValid ? responseData.ToDecrypt(keyval) : null, isValid ? MessageTypeId.MasterDataFound : MessageTypeId.MasterDataCouldNotFound, isValid ? ResponseCode.Success : ResponseCode.Failure);
+        }
 
         #region Internal Method
         internal async Task<OutResponse> ToApplyResponseAsync(string requestId, string responseData, MessageTypeId messageTypeId, ResponseCode responseCode)

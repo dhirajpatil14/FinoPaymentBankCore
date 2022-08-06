@@ -314,5 +314,26 @@ namespace Master.Cache.Service.MasterCache.Repositories
                 Transcations = g.ToList()
             });
         }
+       
+        public async Task<string> GetKeyValConnectionAsync(string connectionName, bool keyVal)
+        {
+            var parameter = new
+            {
+                connectionName,
+            };
+
+            string query;
+            query = keyVal ?"select KeyVal from dbo.mstKeyConfiguration with (nolock) " : " select ConnectionString from dbo.tblConnectionStrings with (nolock) Where ConnectionStringName=@connectionName "; ;
+            
+            var config = new DataDbConfigSettings<object>
+            {
+                PlainQuery = query,
+                Request = parameter is not null ? parameter : string.Empty,
+                DbConnection = _sqlConnectionStrings.PBMasterConnection
+            };
+            var connectionAndKeyVal = await _dataDbConfigurationService.GetDatasAsync<object, string>(configSettings: config);
+
+            return connectionAndKeyVal?.FirstOrDefault();
+        }
     }
 }
