@@ -6,10 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Loggers.Logs\Loggers.Logs.csproj" />
-    <ProjectReference Include="..\..\..\Shared.Services\Shared.Services.csproj" />
-    <ProjectReference Include="..\..\..\Utility.Common\Utility.Common.csproj" />
-    <ProjectReference Include="..\..\..\WebApi.Services\WebApi.Services.csproj" />
+    <ProjectReference Include="..\..\..\Common\Loggers.Logs\Loggers.Logs.csproj" />
+    <ProjectReference Include="..\..\..\Common\Shared.Services\Shared.Services.csproj" />
+    <ProjectReference Include="..\..\..\Common\Utility.Common\Utility.Common.csproj" />
+    <ProjectReference Include="..\..\..\Common\WebApi.Services\WebApi.Services.csproj" />
     <ProjectReference Include="..\..\Application\LoginService.Application\LoginService.Application.csproj" />
   </ItemGroup>
 

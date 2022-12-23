@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="5.0.17" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="Moq" Version="4.15.2" />
     <PackageReference Include="coverlet.collector" Version="3.0.2" />
@@ -19,11 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Product\Queries\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Sample.Application\Sample.Application.csproj" />
+    <ProjectReference Include="..\..\SampleWebAPI\Sample.API.csproj" />
   </ItemGroup>
 
 </Project>

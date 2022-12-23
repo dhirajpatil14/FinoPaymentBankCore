@@ -15,10 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AspNet.Attributes\AspNet.Attributes.csproj" />
-    <ProjectReference Include="..\HotRod.Cache\HotRod.Cache.csproj" />
-    <ProjectReference Include="..\Infrastructure\Sample.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Common\AspNet.Attributes\AspNet.Attributes.csproj" />
+    <ProjectReference Include="..\..\Common\HotRod.Cache\HotRod.Cache.csproj" />
     <ProjectReference Include="..\Sample.Application\Sample.Application.csproj" />
+    <ProjectReference Include="..\Sample.Infrastructure\Sample.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

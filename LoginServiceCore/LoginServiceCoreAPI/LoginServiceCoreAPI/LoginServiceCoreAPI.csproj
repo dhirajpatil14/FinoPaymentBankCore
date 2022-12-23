@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\..\Shared\SharedSettings.json" Link="SharedSettings.json" CopyToOutputDirectory="PreserveNewest"/>
+    <Content Include="..\..\..\Shared\SharedSettings.json" Link="SharedSettings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,9 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\AspNet.Attributes\AspNet.Attributes.csproj" />
+    <ProjectReference Include="..\..\..\Common\AspNet.Attributes\AspNet.Attributes.csproj" />
+    <ProjectReference Include="..\..\..\Common\HotRod.Cache\HotRod.Cache.csproj" />
     <ProjectReference Include="..\..\..\Core\Sample.Domain.csproj" />
-    <ProjectReference Include="..\..\..\HotRod.Cache\HotRod.Cache.csproj" />
     <ProjectReference Include="..\..\Application\LoginService.Application\LoginService.Application.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Login.Identity\Login.Identity.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Login.Infrastructure\Login.Infrastructure.csproj" />

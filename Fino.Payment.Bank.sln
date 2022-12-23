@@ -5,27 +5,27 @@ VisualStudioVersion = 16.0.32106.194
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{6881A608-B306-4243-AEDA-958EFCB1442C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SQL.Helper", "SQL.Helper\SQL.Helper.csproj", "{58F2C7DE-A4FE-457D-92AE-01DE496EB801}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SQL.Helper", "Common\SQL.Helper\SQL.Helper.csproj", "{58F2C7DE-A4FE-457D-92AE-01DE496EB801}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility.Extensions", "Utility.Extensions\Utility.Extensions.csproj", "{D741DC86-3DCA-4A70-B677-BC63DC952C73}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility.Extensions", "Common\Utility.Extensions\Utility.Extensions.csproj", "{D741DC86-3DCA-4A70-B677-BC63DC952C73}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility.Attributes", "Utility.Attribute\Utility.Attributes.csproj", "{F470C52F-3A13-4210-A23D-0BEEF6E53841}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility.Attributes", "Common\Utility.Attribute\Utility.Attributes.csproj", "{F470C52F-3A13-4210-A23D-0BEEF6E53841}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility.Excel", "Utility.Excel\Utility.Excel.csproj", "{F6AE998C-3879-42FE-9C31-06D244E833B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility.Excel", "Common\Utility.Excel\Utility.Excel.csproj", "{F6AE998C-3879-42FE-9C31-06D244E833B2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Enums", "Comman.Enums\Common.Enums.csproj", "{41B6B95B-9DD3-4AA0-9491-2B4B1A1ACA02}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Enums", "Common\Comman.Enums\Common.Enums.csproj", "{41B6B95B-9DD3-4AA0-9491-2B4B1A1ACA02}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotRod.Cache", "HotRod.Cache\HotRod.Cache.csproj", "{933E4718-E4E0-4D33-94C8-2FD68EB03768}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotRod.Cache", "Common\HotRod.Cache\HotRod.Cache.csproj", "{933E4718-E4E0-4D33-94C8-2FD68EB03768}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.Behaviours", "Application.Behaviours\Application.Behaviours.csproj", "{D03D1E5F-CF71-44BD-8109-BA5B56813B26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.Behaviours", "Common\Application.Behaviours\Application.Behaviours.csproj", "{D03D1E5F-CF71-44BD-8109-BA5B56813B26}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Wrappers", "Common.Model\Common.Wrappers.csproj", "{F4E4BC27-2EB3-4FCA-B43F-52FF0393127B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Wrappers", "Common\Common.Model\Common.Wrappers.csproj", "{F4E4BC27-2EB3-4FCA-B43F-52FF0393127B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi.Services", "WebApi.Services\WebApi.Services.csproj", "{F6A9712F-DC7B-4506-A97F-B813044B1719}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi.Services", "Common\WebApi.Services\WebApi.Services.csproj", "{F6A9712F-DC7B-4506-A97F-B813044B1719}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Loggers.Logs", "Loggers.Logs\Loggers.Logs.csproj", "{4810D144-F864-4926-9B1B-98B900988104}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Loggers.Logs", "Common\Loggers.Logs\Loggers.Logs.csproj", "{4810D144-F864-4926-9B1B-98B900988104}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Db.Service", "Data.Db.Service\Data.Db.Service.csproj", "{F1F9C340-3D27-456F-884F-64E848A8871A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Db.Service", "Common\Data.Db.Service\Data.Db.Service.csproj", "{F1F9C340-3D27-456F-884F-64E848A8871A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{98076527-5593-4C68-ACF7-84617FB175F9}"
 EndProject
@@ -35,25 +35,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{55F85640-F5BE-4934-8BCF-0D49885E96C3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.API", "SampleWebAPI\Sample.API.csproj", "{EBF1B400-98DB-45F9-98C3-682AED5C86AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.API", "Sample\SampleWebAPI\Sample.API.csproj", "{EBF1B400-98DB-45F9-98C3-682AED5C86AC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{1A11B18C-B7E1-4CCF-85B6-EED44EBE9C26}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Application", "Sample.Application\Sample.Application.csproj", "{093154C6-7527-4FED-92D6-5884A32F2C8A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Application", "Sample\Sample.Application\Sample.Application.csproj", "{093154C6-7527-4FED-92D6-5884A32F2C8A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Domain", "Core\Sample.Domain.csproj", "{BE3362AD-138F-481C-B710-28A2DF01D4F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Domain", "Sample\Sample.Domain\Sample.Domain.csproj", "{BE3362AD-138F-481C-B710-28A2DF01D4F2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Application", "Common.Application\Common.Application.csproj", "{B8F5B28F-1137-4E05-B0CA-DE8C94D05B74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Application", "Common\Common.Application\Common.Application.csproj", "{B8F5B28F-1137-4E05-B0CA-DE8C94D05B74}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Infrastructure", "Infrastructure\Sample.Infrastructure.csproj", "{69837F54-9A0E-4E07-B564-22A3AD1E4AEC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Infrastructure", "Sample\Sample.Infrastructure\Sample.Infrastructure.csproj", "{69837F54-9A0E-4E07-B564-22A3AD1E4AEC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNet.Attributes", "AspNet.Attributes\AspNet.Attributes.csproj", "{40F9E2BC-D0F5-4CE2-9D49-0971A96EB243}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNet.Attributes", "Common\AspNet.Attributes\AspNet.Attributes.csproj", "{40F9E2BC-D0F5-4CE2-9D49-0971A96EB243}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{88A3ABAD-E1A0-4425-9A7D-64FC4587E6B8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.API.IntegrationTests", "Sample.API.IntegrationTests\Sample.API.IntegrationTests.csproj", "{57905495-83FC-40DC-9EB0-C70DB466DEE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.API.IntegrationTests", "Sample\Test\Sample.API.IntegrationTests\Sample.API.IntegrationTests.csproj", "{57905495-83FC-40DC-9EB0-C70DB466DEE2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Application.UnitTests", "Sample.Application.UnitTests\Sample.Application.UnitTests.csproj", "{1334328B-C5FE-4AD2-A625-6D5D9906B317}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Application.UnitTests", "Sample\Test\Sample.Application.UnitTests\Sample.Application.UnitTests.csproj", "{1334328B-C5FE-4AD2-A625-6D5D9906B317}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LoginServiceCore", "LoginServiceCore", "{9C27C0DB-39E1-45F2-AC3E-9E9B53008FE5}"
 EndProject
@@ -73,13 +73,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Login.Infrastructure", "Log
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Login.Identity", "LoginServiceCore\Infrastructure\Login.Identity\Login.Identity.csproj", "{23644B08-62FE-4863-8977-2F65696C1904}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared.Services", "Shared.Services\Shared.Services.csproj", "{BF27D71B-E7A4-4208-9845-32B06747D237}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared.Services", "Common\Shared.Services\Shared.Services.csproj", "{BF27D71B-E7A4-4208-9845-32B06747D237}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility.Common", "Utility.Common\Utility.Common.csproj", "{4046C294-C1FD-407E-8765-AEA0E6988F49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility.Common", "Common\Utility.Common\Utility.Common.csproj", "{4046C294-C1FD-407E-8765-AEA0E6988F49}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoginService.API.Integration.Tests", "LoginServiceCore\Test\LoginService.API.Integration.Tests\LoginService.API.Integration.Tests.csproj", "{901FE2AE-C508-45C4-8641-4C38062A138B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotRod.Cache.Connector", "HotRod.Cache.Connector\HotRod.Cache.Connector.csproj", "{ABE3EEE6-8AE9-4DA3-B3A2-FD51654A6EF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotRod.Cache.Connector", "Common\HotRod.Cache.Connector\HotRod.Cache.Connector.csproj", "{ABE3EEE6-8AE9-4DA3-B3A2-FD51654A6EF1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{B8AFB77A-5E70-4AD4-8D16-A7ED7E7ED237}"
 	ProjectSection(SolutionItems) = preProject
@@ -92,7 +92,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{9741C8ED-F59
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{C6E56D9E-A492-48C3-A3E4-6BBB80FD04EF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{C1F59CF2-9A10-4F6A-A33B-81733E9CA72A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Sample\Sample.Infrastructure", "{C1F59CF2-9A10-4F6A-A33B-81733E9CA72A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{04CCDD5B-52D2-4B55-A741-F43491697C83}"
 EndProject
@@ -104,7 +104,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCache.Service", "Mast
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCacheService.API.Integration.Tests", "MasterCacheService\Test\MasterCacheService.API.Integration.Tests\MasterCacheService.API.Integration.Tests.csproj", "{40A88835-5A84-4516-BBD9-8C429B242A1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Master.Cache.Service", "Master.Cache.Service\Master.Cache.Service.csproj", "{41276D30-0522-4BB0-AFD2-DF6943E98392}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Master.Cache.Service", "Common\Master.Cache.Service\Master.Cache.Service.csproj", "{41276D30-0522-4BB0-AFD2-DF6943E98392}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

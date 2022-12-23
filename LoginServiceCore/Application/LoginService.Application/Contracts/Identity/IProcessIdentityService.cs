@@ -7,5 +7,6 @@ namespace LoginService.Application.Contracts.Identity
     public interface IProcessIdentityService
     {
         Task<OutResponse> IdentityAsync(AuthenticationRequest authenticationRequest);
+        Task<OutResponse> IdentityPayloadAsync(AuthenticationEnRequest enRequest);
     }
 }

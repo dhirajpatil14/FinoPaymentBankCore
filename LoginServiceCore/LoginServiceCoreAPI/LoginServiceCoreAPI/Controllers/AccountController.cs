@@ -17,10 +17,16 @@ namespace LoginServiceCoreAPI.Controllers
             _processIdentityService = processIdentityService;
         }
 
+        //[HttpPost("authenticate")]
+        //public async Task<IActionResult> AuthenticationAsync(AuthenticationRequest authenticationRequest)
+        //{
+        //    return Ok(await _processIdentityService.IdentityAsync(authenticationRequest));
+        //}
+
         [HttpPost("authenticate")]
-        public async Task<IActionResult> AuthenticationAsync(AuthenticationRequest authenticationRequest)
+        public async Task<IActionResult> AuthenticationENAsync(AuthenticationEnRequest enRequest)
         {
-            return Ok(await _processIdentityService.IdentityAsync(authenticationRequest));
+            return Ok(await _processIdentityService.IdentityPayloadAsync(enRequest));
         }
 
     }

@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\AspNet.Attributes\AspNet.Attributes.csproj" />
+    <ProjectReference Include="..\..\..\Common\AspNet.Attributes\AspNet.Attributes.csproj" />
     <ProjectReference Include="..\..\Infrastructure\MasterCacheService.Infrastructure\MasterCache.Service.csproj" />
   </ItemGroup>
 

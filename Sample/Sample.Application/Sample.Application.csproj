@@ -13,9 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Application.Behaviours\Application.Behaviours.csproj" />
-    <ProjectReference Include="..\Common.Application\Common.Application.csproj" />
-    <ProjectReference Include="..\Core\Sample.Domain.csproj" />
+    <ProjectReference Include="..\..\Common\Application.Behaviours\Application.Behaviours.csproj" />
+    <ProjectReference Include="..\..\Common\Common.Application\Common.Application.csproj" />
+    <ProjectReference Include="..\Sample.Domain\Sample.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
