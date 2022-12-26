@@ -10,10 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Common\Comman.Enums\Common.Enums.csproj" />
-    <ProjectReference Include="..\..\..\Common\Data.Db.Service\Data.Db.Service.csproj" />
-    <ProjectReference Include="..\..\..\Common\HotRod.Cache.Connector\HotRod.Cache.Connector.csproj" />
-    <ProjectReference Include="..\..\..\Common\HotRod.Cache\HotRod.Cache.csproj" />
+    <ProjectReference Include="..\..\..\..\Common\Comman.Enums\Common.Enums.csproj" />
+    <ProjectReference Include="..\..\..\..\Common\Data.Db.Service\Data.Db.Service.csproj" />
+    <ProjectReference Include="..\..\..\..\Common\HotRod.Cache.Connector\HotRod.Cache.Connector.csproj" />
+    <ProjectReference Include="..\..\..\..\Common\HotRod.Cache\HotRod.Cache.csproj" />
     <ProjectReference Include="..\..\Application\LoginService.Application\LoginService.Application.csproj" />
   </ItemGroup>
 

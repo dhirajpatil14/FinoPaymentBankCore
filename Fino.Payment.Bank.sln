@@ -35,25 +35,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{55F85640-F5BE-4934-8BCF-0D49885E96C3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.API", "Sample\SampleWebAPI\Sample.API.csproj", "{EBF1B400-98DB-45F9-98C3-682AED5C86AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.API", "Services\Sample\SampleWebAPI\Sample.API.csproj", "{EBF1B400-98DB-45F9-98C3-682AED5C86AC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{1A11B18C-B7E1-4CCF-85B6-EED44EBE9C26}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Application", "Sample\Sample.Application\Sample.Application.csproj", "{093154C6-7527-4FED-92D6-5884A32F2C8A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Application", "Services\Sample\Sample.Application\Sample.Application.csproj", "{093154C6-7527-4FED-92D6-5884A32F2C8A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Domain", "Sample\Sample.Domain\Sample.Domain.csproj", "{BE3362AD-138F-481C-B710-28A2DF01D4F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Domain", "Services\Sample\Sample.Domain\Sample.Domain.csproj", "{BE3362AD-138F-481C-B710-28A2DF01D4F2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Application", "Common\Common.Application\Common.Application.csproj", "{B8F5B28F-1137-4E05-B0CA-DE8C94D05B74}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Infrastructure", "Sample\Sample.Infrastructure\Sample.Infrastructure.csproj", "{69837F54-9A0E-4E07-B564-22A3AD1E4AEC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Infrastructure", "Services\Sample\Sample.Infrastructure\Sample.Infrastructure.csproj", "{69837F54-9A0E-4E07-B564-22A3AD1E4AEC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNet.Attributes", "Common\AspNet.Attributes\AspNet.Attributes.csproj", "{40F9E2BC-D0F5-4CE2-9D49-0971A96EB243}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{88A3ABAD-E1A0-4425-9A7D-64FC4587E6B8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.API.IntegrationTests", "Sample\Test\Sample.API.IntegrationTests\Sample.API.IntegrationTests.csproj", "{57905495-83FC-40DC-9EB0-C70DB466DEE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.API.IntegrationTests", "Services\Sample\Test\Sample.API.IntegrationTests\Sample.API.IntegrationTests.csproj", "{57905495-83FC-40DC-9EB0-C70DB466DEE2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Application.UnitTests", "Sample\Test\Sample.Application.UnitTests\Sample.Application.UnitTests.csproj", "{1334328B-C5FE-4AD2-A625-6D5D9906B317}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Application.UnitTests", "Services\Sample\Test\Sample.Application.UnitTests\Sample.Application.UnitTests.csproj", "{1334328B-C5FE-4AD2-A625-6D5D9906B317}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LoginServiceCore", "LoginServiceCore", "{9C27C0DB-39E1-45F2-AC3E-9E9B53008FE5}"
 EndProject
@@ -65,19 +65,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5C554E37-B4FF-4C30-866F-15ADCC2F44A9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoginServiceCoreAPI", "LoginServiceCore\LoginServiceCoreAPI\LoginServiceCoreAPI\LoginServiceCoreAPI.csproj", "{DAE8E956-F7B7-4D72-B45D-7B0B71FE273B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoginServiceCoreAPI", "Services\LoginServiceCore\LoginServiceCoreAPI\LoginServiceCoreAPI\LoginServiceCoreAPI.csproj", "{DAE8E956-F7B7-4D72-B45D-7B0B71FE273B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoginService.Application", "LoginServiceCore\Application\LoginService.Application\LoginService.Application.csproj", "{A91F1019-6B06-4707-947C-8CCDFD24E1BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoginService.Application", "Services\LoginServiceCore\Application\LoginService.Application\LoginService.Application.csproj", "{A91F1019-6B06-4707-947C-8CCDFD24E1BD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Login.Infrastructure", "LoginServiceCore\Infrastructure\Login.Infrastructure\Login.Infrastructure.csproj", "{E8237B8E-C951-4939-9D31-53113D98A516}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Login.Infrastructure", "Services\LoginServiceCore\Infrastructure\Login.Infrastructure\Login.Infrastructure.csproj", "{E8237B8E-C951-4939-9D31-53113D98A516}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Login.Identity", "LoginServiceCore\Infrastructure\Login.Identity\Login.Identity.csproj", "{23644B08-62FE-4863-8977-2F65696C1904}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Login.Identity", "Services\LoginServiceCore\Infrastructure\Login.Identity\Login.Identity.csproj", "{23644B08-62FE-4863-8977-2F65696C1904}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared.Services", "Common\Shared.Services\Shared.Services.csproj", "{BF27D71B-E7A4-4208-9845-32B06747D237}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility.Common", "Common\Utility.Common\Utility.Common.csproj", "{4046C294-C1FD-407E-8765-AEA0E6988F49}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoginService.API.Integration.Tests", "LoginServiceCore\Test\LoginService.API.Integration.Tests\LoginService.API.Integration.Tests.csproj", "{901FE2AE-C508-45C4-8641-4C38062A138B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoginService.API.Integration.Tests", "Services\LoginServiceCore\Test\LoginService.API.Integration.Tests\LoginService.API.Integration.Tests.csproj", "{901FE2AE-C508-45C4-8641-4C38062A138B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotRod.Cache.Connector", "Common\HotRod.Cache.Connector\HotRod.Cache.Connector.csproj", "{ABE3EEE6-8AE9-4DA3-B3A2-FD51654A6EF1}"
 EndProject
@@ -92,19 +92,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{9741C8ED-F59
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{C6E56D9E-A492-48C3-A3E4-6BBB80FD04EF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Sample\Sample.Infrastructure", "{C1F59CF2-9A10-4F6A-A33B-81733E9CA72A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{C1F59CF2-9A10-4F6A-A33B-81733E9CA72A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{04CCDD5B-52D2-4B55-A741-F43491697C83}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCacheServiceAPI", "MasterCacheService\MasterCacheAPI\MasterCacheServiceAPI\MasterCacheServiceAPI.csproj", "{C127E66D-600C-45D8-91EB-C78F3C2C96A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCacheServiceAPI", "Services\MasterCacheService\MasterCacheAPI\MasterCacheServiceAPI\MasterCacheServiceAPI.csproj", "{C127E66D-600C-45D8-91EB-C78F3C2C96A7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCacheService.Application", "MasterCacheService\Application\MasterCacheService.Application\MasterCacheService.Application.csproj", "{1BAE37B3-87C2-4D63-B3F3-3C31E581DC9F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCacheService.Application", "Services\MasterCacheService\Application\MasterCacheService.Application\MasterCacheService.Application.csproj", "{1BAE37B3-87C2-4D63-B3F3-3C31E581DC9F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCache.Service", "MasterCacheService\Infrastructure\MasterCacheService.Infrastructure\MasterCache.Service.csproj", "{F3DF9D75-7F06-49C7-AD0A-2C7AC91D5F87}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCache.Service", "Services\MasterCacheService\Infrastructure\MasterCacheService.Infrastructure\MasterCache.Service.csproj", "{F3DF9D75-7F06-49C7-AD0A-2C7AC91D5F87}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCacheService.API.Integration.Tests", "MasterCacheService\Test\MasterCacheService.API.Integration.Tests\MasterCacheService.API.Integration.Tests.csproj", "{40A88835-5A84-4516-BBD9-8C429B242A1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterCacheService.API.Integration.Tests", "Services\MasterCacheService\Test\MasterCacheService.API.Integration.Tests\MasterCacheService.API.Integration.Tests.csproj", "{40A88835-5A84-4516-BBD9-8C429B242A1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Master.Cache.Service", "Common\Master.Cache.Service\Master.Cache.Service.csproj", "{41276D30-0522-4BB0-AFD2-DF6943E98392}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Master.Cache.Service", "Common\Master.Cache.Service\Master.Cache.Service.csproj", "{41276D30-0522-4BB0-AFD2-DF6943E98392}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{8A7D0879-B967-4DF1-BB77-D05529E3E265}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -256,6 +258,7 @@ Global
 		{F6A9712F-DC7B-4506-A97F-B813044B1719} = {6881A608-B306-4243-AEDA-958EFCB1442C}
 		{4810D144-F864-4926-9B1B-98B900988104} = {6881A608-B306-4243-AEDA-958EFCB1442C}
 		{F1F9C340-3D27-456F-884F-64E848A8871A} = {6881A608-B306-4243-AEDA-958EFCB1442C}
+		{98076527-5593-4C68-ACF7-84617FB175F9} = {8A7D0879-B967-4DF1-BB77-D05529E3E265}
 		{977AC170-BF7D-4D0A-AA91-B33C6AC72C33} = {98076527-5593-4C68-ACF7-84617FB175F9}
 		{E4A07E24-484E-4F7F-AE56-A2C82789AEB3} = {98076527-5593-4C68-ACF7-84617FB175F9}
 		{55F85640-F5BE-4934-8BCF-0D49885E96C3} = {98076527-5593-4C68-ACF7-84617FB175F9}
@@ -269,10 +272,11 @@ Global
 		{88A3ABAD-E1A0-4425-9A7D-64FC4587E6B8} = {98076527-5593-4C68-ACF7-84617FB175F9}
 		{57905495-83FC-40DC-9EB0-C70DB466DEE2} = {88A3ABAD-E1A0-4425-9A7D-64FC4587E6B8}
 		{1334328B-C5FE-4AD2-A625-6D5D9906B317} = {88A3ABAD-E1A0-4425-9A7D-64FC4587E6B8}
+		{9C27C0DB-39E1-45F2-AC3E-9E9B53008FE5} = {8A7D0879-B967-4DF1-BB77-D05529E3E265}
 		{5F4AD8CD-C089-4A2A-92B2-4CAFBF496B49} = {9C27C0DB-39E1-45F2-AC3E-9E9B53008FE5}
 		{0D39682E-E230-47E3-A1ED-60D418368F0D} = {9C27C0DB-39E1-45F2-AC3E-9E9B53008FE5}
 		{4FA88161-9B62-4764-84EA-B7126699AFA7} = {9C27C0DB-39E1-45F2-AC3E-9E9B53008FE5}
-		{5C554E37-B4FF-4C30-866F-15ADCC2F44A9} = {9C27C0DB-39E1-45F2-AC3E-9E9B53008FE5}
+		{5C554E37-B4FF-4C30-866F-15ADCC2F44A9} = {8A7D0879-B967-4DF1-BB77-D05529E3E265}
 		{DAE8E956-F7B7-4D72-B45D-7B0B71FE273B} = {5F4AD8CD-C089-4A2A-92B2-4CAFBF496B49}
 		{A91F1019-6B06-4707-947C-8CCDFD24E1BD} = {0D39682E-E230-47E3-A1ED-60D418368F0D}
 		{E8237B8E-C951-4939-9D31-53113D98A516} = {4FA88161-9B62-4764-84EA-B7126699AFA7}
@@ -281,6 +285,7 @@ Global
 		{4046C294-C1FD-407E-8765-AEA0E6988F49} = {6881A608-B306-4243-AEDA-958EFCB1442C}
 		{901FE2AE-C508-45C4-8641-4C38062A138B} = {5C554E37-B4FF-4C30-866F-15ADCC2F44A9}
 		{ABE3EEE6-8AE9-4DA3-B3A2-FD51654A6EF1} = {6881A608-B306-4243-AEDA-958EFCB1442C}
+		{28425359-FFC1-4ADD-A6E9-94E92424752A} = {8A7D0879-B967-4DF1-BB77-D05529E3E265}
 		{9741C8ED-F597-43BA-925E-E06F4C6584B7} = {28425359-FFC1-4ADD-A6E9-94E92424752A}
 		{C6E56D9E-A492-48C3-A3E4-6BBB80FD04EF} = {28425359-FFC1-4ADD-A6E9-94E92424752A}
 		{C1F59CF2-9A10-4F6A-A33B-81733E9CA72A} = {28425359-FFC1-4ADD-A6E9-94E92424752A}

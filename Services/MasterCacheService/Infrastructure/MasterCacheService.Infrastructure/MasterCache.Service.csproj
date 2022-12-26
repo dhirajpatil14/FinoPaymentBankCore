@@ -10,10 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Common\Data.Db.Service\Data.Db.Service.csproj" />
-    <ProjectReference Include="..\..\..\Common\HotRod.Cache\HotRod.Cache.csproj" />
-    <ProjectReference Include="..\..\..\Common\Loggers.Logs\Loggers.Logs.csproj" />
-    <ProjectReference Include="..\..\..\Common\Shared.Services\Shared.Services.csproj" />
+    <ProjectReference Include="..\..\..\..\Common\Data.Db.Service\Data.Db.Service.csproj" />
+    <ProjectReference Include="..\..\..\..\Common\HotRod.Cache\HotRod.Cache.csproj" />
+    <ProjectReference Include="..\..\..\..\Common\Loggers.Logs\Loggers.Logs.csproj" />
+    <ProjectReference Include="..\..\..\..\Common\Shared.Services\Shared.Services.csproj" />
     <ProjectReference Include="..\..\Application\MasterCacheService.Application\MasterCacheService.Application.csproj" />
   </ItemGroup>
 
