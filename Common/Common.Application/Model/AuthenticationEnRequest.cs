@@ -1,9 +1,8 @@
-﻿using Common.Application.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LoginService.Application.Models
+namespace Common.Application.Model
 {
     public class AuthenticationEnRequest : EncryptInRequest
     {

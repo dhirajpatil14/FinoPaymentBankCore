@@ -5,6 +5,6 @@ namespace LoginService.Application.Models
     public class LoginDataResponse
     {
         [JsonProperty("Login_Data")]
-        public string LoginData { get; set; } = null;
+        public object LoginData { get; set; } = null;
     }
 }

@@ -182,7 +182,7 @@ namespace Login.Identity.Service
             var checkValidReturnCode = ValidReturnCodeExtension.IsValidCode(result?.Data?.ReturnCode);
 
             var islogService = isNotValid ? await _loggerService.WriteCorelationLogAsync(new CorelationLoggerRequest { ServiceId = authenticationRequest.ServiceID, MethodId = authenticationRequest.MethodId, LayerId = LayerType.ESB.GetIntValue(), RequestFlag = false, ResponseFlag = true, CorelationRequest = authenticationRequest.RequestId, CorelationSession = authenticationRequest.SessionId, StatusCode = EsbsMessages.ServerUnavailable.GetIntValue(), ResponseMessage = "ESB Server UnAvailable" }) : 0;
-            islogService = !isNotValid ? await _loggerService.WriteCorelationLogAsync(new CorelationLoggerRequest { ServiceId = authenticationRequest.ServiceID, MethodId = authenticationRequest.MethodId, LayerId = LayerType.ESB.GetIntValue(), RequestFlag = false, ResponseFlag = true, CorelationRequest = authenticationRequest.RequestId, CorelationSession = authenticationRequest.SessionId, StatusCode = checkValidReturnCode ? ResponseCode.Success.GetIntValue() : ResponseCode.Error.GetIntValue(), ResponseMessage = result?.Data?.ToJsonSerialize() }) : 0;
+            //islogService = !isNotValid ? await _loggerService.WriteCorelationLogAsync(new CorelationLoggerRequest { ServiceId = authenticationRequest.ServiceID, MethodId = authenticationRequest.MethodId, LayerId = LayerType.ESB.GetIntValue(), RequestFlag = false, ResponseFlag = true, CorelationRequest = authenticationRequest.RequestId, CorelationSession = authenticationRequest.SessionId, StatusCode = checkValidReturnCode ? ResponseCode.Success.GetIntValue() : ResponseCode.Error.GetIntValue(), ResponseMessage = result?.Data?.ToJsonSerialize() }) : 0;
 
             outRespnse.ResponseCode = isNotValid ? ResponseCode.RemoteServerError.GetIntValue() : ResponseCode.Success.GetIntValue();
             outRespnse.ResponseMessage = isNotValid ? responseMessage.CorrectedMessage : string.Empty;
@@ -196,8 +196,6 @@ namespace Login.Identity.Service
 
 
             var isAccessToken = result?.Data?.AccessToken is not null;
-
-
 
 
             #region IF Return Code  Zero or Not
@@ -234,7 +232,7 @@ namespace Login.Identity.Service
             outRespnse.ResponseMessage = branchCodeNotExist is not null ? branchCodeNotExist.CorrectedMessage : outRespnse.ResponseMessage;
             outRespnse.MessageType = branchCodeNotExist is not null ? MessageType.Exclam.GetStringValue() : outRespnse.MessageType;
             //outRespnse.ResponseData = "{\"Login_Data\":" + outRespnse.ResponseData + "}";
-            outRespnse.ResponseData = new LoginDataResponse { LoginData = outRespnse.ResponseData }.ToJsonSerialize();
+            //outRespnse.ResponseData = new LoginDataResponse { LoginData = outRespnse.ResponseData }.ToJsonSerialize();
 
             if (branchCodeNotExist is not null)
                 return outRespnse;
@@ -281,7 +279,7 @@ namespace Login.Identity.Service
 
                     var LoginResponseData = new CommonChannelIdTwo
                     {
-                        LoginData = outRespnse.ResponseData,
+                        LoginData = outRespnse.ResponseData.ToJsonDeSerialize<dynamic>(),
                         SessionId = authenticationRequest.SessionId,
                         NoOfFinger = _appSettings.NoOfFinger.ToString(),
                         Threshold = _appSettings.Threshold.ToString(),
@@ -301,9 +299,8 @@ namespace Login.Identity.Service
                         LastDownloadDate = lstDownload.ToString(),
                         CategoryCode = checkCategoryCode.ToString()
                     };
-
                     outRespnse.ResponseData = LoginResponseData.ToJsonSerialize();
-
+                    
                     //line 1096
                     break;
                 case "1":
@@ -380,7 +377,7 @@ namespace Login.Identity.Service
 
                     var LoginResponseOne = new CommonChannelIdOne
                     {
-                        LoginData = outRespnse.ResponseData,
+                        LoginData = outRespnse.ResponseData.ToJsonDeSerialize<dynamic>(),
                         UserId = loginData?.UserId,
                         UserTypeId = userType.UserTypeId.ToString(),
                         UserRole = userType.UserRole.ToString(),
@@ -418,7 +415,7 @@ namespace Login.Identity.Service
 
                         var LoginResponseThree = new CommonChannelIdThree
                         {
-                            LoginData = outRespnse.ResponseData,
+                            LoginData = outRespnse.ResponseData.ToJsonDeSerialize<dynamic>(),
                             UserId = loginData?.UserId,
                             UserTypeId = userType.UserTypeId.ToString(),
                             UserRole = userType.UserRole.ToString(),
@@ -449,7 +446,7 @@ namespace Login.Identity.Service
                         fosData = await _userRepositories.GetFosVersionAsync(AuthenticatorType.FINOINGE.GetStringValue(), $"INGEAppVersion{AuthenticatorType.FINOINGE.GetStringValue()}{loginData.SystemInfo.Channel}");
                         var LoginResponseSix = new CommonChannelIdThree
                         {
-                            LoginData = outRespnse.ResponseData,
+                            LoginData = outRespnse.ResponseData.ToJsonDeSerialize<dynamic>(),
                             UserId = loginData?.UserId,
                             UserTypeId = userType.UserTypeId.ToString(),
                             UserRole = userType.UserRole.ToString(),
@@ -479,7 +476,7 @@ namespace Login.Identity.Service
                     fosData = await _userRepositories.GetFosVersionAsync(AuthenticatorType.FINOMER.GetStringValue(), $"FINOMERAppVersion{AuthenticatorType.FINOMER.GetStringValue()}{loginData.SystemInfo.Channel}");
                     var LoginResponseDefault = new CommonChannelIdThree
                     {
-                        LoginData = outRespnse.ResponseData,
+                        LoginData = outRespnse.ResponseData.ToJsonDeSerialize<dynamic>(),
                         UserId = loginData?.UserId,
                         UserTypeId = userType.UserTypeId.ToString(),
                         UserRole = userType.UserRole.ToString(),

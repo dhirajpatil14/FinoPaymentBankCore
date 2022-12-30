@@ -1,17 +1,15 @@
 using HotRod.Cache;
-using Login.Identity;
-using Login.Infrastructure;
-using LoginService.Application;
-using LoginServiceCoreAPI.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using PBSecurity;
+using ServiceRequest.Identity;
+using ServiceRequest.Infrastructure;
+using ServiceRequestCoreAPI.Extensions;
 using SQL.Helper;
 
-namespace LoginServiceCoreAPI
+namespace ServiceRequestCoreAPI
 {
     public class Startup
     {
@@ -25,15 +23,16 @@ namespace LoginServiceCoreAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
 
+            services.AddControllers();
+            
             services.AddSqlConnectionService(Configuration);
 
             services.AddSwaggerExtension();
 
-            services.AddApiVersioningExtension();
-
             services.AddCacheServiceLayer();
+
+            services.AddServiceRequestService();
 
             services.UseConfigurationExtension(Configuration);
 
@@ -41,13 +40,7 @@ namespace LoginServiceCoreAPI
 
             services.AddAuthentication();
 
-            services.AddApplicationService();
-
-            services.AddIdentityService();
-
-            services.AddInfrastureService();
-
-            services.AddPBSecurityServiceLayer();
+            services.AddInfrastructureService();
 
         }
 
@@ -57,10 +50,9 @@ namespace LoginServiceCoreAPI
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-
-
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ServiceRequestCoreAPI v1"));
             }
-            app.UseSwaggerExtension(env.IsDevelopment());
 
             app.UseHttpsRedirection();
 
@@ -73,8 +65,6 @@ namespace LoginServiceCoreAPI
             app.UseAuthentication();
 
             app.UseErrorHandlingMiddleware();
-
-
 
             app.UseEndpoints(endpoints =>
             {

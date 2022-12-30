@@ -1,4 +1,5 @@
-﻿using Common.Application.Model;
+﻿using Common.Application.Interface;
+using Common.Application.Model;
 using LoginService.Application.Models;
 using System.Threading.Tasks;
 

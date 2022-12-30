@@ -29,8 +29,10 @@ namespace Common.Enums
         MasterStatus = 8,
 
         [StringValue("tblCacheAuditTrail")]
-        CacheAuditTrail = 9
+        CacheAuditTrail = 9,
 
+        [StringValue("MstSSLCretificate")]
+        SSLCertificate
 
     }
 }

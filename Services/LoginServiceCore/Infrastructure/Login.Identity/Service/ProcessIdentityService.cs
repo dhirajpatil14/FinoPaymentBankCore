@@ -1,9 +1,11 @@
-﻿using Common.Application.Model;
+﻿using Common.Application.Interface;
+using Common.Application.Model;
 using Common.Enums;
 using Loggers.Logs;
 using Loggers.Logs.Model;
 using LoginService.Application.Contracts.Identity;
 using LoginService.Application.Models;
+using PBSecurity;
 using System.Threading.Tasks;
 using Utility.Common;
 using Utility.Extensions;
@@ -15,13 +17,13 @@ namespace Login.Identity.Service
 
         private readonly IAuthenticationService _authenticationService;
         private readonly ILoggerService _loggerService;
+        private readonly CommonEncryption _commonEncryption;
 
-
-        public ProcessIdentityService(IAuthenticationService authenticationService, ILoggerService loggerService)
+        public ProcessIdentityService(IAuthenticationService authenticationService, ILoggerService loggerService, CommonEncryption commonEncryption)
         {
             _authenticationService = authenticationService;
             _loggerService = loggerService;
-
+            _commonEncryption = commonEncryption;
         }
 
         public async Task<OutResponse> IdentityAsync(AuthenticationRequest authenticationRequest)
@@ -206,11 +208,11 @@ namespace Login.Identity.Service
             }
             else
             {
-                if (authenticationRequest.IsEncrypt)
+                if (!authenticationRequest.IsEncrypt)
                 {
                     //var decriptData = authenticationRequest?.RequestData?.ToDecryptOpenSSL(authenticationRequest.SessionId);
-                    var decriptData = enRequest?.payloadData?.ToDecryptOpenSSL(enRequest.payloadData);
-                    authenticationRequest.RequestData = decriptData;
+                    var decriptData = _commonEncryption.LoginRequest(enRequest, "LOGIN");
+                    //authenticationRequest = decriptData;
                 }
 
                 await _loggerService.WriteCorelationLogAsync(new CorelationLoggerRequest { ServiceId = authenticationRequest.ServiceID, MethodId = authenticationRequest.MethodId, LayerId = LayerType.BLL.GetIntValue(), RequestFlag = true, ResponseFlag = false, CorelationRequest = authenticationRequest.RequestId, CorelationSession = authenticationRequest.SessionId, StatusCode = DefaultStatus.Default.GetIntValue(), ResponseMessage = "Process Identity Service" });

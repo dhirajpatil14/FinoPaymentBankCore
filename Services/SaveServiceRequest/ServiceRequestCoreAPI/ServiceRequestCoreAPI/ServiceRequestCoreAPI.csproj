@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+	  <LangVersion>9.0</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Common\AspNet.Attributes\AspNet.Attributes.csproj" />
+    <ProjectReference Include="..\..\..\..\Common\HotRod.Cache\HotRod.Cache.csproj" />
+    <ProjectReference Include="..\..\..\..\Common\Loggers.Logs\Loggers.Logs.csproj" />
+    <ProjectReference Include="..\..\..\..\Common\SQL.Helper\SQL.Helper.csproj" />
+    <ProjectReference Include="..\..\Application\ServiceRequest.Application\ServiceRequest.Application.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\ServiceRequest.Identity\ServiceRequest.Identity.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\ServiceRequest.Infrastructure\ServiceRequest.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
