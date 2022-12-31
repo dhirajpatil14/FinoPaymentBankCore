@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace ServiceRequest.Application.Contracts.Identity
 {
-    public interface IProcessSSRService
+    public interface ISaveServiceRequestService
     {
-        Task<OutResponse> SaveServiceAsync(SaveServiceRequest saveServiceRequest);
+        Task<OutResponse> PanValidation(SaveServiceRequest saveServiceRequest)
     }
 }

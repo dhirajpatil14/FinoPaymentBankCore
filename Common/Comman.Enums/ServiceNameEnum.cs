@@ -26,8 +26,9 @@ namespace Common.Enums
         OTPSERVICE = 112,
 
         [IntValueAttribute(113)]
-        MERCHANTSERVICE = 113
+        MERCHANTSERVICE = 113,
 
-
+        [IntValueAttribute(113)]
+        SERVICEREQUEST = 6
     }
 }

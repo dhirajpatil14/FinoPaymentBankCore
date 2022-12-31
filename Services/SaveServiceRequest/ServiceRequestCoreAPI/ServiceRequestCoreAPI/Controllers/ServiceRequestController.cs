@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ServiceRequest.Application.Contracts.Identity;
 using ServiceRequest.Application.Models;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace ServiceRequestCoreAPI.Controllers
     [ApiController]
     public class ServiceRequestController : ControllerBase
     {
+        private readonly IProcessSSRService _processSSRService;
         public ServiceRequestController()
         {
 
@@ -21,7 +23,7 @@ namespace ServiceRequestCoreAPI.Controllers
         [HttpPost("serviceRequest")]
         public async Task<IActionResult> SaveServiceRequestAsync(SaveServiceRequest saveServiceRequest)
         {
-            return Ok();
+            return Ok(await _processSSRService.SaveServiceAsync(saveServiceRequest));
         }
     }
 }
