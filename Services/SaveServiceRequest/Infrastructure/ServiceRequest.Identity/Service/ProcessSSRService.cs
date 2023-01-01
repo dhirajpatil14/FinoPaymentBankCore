@@ -16,9 +16,11 @@ namespace ServiceRequest.Identity.Service
     public class ProcessSSRService : IProcessSSRService
     {
         private readonly ILoggerService _loggerService;
-        public ProcessSSRService(ILoggerService loggerService)
+        private readonly ISaveServiceRequestService _saveServiceRequestService;
+        public ProcessSSRService(ILoggerService loggerService, ISaveServiceRequestService saveServiceRequestService)
         {
             _loggerService = loggerService;
+            _saveServiceRequestService = saveServiceRequestService;
         }
 
         public async Task<OutResponse> SaveServiceAsync(SaveServiceRequest saveServiceRequest)
@@ -43,7 +45,7 @@ namespace ServiceRequest.Identity.Service
                 switch(saveServiceRequest.MethodId)
                 {
                     case 1: //Pan Validation Check 
-                        PanValidation
+                        outresponse = await _saveServiceRequestService.PanValidation(saveServiceRequest);
                         break;
                 }
             }

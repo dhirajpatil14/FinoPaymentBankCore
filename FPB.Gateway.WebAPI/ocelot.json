@@ -1,0 +1,16 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/Account",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 4332
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/Account",
+      "UpstreamHttpMethod": [ "POST" ]
+    }
+  ]
+}

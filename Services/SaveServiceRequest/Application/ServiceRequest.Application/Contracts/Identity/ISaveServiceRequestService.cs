@@ -9,6 +9,6 @@ namespace ServiceRequest.Application.Contracts.Identity
 {
     public interface ISaveServiceRequestService
     {
-        Task<OutResponse> PanValidation(SaveServiceRequest saveServiceRequest)
+        Task<OutResponse> PanValidation(SaveServiceRequest saveServiceRequest);
     }
 }
