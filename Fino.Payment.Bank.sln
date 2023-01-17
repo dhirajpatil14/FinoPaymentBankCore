@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32106.194
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{6881A608-B306-4243-AEDA-958EFCB1442C}"
 EndProject
@@ -110,8 +110,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{8A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PBSecurity", "Common\PBSecurity\PBSecurity.csproj", "{5A8F745C-1A87-4D63-8D48-59F5395C3879}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FPB.Gateway.WebAPI", "FPB.Gateway.WebAPI\FPB.Gateway.WebAPI.csproj", "{B539185C-DD65-4C61-A763-45CAC50AF55A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SaveServiceRequest", "SaveServiceRequest", "{63F0CDA3-050A-40BD-A369-D62408E6A82C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{BDFE6CE8-DF2E-4CF2-BB1D-8F29001BA3C4}"
@@ -122,15 +120,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{3912867C-1E49-4C50-8076-6E608C59F865}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceRequestCoreAPI", "Services\SaveServiceRequest\ServiceRequestCoreAPI\ServiceRequestCoreAPI\ServiceRequestCoreAPI.csproj", "{F55F6E9C-6731-4594-91F4-1A6B9C1D57C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceRequestCoreAPI", "Services\SaveServiceRequest\ServiceRequestCoreAPI\ServiceRequestCoreAPI\ServiceRequestCoreAPI.csproj", "{F55F6E9C-6731-4594-91F4-1A6B9C1D57C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceRequest.Application", "Services\SaveServiceRequest\Application\ServiceRequest.Application\ServiceRequest.Application.csproj", "{98E9775D-AA8A-4D98-969A-E0A1CB2AA5E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceRequest.Application", "Services\SaveServiceRequest\Application\ServiceRequest.Application\ServiceRequest.Application.csproj", "{98E9775D-AA8A-4D98-969A-E0A1CB2AA5E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceRequest.Identity", "Services\SaveServiceRequest\Infrastructure\ServiceRequest.Identity\ServiceRequest.Identity.csproj", "{E20ED833-4B40-4C5B-B5E2-31854AE7FC39}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceRequest.Identity", "Services\SaveServiceRequest\Infrastructure\ServiceRequest.Identity\ServiceRequest.Identity.csproj", "{E20ED833-4B40-4C5B-B5E2-31854AE7FC39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceRequest.Infrastructure", "Services\SaveServiceRequest\Infrastructure\ServiceRequest.Infrastructure\ServiceRequest.Infrastructure.csproj", "{1D1180A3-1463-4A87-A4E9-9744EC97808F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceRequest.Infrastructure", "Services\SaveServiceRequest\Infrastructure\ServiceRequest.Infrastructure\ServiceRequest.Infrastructure.csproj", "{1D1180A3-1463-4A87-A4E9-9744EC97808F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceRequest.API.Integration.Tests", "Services\SaveServiceRequest\Test\ServiceRequest.API.Integration.Tests\ServiceRequest.API.Integration.Tests.csproj", "{1369EE35-B756-41C9-ADDD-87F8C3DB3FA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceRequest.API.Integration.Tests", "Services\SaveServiceRequest\Test\ServiceRequest.API.Integration.Tests\ServiceRequest.API.Integration.Tests.csproj", "{1369EE35-B756-41C9-ADDD-87F8C3DB3FA1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -270,10 +268,6 @@ Global
 		{5A8F745C-1A87-4D63-8D48-59F5395C3879}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A8F745C-1A87-4D63-8D48-59F5395C3879}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A8F745C-1A87-4D63-8D48-59F5395C3879}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B539185C-DD65-4C61-A763-45CAC50AF55A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B539185C-DD65-4C61-A763-45CAC50AF55A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B539185C-DD65-4C61-A763-45CAC50AF55A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B539185C-DD65-4C61-A763-45CAC50AF55A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F55F6E9C-6731-4594-91F4-1A6B9C1D57C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F55F6E9C-6731-4594-91F4-1A6B9C1D57C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F55F6E9C-6731-4594-91F4-1A6B9C1D57C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
